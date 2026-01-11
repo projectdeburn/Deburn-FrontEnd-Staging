@@ -162,7 +162,7 @@ export default function Register() {
       <div className="auth-container" style={{ maxWidth: '480px' }}>
         <div className="auth-header">
           <div className="auth-logo">
-            <span className="auth-logo-text">Eve</span>
+            <span className="auth-logo-text">Deburn</span>
           </div>
           <h1 className="auth-title">{t('register.title', 'Create your account')}</h1>
           <p className="auth-subtitle">{t('register.subtitle', 'Start your leadership development journey')}</p>

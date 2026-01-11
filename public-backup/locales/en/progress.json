@@ -1,0 +1,32 @@
+{
+  "hero": {
+    "title": "Your Progress",
+    "tagline": "Track your growth over time"
+  },
+  "stats": {
+    "dayStreak": "Day Streak",
+    "checkins": "Check-ins",
+    "lessonsCompleted": "Lessons Completed",
+    "coachSessions": "Coach Sessions"
+  },
+  "trends": {
+    "title": "Wellbeing Trends (Last 30 Days)",
+    "overallMood": "Overall Mood",
+    "stressLevels": "Stress Levels"
+  },
+  "insights": {
+    "title": "Key Insights",
+    "thursdayPattern": {
+      "title": "Thursday Stress Pattern",
+      "description": "Your stress consistently spikes on Thursdays. Consider restructuring your meeting schedule or blocking prep time."
+    },
+    "morningCheckin": {
+      "title": "Morning Check-in Habit",
+      "description": "You've checked in before 9am for {{days}} consecutive days. This consistency correlates with {{percent}}% better mood scores."
+    },
+    "focusArea": {
+      "title": "Focus Area: Delegation",
+      "description": "Based on your coaching sessions, delegation remains a growth opportunity. Continue with the current learning path."
+    }
+  }
+}

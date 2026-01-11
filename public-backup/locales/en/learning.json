@@ -1,0 +1,151 @@
+{
+  "hero": {
+    "title": "Learning",
+    "tagline": "Micro-lessons for busy leaders"
+  },
+  "categories": {
+    "leadership": "Leadership",
+    "breathTechniques": "Breath Techniques",
+    "meditation": "Meditation",
+    "audio": "Audio Learning"
+  },
+  "types": {
+    "video": "Video",
+    "audio": "Audio",
+    "article": "Article"
+  },
+  "courses": {
+    "leadLikeVisionary": {
+      "title": "Lead Like a Visionary"
+    },
+    "navigatingUnknown": {
+      "title": "Navigating the Unknown: Mastering Leadership in Uncertainty"
+    },
+    "safeSpaces": {
+      "title": "Safe Spaces: Creating a Culture of Psychological Safety"
+    },
+    "burnoutPrevention": {
+      "title": "Burnout Prevention: Thrive, Don't Just Survive"
+    },
+    "empathyInAction": {
+      "title": "Empathy in Action"
+    },
+    "artOfDecisionMaking": {
+      "title": "The Art of Decision Making"
+    },
+    "influenceInspire": {
+      "title": "Influence & Inspire"
+    },
+    "agileLeadership": {
+      "title": "Agile Leadership"
+    },
+    "feedbackLeadershipTool": {
+      "title": "Feedback: The Leadership Tool"
+    },
+    "networkingNinja": {
+      "title": "Networking Ninja"
+    },
+    "conflictResolutionMastery": {
+      "title": "Conflict Resolution Mastery"
+    },
+    "courageousConversations": {
+      "title": "Courageous Conversations"
+    },
+    "powerOfAuthenticity": {
+      "title": "The Power of Authenticity"
+    },
+    "strategicThinkingUnleashed": {
+      "title": "Strategic Thinking Unleashed"
+    },
+    "innovationLeadership": {
+      "title": "Innovation Leadership"
+    },
+    "timeManagementLeaders": {
+      "title": "Time Management for Leaders"
+    },
+    "leadingRemoteTeams": {
+      "title": "Leading Remote Teams"
+    },
+    "emotionalIntelligenceElevation": {
+      "title": "Emotional Intelligence Elevation"
+    },
+    "buildingResilientTeams": {
+      "title": "Building Resilient Teams"
+    },
+    "culturalIntelligenceMastery": {
+      "title": "Cultural Intelligence Mastery"
+    },
+    "visionaryGoalSetting": {
+      "title": "Visionary Goal Setting"
+    },
+    "adaptOrDie": {
+      "title": "Adapt or Die: Change Management"
+    },
+    "charismaUnlocked": {
+      "title": "Charisma Unlocked"
+    },
+    "delegationDoneRight": {
+      "title": "Delegation Done Right"
+    },
+    "leadingWithPurpose": {
+      "title": "Leading with Purpose"
+    },
+    "creativeProblemSolving": {
+      "title": "Creative Problem Solving"
+    },
+    "buildingTrustTeams": {
+      "title": "Building Trust in Teams"
+    },
+    "mindfulLeadership": {
+      "title": "Mindful Leadership"
+    },
+    "mentorshipMagic": {
+      "title": "Mentorship Magic"
+    },
+    "artOfStorytelling": {
+      "title": "The Art of Storytelling"
+    },
+    "kpiMasteryLeaders": {
+      "title": "KPI Mastery for Leaders"
+    },
+    "buildingCollaborativeCultures": {
+      "title": "Building Collaborative Cultures"
+    },
+    "visionaryLeadershipCrisis": {
+      "title": "Visionary Leadership in Crisis"
+    },
+    "breatheInLeadOut": {
+      "title": "Breathe In, Lead Out"
+    },
+    "power478Breathing": {
+      "title": "The Power of 4-7-8 Breathing"
+    },
+    "expandingBreathEnergy": {
+      "title": "Expanding Your Breath for Energy"
+    },
+    "calmingStormAnxiety": {
+      "title": "Calming the Storm: Breath for Anxiety"
+    },
+    "mindfulBreathingLeaders": {
+      "title": "Mindful Breathing for Leaders"
+    },
+    "meditationClarityFocus": {
+      "title": "Meditation for Clarity and Focus"
+    },
+    "visualizationTechniques": {
+      "title": "Visualization Techniques for Leaders"
+    },
+    "guidedMeditationStressRelief": {
+      "title": "Guided Meditation for Stress Relief"
+    },
+    "cultivatingGratitude": {
+      "title": "Cultivating Gratitude Through Meditation"
+    },
+    "mindfulnessMeditationLeadership": {
+      "title": "Mindfulness Meditation for Effective Leadership"
+    },
+    "timeNinja": {
+      "title": "Time Ninja: Master Your Schedule"
+    }
+  }
+}

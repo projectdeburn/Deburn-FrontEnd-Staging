@@ -1,0 +1,63 @@
+{
+  "nav": {
+    "dashboard": "Instrumentpanel",
+    "checkin": "Incheckning",
+    "coach": "Fråga Eve",
+    "learning": "Lärande",
+    "circles": "Cirklar",
+    "progress": "Framsteg",
+    "settings": "Inställningar",
+    "home": "Hem",
+    "learn": "Lär"
+  },
+  "low": "Låg",
+  "high": "Hög",
+  "back": "Tillbaka",
+  "continue": "Fortsätt",
+  "buttons": {
+    "continue": "Fortsätt",
+    "back": "Tillbaka",
+    "save": "Spara ändringar",
+    "cancel": "Avbryt",
+    "submit": "Skicka",
+    "send": "Skicka",
+    "close": "Stäng"
+  },
+  "greeting": {
+    "morning": "God morgon, {{name}}",
+    "afternoon": "God eftermiddag, {{name}}",
+    "evening": "God kväll, {{name}}"
+  },
+  "time": {
+    "dayStreak": {
+      "one": "{{count}} dag i rad",
+      "other": "{{count}} dagar i rad"
+    },
+    "minutesRemaining": "{{count}} min kvar",
+    "minutesRead": "{{count}} min läsning",
+    "minutes": "{{count}} min",
+    "hoursAgo": {
+      "one": "{{count}} timme sedan",
+      "other": "{{count}} timmar sedan"
+    },
+    "yesterday": "Igår"
+  },
+  "userMenu": {
+    "profile": "Profil",
+    "logout": "Logga ut"
+  },
+  "trends": {
+    "mood": "Humör",
+    "energy": "Energi",
+    "stress": "Stress",
+    "positive": "+{{value}} %",
+    "negative": "-{{value}} %",
+    "stable": "Stabil",
+    "fromLastMonth": "från förra månaden"
+  },
+  "language": {
+    "label": "Språk",
+    "english": "English",
+    "swedish": "Svenska"
+  }
+}

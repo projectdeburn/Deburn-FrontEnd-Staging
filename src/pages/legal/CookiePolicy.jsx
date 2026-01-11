@@ -11,7 +11,7 @@ export default function CookiePolicy() {
         {/* Header */}
         <header className="legal-header">
           <Link to="/" className="legal-logo">
-            Eve
+            Deburn
           </Link>
           <h1 className="legal-title">Cookie Policy</h1>
           <p className="legal-meta">Last updated: January 2025</p>
@@ -28,7 +28,7 @@ export default function CookiePolicy() {
 
           <section className="legal-section">
             <h2>2. How We Use Cookies</h2>
-            <p>Eve uses cookies for the following purposes:</p>
+            <p>Deburn uses cookies for the following purposes:</p>
 
             <h3>Essential Cookies</h3>
             <p>
@@ -118,7 +118,7 @@ export default function CookiePolicy() {
             <line x1="19" y1="12" x2="5" y2="12"></line>
             <polyline points="12 19 5 12 12 5"></polyline>
           </svg>
-          Back to Eve
+          Back to Deburn
         </Link>
       </div>
     </div>

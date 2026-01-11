@@ -63,7 +63,7 @@ export default function Login() {
       <div className="auth-container">
         <div className="auth-header">
           <div className="auth-logo">
-            <span className="auth-logo-text">Eve</span>
+            <span className="auth-logo-text">Deburn</span>
           </div>
           <h1 className="auth-title">{t('login.title', 'Welcome back')}</h1>
           <p className="auth-subtitle">{t('login.subtitle', 'Sign in to continue your leadership journey')}</p>
@@ -72,7 +72,11 @@ export default function Login() {
         <div className="auth-form">
           {error && (
             <div className="auth-alert error visible">
-              <i className="lucide-alert-circle"></i>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
               <span>{error}</span>
             </div>
           )}
@@ -92,6 +96,7 @@ export default function Login() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
+              <span className="form-error" id="login-email-error"></span>
             </div>
 
             <div className="form-group">
@@ -127,6 +132,7 @@ export default function Login() {
                   )}
                 </button>
               </div>
+              <span className="form-error" id="login-password-error"></span>
             </div>
 
             <div className="form-row">

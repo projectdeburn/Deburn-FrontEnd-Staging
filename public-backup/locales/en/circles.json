@@ -1,0 +1,26 @@
+{
+  "hero": {
+    "title": "Leadership Circles",
+    "tagline": "Connect with peers who understand"
+  },
+  "yourCircle": {
+    "title": "Your Circle",
+    "meetsBiweekly": "Meets bi-weekly",
+    "members": "{{count}} members"
+  },
+  "meeting": {
+    "nextMeeting": "Next meeting",
+    "joinVideoCall": "Join Video Call",
+    "viewDiscussion": "View Discussion"
+  },
+  "topic": {
+    "thisWeek": "This week's topic"
+  },
+  "discussions": {
+    "title": "Recent Discussions",
+    "replies": {
+      "one": "{{count}} reply",
+      "other": "{{count}} replies"
+    }
+  }
+}

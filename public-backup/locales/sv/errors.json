@@ -1,0 +1,24 @@
+{
+  "general": {
+    "somethingWentWrong": "Något gick fel. Försök igen.",
+    "networkError": "Nätverksfel. Kontrollera din anslutning.",
+    "serverError": "Serverfel. Försök igen senare.",
+    "notFound": "Hittades inte",
+    "unauthorized": "Du måste vara inloggad för att komma åt detta.",
+    "forbidden": "Du har inte behörighet att komma åt detta."
+  },
+  "auth": {
+    "invalidCredentials": "Ogiltig e-post eller lösenord",
+    "emailNotVerified": "Vänligen verifiera din e-post innan du loggar in.",
+    "accountSuspended": "Ditt konto har stängts av. Kontakta support.",
+    "sessionExpired": "Din session har gått ut. Logga in igen.",
+    "registrationFailed": "Registreringen misslyckades",
+    "emailAlreadyRegistered": "Denna e-post är redan registrerad.",
+    "invalidResetToken": "Denna återställningslänk är ogiltig eller har gått ut.",
+    "passwordResetFailed": "Lösenordsåterställningen misslyckades"
+  },
+  "coach": {
+    "sendFailed": "Tyvärr, jag stötte på ett fel. Försök igen.",
+    "connectionLost": "Anslutningen förlorad. Återansluter..."
+  }
+}

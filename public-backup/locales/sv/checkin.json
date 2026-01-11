@@ -1,0 +1,39 @@
+{
+  "title": "Daglig incheckning",
+  "step": "Steg",
+  "of": "av",
+  "mood": {
+    "question": "Hur mår du just nu?",
+    "struggling": "Kämpar",
+    "low": "Låg",
+    "neutral": "Neutral",
+    "good": "Bra",
+    "great": "Utmärkt"
+  },
+  "energy": {
+    "question": "Hur är din energinivå?",
+    "physical": "Fysisk energi",
+    "mental": "Mental energi"
+  },
+  "sleep": {
+    "question": "Hur sov du?",
+    "poor": "Dåligt",
+    "fair": "Sådär",
+    "ok": "OK",
+    "good": "Bra",
+    "great": "Utmärkt"
+  },
+  "stress": {
+    "label": "Nuvarande stressnivå",
+    "calm": "Lugn",
+    "overwhelmed": "Överväldigad"
+  },
+  "complete": {
+    "title": "Incheckning klar",
+    "streak": "dagars svit!",
+    "insight": "Dagens insikt",
+    "insightText": "Din stress tenderar att öka på torsdagar. Överväg att blockera 30 minuter före dina eftermiddagsmöten för förberedelse.",
+    "tipLabel": "Ditt morgontips:",
+    "tipText": "\"Prova 2-minuters andningsövningen före ditt möte kl 10\""
+  }
+}

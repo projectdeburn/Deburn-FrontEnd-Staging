@@ -1,0 +1,39 @@
+{
+  "title": "Daily Check-in",
+  "step": "Step",
+  "of": "of",
+  "mood": {
+    "question": "How are you feeling right now?",
+    "struggling": "Struggling",
+    "low": "Low",
+    "neutral": "Neutral",
+    "good": "Good",
+    "great": "Great"
+  },
+  "energy": {
+    "question": "What's your energy level?",
+    "physical": "Physical Energy",
+    "mental": "Mental Energy"
+  },
+  "sleep": {
+    "question": "How did you sleep?",
+    "poor": "Poor",
+    "fair": "Fair",
+    "ok": "OK",
+    "good": "Good",
+    "great": "Great"
+  },
+  "stress": {
+    "label": "Current stress level",
+    "calm": "Calm",
+    "overwhelmed": "Overwhelmed"
+  },
+  "complete": {
+    "title": "Check-in Complete",
+    "streak": "Day Streak!",
+    "insight": "Today's Insight",
+    "insightText": "Your stress tends to spike on Thursdays. Consider blocking 30 minutes before your afternoon meetings for preparation.",
+    "tipLabel": "Your morning tip:",
+    "tipText": "\"Try the 2-minute breathing exercise before your 10am call\""
+  }
+}

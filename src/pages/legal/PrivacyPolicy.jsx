@@ -11,7 +11,7 @@ export default function PrivacyPolicy() {
         {/* Header */}
         <header className="legal-header">
           <Link to="/" className="legal-logo">
-            Eve
+            Deburn
           </Link>
           <h1 className="legal-title">Privacy Policy</h1>
           <p className="legal-meta">Last updated: January 2025</p>
@@ -22,7 +22,7 @@ export default function PrivacyPolicy() {
           <section className="legal-section">
             <h2>1. Introduction</h2>
             <p>
-              Eve ("we", "our", or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our AI-powered coaching platform.
+              Deburn ("we", "our", or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our AI-powered coaching platform.
             </p>
           </section>
 
@@ -87,7 +87,7 @@ export default function PrivacyPolicy() {
             <line x1="19" y1="12" x2="5" y2="12"></line>
             <polyline points="12 19 5 12 12 5"></polyline>
           </svg>
-          Back to Eve
+          Back to Deburn
         </Link>
       </div>
     </div>

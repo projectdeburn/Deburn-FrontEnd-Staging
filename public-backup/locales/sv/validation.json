@@ -1,0 +1,32 @@
+{
+  "email": {
+    "required": "E-post krävs",
+    "invalid": "Ange en giltig e-postadress"
+  },
+  "password": {
+    "required": "Lösenord krävs",
+    "minLength": "Lösenordet måste vara minst {{min}} tecken",
+    "lowercase": "Lösenordet måste innehålla minst en liten bokstav",
+    "uppercase": "Lösenordet måste innehålla minst en stor bokstav",
+    "number": "Lösenordet måste innehålla minst en siffra",
+    "special": "Lösenordet måste innehålla minst ett specialtecken",
+    "mismatch": "Lösenorden matchar inte"
+  },
+  "name": {
+    "firstNameRequired": "Förnamn krävs",
+    "lastNameRequired": "Efternamn krävs",
+    "minLength": "Namnet måste vara minst {{min}} tecken"
+  },
+  "organization": {
+    "required": "Organisationsnamn krävs",
+    "minLength": "Organisationsnamnet måste vara minst {{min}} tecken"
+  },
+  "country": {
+    "required": "Välj ditt land"
+  },
+  "consent": {
+    "termsRequired": "Du måste godkänna Användarvillkoren",
+    "privacyRequired": "Du måste godkänna Integritetspolicyn",
+    "dataProcessingRequired": "Du måste samtycka till databehandling"
+  }
+}
