@@ -1,0 +1,38 @@
+{
+  "title": "Profile Settings",
+  "picture": {
+    "title": "Profile Picture",
+    "hint": "Upload a profile picture to personalize your account.",
+    "limits": "Max file size: 1MB. Formats: JPG, PNG",
+    "upload": "Upload Photo",
+    "remove": "Remove"
+  },
+  "personalInfo": {
+    "title": "Personal Information",
+    "firstName": "First Name",
+    "firstNamePlaceholder": "Your first name",
+    "lastName": "Last Name",
+    "lastNamePlaceholder": "Your last name",
+    "email": "Email Address",
+    "emailPlaceholder": "you@company.com",
+    "emailHelper": "Contact support to change your email address",
+    "organization": "Organization",
+    "organizationPlaceholder": "Your company name",
+    "jobTitle": "Job Title",
+    "jobTitlePlaceholder": "e.g. Engineering Manager",
+    "bio": "Bio",
+    "bioPlaceholder": "Tell us a bit about yourself..."
+  },
+  "language": {
+    "label": "Language",
+    "helper": "This affects the app interface and Ask Eve responses"
+  },
+  "account": {
+    "title": "Account",
+    "changePassword": "Change Password",
+    "changePasswordDescription": "Update your password to keep your account secure"
+  },
+  "messages": {
+    "updateSuccess": "Profile updated successfully"
+  }
+}

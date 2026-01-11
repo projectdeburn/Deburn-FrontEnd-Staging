@@ -1,0 +1,25 @@
+{
+  "hero": {
+    "tagline": "Lead with resilience. Build with purpose."
+  },
+  "checkinCard": {
+    "title": "Daily Check-in",
+    "description": "Start your day with a quick reflection",
+    "button": "Begin Check-in"
+  },
+  "focusCard": {
+    "title": "Today's Focus",
+    "button": "Continue"
+  },
+  "weekGlance": {
+    "title": "Your Week at a Glance"
+  },
+  "quickAccess": {
+    "title": "Quick Access",
+    "aiCoach": "Ask Eve",
+    "insightsWaiting": "{{count}} insights waiting",
+    "learning": "Learning",
+    "continueModule": "Continue module",
+    "nextCircle": "Next Circle"
+  }
+}

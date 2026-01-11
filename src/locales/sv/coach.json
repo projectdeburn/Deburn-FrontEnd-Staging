@@ -1,0 +1,31 @@
+{
+  "hero": {
+    "title": "Fråga Eve",
+    "tagline": "Din personliga ledarskapskompanjon"
+  },
+  "welcome": {
+    "greeting": "Hej! Jag är Eve, din ledarskapscoach. Jag finns här för att hjälpa dig växa som ledare, hantera stress och bygga starkare team.",
+    "prompt": "Vad vill du utforska idag?"
+  },
+  "starters": {
+    "leadership": "Jag vill utveckla mitt ledarskap",
+    "team": "Jag behöver hjälp med mitt team",
+    "conversation": "Jag har ett utmanande samtal framför mig",
+    "stress": "Min stress har byggts upp"
+  },
+  "input": {
+    "placeholder": "Skriv ett meddelande...",
+    "hint": "Dina samtal är privata och konfidentiella"
+  },
+  "quickReplies": {
+    "tellMore": "Berätta mer om det",
+    "whatSuggest": "Vad skulle du föreslå?",
+    "tryExercise": "Jag vill prova en övning"
+  },
+  "crisis": {
+    "message": "Tack för att du delar detta med mig. Det du berättar är viktigt, och ditt välbefinnande är det allra viktigaste.\n\nJag är Eve, en ledarskapscoach, och det du beskriver behöver stöd från någon som är kvalificerad att hjälpa med just detta.\n\nVänligen kontakta:\n- Nödnummer: 112\n- Krisstöd: Mind självmordslinjen 90101 eller Jourhavande medmänniska 08-702 16 80\n- Din organisations företagshälsovård om tillgänglig\n- En betrodd kollega, vän eller familjemedlem\n\nDu behöver inte möta detta ensam. Sök stöd nu.\n\nJag finns här när du är redo att fortsätta våra ledarskapssamtal."
+  },
+  "errors": {
+    "sendFailed": "Tyvärr, jag stötte på ett fel. Försök igen."
+  }
+}
