@@ -16,17 +16,15 @@
   --hub-warning: #C49A6C;
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+/* Global * and body styles removed - use prototype.css globals instead */
+/* Hub-specific styles scoped to .hub-page wrapper */
 
-body {
+.hub-page {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background-color: var(--hub-bg);
   color: var(--hub-text);
   line-height: 1.5;
+  min-height: 100vh;
 }
 
 /* Layout */

@@ -44,7 +44,7 @@ export default function ForgotPassword() {
       <div className="auth-container">
         <div className="auth-header">
           <div className="auth-logo">
-            <span className="auth-logo-text">Eve</span>
+            <span className="auth-logo-text">Deburn</span>
           </div>
           <h1 className="auth-title">{t('forgotPassword.title', 'Reset your password')}</h1>
           <p className="auth-subtitle">{t('forgotPassword.subtitle', "Enter your email and we'll send you a reset link")}</p>
