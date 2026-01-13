@@ -5,7 +5,7 @@
 
 import { get, post, del } from '@/utils/api';
 
-const BASE = `${process.env.ENDPOINT}/api/auth`;
+const BASE = `${import.meta.env.VITE_ENDPOINT}/api/auth`;
 
 export const authApi = {
   /**

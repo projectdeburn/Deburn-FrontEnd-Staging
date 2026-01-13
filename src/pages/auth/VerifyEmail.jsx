@@ -28,7 +28,7 @@ export default function VerifyEmail() {
 
   async function verifyToken() {
     try {
-      const response = await fetch(`${process.env.ENDPOINT}/api/auth/verify-email`, {
+      const response = await fetch(`${import.meta.env.VITE_ENDPOINT}/api/auth/verify-email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token }),
@@ -51,7 +51,7 @@ export default function VerifyEmail() {
 
     setIsResending(true);
     try {
-      const response = await fetch(`${process.env.ENDPOINT}/api/auth/resend-verification`, {
+      const response = await fetch(`${import.meta.env.VITE_ENDPOINT}/api/auth/resend-verification`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),

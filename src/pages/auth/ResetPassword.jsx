@@ -44,7 +44,7 @@ export default function ResetPassword() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${process.env.ENDPOINT}/api/auth/reset-password`, {
+      const response = await fetch(`${import.meta.env.VITE_ENDPOINT}/api/auth/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token, password }),

@@ -74,7 +74,7 @@ export default function Learning() {
   async function loadLearningContent() {
     setIsLoading(true);
     try {
-      const response = await get(`${process.env.ENDPOINT}/api/learning/modules`);
+      const response = await get(`${import.meta.env.VITE_ENDPOINT}/api/learning/modules`);
       if (response.success) {
         setModules(response.data.modules || []);
       }

@@ -88,8 +88,8 @@ export default function Dashboard() {
     setIsLoading(true);
     try {
       const [dashboardResponse, trendsResponse] = await Promise.all([
-        get(`${process.env.ENDPOINT}/api/dashboard`).catch(() => ({ success: false })),
-        get(`${process.env.ENDPOINT}/api/checkin/trends?period=7`).catch(() => ({ success: false })),
+        get(`${import.meta.env.VITE_ENDPOINT}/api/dashboard`).catch(() => ({ success: false })),
+        get(`${import.meta.env.VITE_ENDPOINT}/api/checkin/trends?period=7`).catch(() => ({ success: false })),
       ]);
 
       if (dashboardResponse.success) {
