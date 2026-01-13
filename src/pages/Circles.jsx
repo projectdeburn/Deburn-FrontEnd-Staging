@@ -69,8 +69,8 @@ export default function Circles() {
     setIsLoading(true);
     try {
       const [groupsRes, invitesRes] = await Promise.all([
-        get('/api/circles/groups').catch(() => ({ success: false })),
-        get('/api/circles/invitations').catch(() => ({ success: false })),
+        get(`${process.env.ENDPOINT}/api/circles/groups`).catch(() => ({ success: false })),
+        get(`${process.env.ENDPOINT}/api/circles/invitations`).catch(() => ({ success: false })),
       ]);
 
       if (groupsRes.success) {

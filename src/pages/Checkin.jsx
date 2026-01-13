@@ -215,7 +215,7 @@ export default function Checkin() {
   async function submitCheckin() {
     setIsSubmitting(true);
     try {
-      const response = await post('/api/checkin', {
+      const response = await post(`${process.env.ENDPOINT}/api/checkin`, {
         mood,
         physicalEnergy,
         mentalEnergy,

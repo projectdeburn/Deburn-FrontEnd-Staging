@@ -5,7 +5,7 @@
 
 import { get, post, getApiBaseUrl } from '@/utils/api';
 
-const BASE = '/api/coach';
+const BASE = `${process.env.ENDPOINT}/api/coach`;
 
 export const coachApi = {
   /**

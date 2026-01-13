@@ -108,7 +108,7 @@ export default function Profile() {
     formData.append('avatar', file);
 
     try {
-      const response = await uploadFile('/api/profile/avatar', formData);
+      const response = await uploadFile(`${process.env.ENDPOINT}/api/profile/avatar`, formData);
       if (response.success) {
         setAvatarUrl(response.data.avatarUrl);
         await refreshUser();
@@ -120,7 +120,7 @@ export default function Profile() {
 
   async function handleRemoveAvatar() {
     try {
-      await put('/api/profile/avatar', { remove: true });
+      await put(`${process.env.ENDPOINT}/api/profile/avatar`, { remove: true });
       setAvatarUrl('');
       await refreshUser();
     } catch (err) {
@@ -135,7 +135,7 @@ export default function Profile() {
     setShowSuccess(false);
 
     try {
-      const response = await put('/api/profile', {
+      const response = await put(`${process.env.ENDPOINT}/api/profile`, {
         firstName,
         lastName,
         organization,

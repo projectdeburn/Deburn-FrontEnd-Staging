@@ -102,7 +102,7 @@ export default function Admin() {
   async function loadAdminStats() {
     setIsLoading(true);
     try {
-      const response = await get('/api/admin/stats');
+      const response = await get(`${process.env.ENDPOINT}/api/admin/stats`);
       if (response.success) {
         setStats(response.data);
       }

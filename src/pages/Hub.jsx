@@ -109,8 +109,8 @@ export default function Hub() {
     setIsLoading(true);
     try {
       const [orgRes, membersRes] = await Promise.all([
-        get('/api/hub/organization').catch(() => ({ success: false })),
-        get('/api/hub/members').catch(() => ({ success: false })),
+        get(`${process.env.ENDPOINT}/api/hub/organization`).catch(() => ({ success: false })),
+        get(`${process.env.ENDPOINT}/api/hub/members`).catch(() => ({ success: false })),
       ]);
 
       if (orgRes.success) {

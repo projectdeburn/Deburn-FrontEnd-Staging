@@ -5,7 +5,7 @@
 
 import { get, post, put, del, uploadFile } from '@/utils/api';
 
-const BASE = '/api/hub';
+const BASE = `${process.env.ENDPOINT}/api/hub`;
 
 export const hubApi = {
   // ============================================================================
