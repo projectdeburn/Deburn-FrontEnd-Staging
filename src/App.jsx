@@ -121,6 +121,16 @@ function AppRoutes() {
         />
       </Route>
 
+      {/* Check-in (fullscreen, no sidebar) */}
+      <Route
+        path="/checkin"
+        element={
+          <ProtectedRoute>
+            <Checkin />
+          </ProtectedRoute>
+        }
+      />
+
       {/* Protected app routes */}
       <Route
         element={
@@ -130,7 +140,6 @@ function AppRoutes() {
         }
       >
         <Route path="/" element={<Dashboard />} />
-        <Route path="/checkin" element={<Checkin />} />
         <Route path="/coach" element={<Coach />} />
         <Route path="/learning" element={<Learning />} />
         <Route path="/circles" element={<Circles />} />

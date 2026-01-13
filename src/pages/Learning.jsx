@@ -39,18 +39,6 @@ const icons = {
       <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
     </svg>
   ),
-  clock: (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="10"></circle>
-      <polyline points="12 6 12 12 16 14"></polyline>
-    </svg>
-  ),
-  checkCircle: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-      <polyline points="22 4 12 14.01 9 11.01"></polyline>
-    </svg>
-  ),
 };
 
 // Content type icons
@@ -85,15 +73,6 @@ export default function Learning() {
     }
   }
 
-  function formatDuration(minutes) {
-    if (minutes < 60) {
-      return `${minutes} ${t('common:min', 'min')}`;
-    }
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
-  }
-
   if (isLoading) {
     return (
       <div className="loading-overlay">
@@ -125,108 +104,65 @@ export default function Learning() {
 
       {/* Learning Content Container */}
       <div id="learning-content-container">
-        {/* Continue Learning Section */}
-        {modules.some((m) => m.progress > 0 && m.progress < 100) && (
-          <section className="learning-section">
-            <h2 className="section-title">
-              {t('learning:continueLearning', 'Continue Learning')}
-            </h2>
-            <div className="learning-grid">
-              {modules
-                .filter((m) => m.progress > 0 && m.progress < 100)
-                .map((module) => (
-                  <LearningCard
-                    key={module.id}
-                    module={module}
-                    formatDuration={formatDuration}
-                    t={t}
-                  />
-                ))}
-            </div>
-          </section>
-        )}
-
-        {/* All Modules */}
+        {/* Featured Section */}
         <section className="learning-section">
           <h2 className="section-title">
-            {t('learning:allModules', 'All Modules')}
+            {t('learning:featured', 'Featured')}
           </h2>
-          {modules.length > 0 ? (
+          <div className="learning-grid">
+            {modules
+              .filter((m) => m.featured)
+              .slice(0, 3)
+              .map((module) => (
+                <LearningCard key={module.id} module={module} />
+              ))}
+            {modules.filter((m) => m.featured).length === 0 &&
+              modules.slice(0, 3).map((module) => (
+                <LearningCard key={module.id} module={module} />
+              ))}
+          </div>
+        </section>
+
+        {/* Group remaining modules by category */}
+        {Object.entries(
+          modules.reduce((acc, module) => {
+            const category = module.category || 'Leadership';
+            if (!acc[category]) acc[category] = [];
+            acc[category].push(module);
+            return acc;
+          }, {})
+        ).map(([category, categoryModules]) => (
+          <section key={category} className="learning-section">
+            <h2 className="section-title">{category}</h2>
             <div className="learning-grid">
-              {modules.map((module) => (
-                <LearningCard
-                  key={module.id}
-                  module={module}
-                  formatDuration={formatDuration}
-                  t={t}
-                />
+              {categoryModules.map((module) => (
+                <LearningCard key={module.id} module={module} />
               ))}
             </div>
-          ) : (
-            <div className="card empty-state">
-              {icons.bookOpen}
-              <p>{t('learning:noModules', 'No learning modules available yet.')}</p>
-            </div>
-          )}
-        </section>
+          </section>
+        ))}
+
+        {modules.length === 0 && (
+          <div className="card empty-state">
+            {icons.bookOpen}
+            <p>{t('learning:noModules', 'No learning modules available yet.')}</p>
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
 // Learning Card Component
-function LearningCard({ module, formatDuration, t }) {
-  const contentIcon = contentIcons[module.type] || icons.bookOpen;
-  const cardClass = module.type === 'video' || module.type === 'audio'
-    ? 'learning-card learning-card-playable'
-    : 'learning-card learning-card-readable';
+function LearningCard({ module }) {
+  const contentIcon = contentIcons[module.type] || icons.fileText;
 
   return (
-    <div className={`${cardClass} ${module.progress === 100 ? 'completed' : ''}`}>
-      {/* Image/Icon */}
-      <div className="learning-card-image">
-        {module.thumbnail ? (
-          <img src={module.thumbnail} alt={module.title} />
-        ) : (
-          <div className="learning-card-icon">
-            {contentIcon}
-          </div>
-        )}
+    <div className="learning-card">
+      <div className="learning-card-icon">
+        {contentIcon}
       </div>
-
-      {/* Content */}
-      <div className="learning-card-content">
-        <div className="learning-card-meta">
-          <span className="learning-type">{module.type || 'lesson'}</span>
-          <span className="learning-duration">
-            {icons.clock}
-            {formatDuration(module.duration || 10)}
-          </span>
-        </div>
-
-        <h3 className="learning-card-title">{module.title}</h3>
-        <p className="learning-card-description">{module.description}</p>
-
-        {/* Progress */}
-        {module.progress > 0 && (
-          <div className="learning-progress">
-            <div className="progress-bar">
-              <div
-                className="progress-fill"
-                style={{ width: `${module.progress}%` }}
-              />
-            </div>
-            {module.progress === 100 ? (
-              <span className="progress-complete">
-                {icons.checkCircle}
-                {t('common:complete', 'Complete')}
-              </span>
-            ) : (
-              <span className="progress-text">{module.progress}%</span>
-            )}
-          </div>
-        )}
-      </div>
+      <h3 className="learning-card-title">{module.title}</h3>
     </div>
   );
 }

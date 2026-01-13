@@ -280,7 +280,7 @@ export default function Coach() {
             {quickReplies.map((reply, index) => (
               <button
                 key={index}
-                className="quick-reply-btn"
+                className="quick-reply-chip"
                 onClick={() => handleQuickReply(reply)}
               >
                 {reply}

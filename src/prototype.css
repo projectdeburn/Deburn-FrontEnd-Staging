@@ -883,9 +883,12 @@ p {
    Check-in Screen
    ========================================================================== */
 
-#screen-checkin {
+#screen-checkin,
+.checkin-screen {
+    display: flex;
     justify-content: center;
     align-items: center;
+    min-height: 100vh;
     background: var(--color-warm-white);
 }
 
@@ -2231,10 +2234,11 @@ p {
     margin-bottom: var(--space-3);
 }
 
-.learning-card-icon i {
+.learning-card-icon i,
+.learning-card-icon svg {
     width: 24px;
     height: 24px;
-    color: var(--color-ember);
+    color: var(--color-sage);
 }
 
 .learning-grid .learning-card-title {

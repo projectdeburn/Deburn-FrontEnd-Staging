@@ -181,17 +181,19 @@ export default function Profile() {
       {/* Content */}
       <div className="profile-content">
         {/* Profile Picture */}
-        <section className="profile-section profile-picture-card">
+        <section className="profile-section">
           <h2 className="profile-section-title">
             {t('profile:avatar.title', 'Profile Picture')}
           </h2>
-          <div className="profile-picture-preview">
-            <div className="profile-avatar-large">
-              {avatarUrl ? (
-                <img src={avatarUrl} alt={`${firstName} ${lastName}`} />
-              ) : (
-                <span>{initials}</span>
-              )}
+          <div className="profile-picture-card">
+            <div className="profile-picture-preview">
+              <div className="profile-avatar-large">
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt={`${firstName} ${lastName}`} />
+                ) : (
+                  <span>{initials}</span>
+                )}
+              </div>
             </div>
             <div className="profile-picture-info">
               <p className="profile-picture-hint">

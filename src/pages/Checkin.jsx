@@ -163,6 +163,14 @@ export default function Checkin() {
 
   const totalSteps = 4;
 
+  // Helper function to calculate slider fill gradient
+  function getSliderStyle(value, min = 1, max = 10) {
+    const percentage = ((value - min) / (max - min)) * 100;
+    return {
+      background: `linear-gradient(90deg, var(--color-sage) 0%, var(--color-deep-forest) ${percentage}%, var(--neutral-200) ${percentage}%)`,
+    };
+  }
+
   // Mood labels
   const moodLabels = {
     1: t('checkin:mood.struggling', 'Struggling'),
@@ -235,9 +243,10 @@ export default function Checkin() {
   }
 
   return (
-    <div className="checkin-container">
-      {/* Check-in Header */}
-      <header className="checkin-header">
+    <div className="checkin-screen">
+      <div className="checkin-container">
+        {/* Check-in Header */}
+        <header className="checkin-header">
         <button className="back-btn" onClick={() => navigate('/')}>
           {icons.arrowLeft}
         </button>
@@ -303,6 +312,7 @@ export default function Checkin() {
                 value={physicalEnergy}
                 onChange={(e) => setPhysicalEnergy(parseInt(e.target.value))}
                 className="slider"
+                style={getSliderStyle(physicalEnergy)}
               />
               <div className="slider-labels">
                 <span>{t('common:low', 'Low')}</span>
@@ -324,6 +334,7 @@ export default function Checkin() {
                 value={mentalEnergy}
                 onChange={(e) => setMentalEnergy(parseInt(e.target.value))}
                 className="slider"
+                style={getSliderStyle(mentalEnergy)}
               />
               <div className="slider-labels">
                 <span>{t('common:low', 'Low')}</span>
@@ -412,34 +423,35 @@ export default function Checkin() {
         </div>
       </div>
 
-      {/* Navigation Buttons */}
-      <div className="checkin-nav">
-        <button
-          className="btn btn-ghost"
-          onClick={handleBack}
-          style={{ visibility: currentStep === 1 || currentStep === 4 ? 'hidden' : 'visible' }}
-        >
-          {icons.arrowLeft}
-          <span>{t('common:back', 'Back')}</span>
-        </button>
-        <button
-          className="btn btn-primary"
-          onClick={handleNext}
-          disabled={!isStepValid() || isSubmitting}
-        >
-          {isSubmitting ? (
-            <span>{t('common:loading', 'Loading...')}</span>
-          ) : currentStep === 4 ? (
-            <span>{t('checkin:complete.done', 'Done')}</span>
-          ) : currentStep === 3 ? (
-            <span>{t('checkin:submit', 'Submit')}</span>
-          ) : (
-            <>
-              <span>{t('common:continue', 'Continue')}</span>
-              {icons.arrowRight}
-            </>
-          )}
-        </button>
+        {/* Navigation Buttons */}
+        <div className="checkin-nav">
+          <button
+            className="btn btn-ghost"
+            onClick={handleBack}
+            style={{ visibility: currentStep === 1 || currentStep === 4 ? 'hidden' : 'visible' }}
+          >
+            {icons.arrowLeft}
+            <span>{t('common:back', 'Back')}</span>
+          </button>
+          <button
+            className="btn btn-primary"
+            onClick={handleNext}
+            disabled={!isStepValid() || isSubmitting}
+          >
+            {isSubmitting ? (
+              <span>{t('common:loading', 'Loading...')}</span>
+            ) : currentStep === 4 ? (
+              <span>{t('checkin:complete.done', 'Done')}</span>
+            ) : currentStep === 3 ? (
+              <span>{t('checkin:submit', 'Submit')}</span>
+            ) : (
+              <>
+                <span>{t('common:continue', 'Continue')}</span>
+                {icons.arrowRight}
+              </>
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );
