@@ -109,16 +109,9 @@ function AppRoutes() {
       <Route path="/terms-of-service" element={<TermsOfService />} />
       <Route path="/cookie-policy" element={<CookiePolicy />} />
 
-      {/* Hub admin (separate layout) */}
+      {/* Hub admin (separate layout) - temporarily public for dev */}
       <Route element={<HubLayout />}>
-        <Route
-          path="/hub"
-          element={
-            <ProtectedRoute>
-              <Hub />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/hub" element={<Hub />} />
       </Route>
 
       {/* Check-in (fullscreen, no sidebar) */}

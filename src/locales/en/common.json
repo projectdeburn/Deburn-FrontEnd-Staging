@@ -59,5 +59,18 @@
     "label": "Language",
     "english": "English",
     "swedish": "Svenska"
-  }
+  },
+  "loading": "Loading...",
+  "saving": "Saving...",
+  "adding": "Adding...",
+  "creating": "Creating...",
+  "searching": "Searching...",
+  "save": "Save",
+  "saveChanges": "Save Changes",
+  "cancel": "Cancel",
+  "remove": "Remove",
+  "delete": "Delete",
+  "edit": "Edit",
+  "refresh": "Refresh",
+  "logout": "Sign Out"
 }

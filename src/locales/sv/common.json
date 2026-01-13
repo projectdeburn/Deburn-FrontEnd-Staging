@@ -59,5 +59,18 @@
     "label": "Språk",
     "english": "English",
     "swedish": "Svenska"
-  }
+  },
+  "loading": "Laddar...",
+  "saving": "Sparar...",
+  "adding": "Lägger till...",
+  "creating": "Skapar...",
+  "searching": "Söker...",
+  "save": "Spara",
+  "saveChanges": "Spara ändringar",
+  "cancel": "Avbryt",
+  "remove": "Ta bort",
+  "delete": "Radera",
+  "edit": "Redigera",
+  "refresh": "Uppdatera",
+  "logout": "Logga ut"
 }

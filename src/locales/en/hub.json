@@ -1,0 +1,268 @@
+{
+  "title": "Hub",
+  "subtitle": "Global Administration",
+  "loading": "Checking access...",
+  "signedInAs": "Signed in as",
+
+  "tabs": {
+    "hub-admins": "Hub Admins",
+    "organizations": "Organizations",
+    "ask-eve": "Ask Eve",
+    "content": "Content Library",
+    "compliance": "Compliance"
+  },
+
+  "unauthorized": {
+    "title": "Access Denied",
+    "message": "You don't have permission to access the Hub.",
+    "returnButton": "Return to App"
+  },
+
+  "admins": {
+    "title": "Hub Administrators",
+    "subtitle": "Users with access to this global admin section",
+    "addAdmin": "Add Hub Admin",
+    "addButton": "Add Admin",
+    "emailPlaceholder": "Enter email address",
+    "currentUser": "Current user",
+    "table": {
+      "email": "Email",
+      "addedBy": "Added By",
+      "added": "Added"
+    },
+    "empty": "No hub admins found",
+    "success": {
+      "added": "Hub admin {{email}} added successfully",
+      "removed": "Hub admin {{email}} removed successfully"
+    },
+    "error": {
+      "load": "Failed to load hub admins",
+      "add": "Failed to add hub admin",
+      "remove": "Failed to remove hub admin"
+    },
+    "confirm": {
+      "remove": "Are you sure you want to remove {{email}} as a hub admin?"
+    }
+  },
+
+  "orgs": {
+    "createTitle": "Create Organization",
+    "createSubtitle": "Add a new organization to the platform",
+    "createButton": "Create Organization",
+    "existing": "Existing Organizations",
+    "noOrgs": "No organizations yet",
+    "memberCount": "{{count}} members",
+    "form": {
+      "name": "Organization Name",
+      "namePlaceholder": "e.g., Acme Corp",
+      "domain": "Domain (optional)",
+      "domainPlaceholder": "e.g., acme.com"
+    },
+    "adminsTitle": "Organization Administrators",
+    "adminsSubtitle": "Users who can manage organizations and circles",
+    "noAdmins": "No organization admins found",
+    "adminForm": {
+      "email": "Email",
+      "emailPlaceholder": "Enter email address",
+      "org": "Organization",
+      "selectOrg": "Select organization...",
+      "addButton": "Add Admin"
+    },
+    "table": {
+      "user": "User",
+      "organizations": "Organizations"
+    },
+    "removeFromOrg": "Remove admin from {{org}}",
+    "success": {
+      "created": "Organization {{name}} created successfully",
+      "adminAdded": "{{email}} added as admin for {{org}}",
+      "adminRemoved": "{{email}} removed from {{org}}"
+    },
+    "error": {
+      "load": "Failed to load organizations",
+      "create": "Failed to create organization",
+      "addAdmin": "Failed to add organization admin",
+      "removeAdmin": "Failed to remove organization admin"
+    },
+    "confirm": {
+      "removeAdmin": "Are you sure you want to remove {{email}} from {{org}}?"
+    }
+  },
+
+  "eve": {
+    "limitsTitle": "Conversation Limits",
+    "limitsSubtitle": "Daily message limits for Ask Eve",
+    "dailyLimit": "Daily exchanges per user",
+    "limitHelper": "Users will see a message when they reach their daily limit and be asked to return tomorrow.",
+    "configTitle": "Coach Configuration",
+    "configSubtitle": "Current AI model and topic detection settings",
+    "config": {
+      "model": "AI Model",
+      "maxTokens": "Max Tokens",
+      "temperature": "Temperature",
+      "methodology": "Coaching Methodology",
+      "primary": "Primary",
+      "ethical": "Ethical Standards",
+      "frameworks": "Scientific Frameworks",
+      "topics": "Supported Topics",
+      "crisisKeywords": "Crisis Keywords (Level 3 - Stop Coaching)",
+      "softKeywords": "Soft Escalation Keywords (Level 1 - Caution)",
+      "hardBoundaries": "Hard Boundaries (Never Provide)"
+    },
+    "promptsTitle": "System Prompts",
+    "promptsSubtitle": "Coach personality and behavior prompts by language",
+    "noPrompts": "No prompts found",
+    "contentTitle": "Content Recommendations",
+    "contentSubtitle": "Content the coach recommends based on conversation topics",
+    "contentInfo": "Eve recommends content from the Content Library based on detected topics in conversations.",
+    "contentInstructions": "To make content available to the coach:",
+    "step1": "Go to the Content Library tab",
+    "step2": "Edit a content item and set its Coach Topics",
+    "step3": "Set Status to \"Published\" to make it available",
+    "availableTopics": "Available Topics",
+    "success": {
+      "limitSaved": "Daily limit saved successfully",
+      "promptSaved": "Prompt saved successfully"
+    },
+    "error": {
+      "load": "Failed to load coach settings",
+      "limitRange": "Daily limit must be between 1 and 100",
+      "saveFailed": "Failed to save settings",
+      "promptSaveFailed": "Failed to save prompt"
+    }
+  },
+
+  "prompts": {
+    "editTitle": "Edit Prompt"
+  },
+
+  "content": {
+    "title": "Content Library",
+    "subtitle": "Microlearning courses and resources",
+    "addContent": "Add Content",
+    "noItems": "No content items found",
+    "noItemsHint": "Click \"+ Add Content\" to create new microlearning content",
+    "filters": {
+      "category": "Category",
+      "type": "Content Type",
+      "status": "Status",
+      "allCategories": "All Categories",
+      "allTypes": "All Types",
+      "allStatuses": "All Statuses"
+    },
+    "modal": {
+      "createTitle": "Create Content Item",
+      "editTitle": "Edit Content Item",
+      "create": "Create"
+    },
+    "form": {
+      "contentType": "Content Type",
+      "category": "Category",
+      "status": "Status",
+      "titleEn": "Title (English)",
+      "titleSv": "Title (Swedish)",
+      "length": "Length (minutes)",
+      "framework": "Related Framework",
+      "purpose": "Purpose",
+      "outcome": "Desired Outcome",
+      "coachTopics": "Coach Topics (for Ask Eve recommendations)",
+      "priority": "Coach Priority (0-10, higher = more recommended)",
+      "enableCoach": "Enable for coach recommendations",
+      "textContent": "Text Content",
+      "contentEn": "Content (English)",
+      "contentSv": "Content (Swedish)",
+      "voiceover": "Voiceover Script",
+      "scriptEn": "Script (English)",
+      "scriptSv": "Script (Swedish)",
+      "ttsSettings": "TTS Generation Settings",
+      "speed": "Speech Speed",
+      "voice": "Voice",
+      "video": "Video",
+      "videoUrl": "Video URL",
+      "embedCode": "Embed Code"
+    },
+    "success": {
+      "created": "Content item created successfully",
+      "updated": "Content item updated successfully",
+      "deleted": "Content item deleted successfully"
+    },
+    "error": {
+      "load": "Failed to load content",
+      "loadItem": "Failed to load content item",
+      "create": "Failed to create content",
+      "update": "Failed to update content",
+      "delete": "Failed to delete content",
+      "titleRequired": "English title is required"
+    },
+    "confirm": {
+      "delete": "Are you sure you want to delete this content item? This action cannot be undone."
+    }
+  },
+
+  "compliance": {
+    "dashboardTitle": "Compliance Dashboard",
+    "dashboardSubtitle": "GDPR compliance status and statistics",
+    "refreshStats": "Refresh Stats",
+    "stats": {
+      "totalUsers": "Total Users",
+      "pendingDeletions": "Pending Deletions",
+      "auditLogs": "Audit Log Entries",
+      "activeSessions": "Active Sessions"
+    },
+    "userDataTitle": "User Data Management",
+    "userDataSubtitle": "Search, export, and delete user data (GDPR Articles 17 & 20)",
+    "findUser": "Find User by Email",
+    "search": "Search",
+    "userInfo": "User Information",
+    "field": {
+      "email": "Email",
+      "organization": "Organization",
+      "status": "Status",
+      "created": "Created",
+      "lastLogin": "Last Login",
+      "sessions": "Sessions",
+      "checkins": "Check-ins",
+      "consents": "Consents"
+    },
+    "deletionRequested": "Deletion Requested",
+    "scheduledFor": "Scheduled",
+    "exportData": "Export User Data (GDPR)",
+    "exporting": "Exporting user data...",
+    "deleteAccount": "Delete Account",
+    "pendingTitle": "Pending Account Deletions",
+    "pendingSubtitle": "Users who have requested account deletion (30-day grace period)",
+    "noPending": "No pending deletions",
+    "table": {
+      "email": "Email",
+      "requested": "Requested",
+      "scheduledFor": "Scheduled For",
+      "actions": "Actions"
+    },
+    "executeNow": "Execute Now",
+    "securityTitle": "Security Controls",
+    "securitySubtitle": "Manual security maintenance actions",
+    "cleanupSessions": "Cleanup Expired Sessions",
+    "viewConfig": "View Security Config",
+    "hideConfig": "Hide Security Config",
+    "success": {
+      "exported": "User data exported successfully",
+      "deleted": "Account {{email}} scheduled for deletion",
+      "cleanup": "Cleaned up {{count}} expired sessions"
+    },
+    "error": {
+      "loadStats": "Failed to load compliance stats",
+      "userNotFound": "User not found",
+      "export": "Failed to export user data",
+      "delete": "Failed to delete account",
+      "loadDeletions": "Failed to load pending deletions",
+      "cleanup": "Failed to cleanup sessions",
+      "loadConfig": "Failed to load security config",
+      "emailMismatch": "Email does not match. Deletion cancelled."
+    },
+    "confirm": {
+      "delete": "Are you sure you want to delete the account for {{email}}? This action cannot be undone.",
+      "typeEmail": "Please type the email address to confirm: {{email}}",
+      "executeNow": "Are you sure you want to immediately delete the account for {{email}}?"
+    }
+  }
+}

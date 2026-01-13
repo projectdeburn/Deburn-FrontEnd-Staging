@@ -18,6 +18,7 @@ import enLearning from '@/locales/en/learning.json';
 import enProfile from '@/locales/en/profile.json';
 import enProgress from '@/locales/en/progress.json';
 import enValidation from '@/locales/en/validation.json';
+import enHub from '@/locales/en/hub.json';
 
 import svCommon from '@/locales/sv/common.json';
 import svAuth from '@/locales/sv/auth.json';
@@ -30,6 +31,7 @@ import svLearning from '@/locales/sv/learning.json';
 import svProfile from '@/locales/sv/profile.json';
 import svProgress from '@/locales/sv/progress.json';
 import svValidation from '@/locales/sv/validation.json';
+import svHub from '@/locales/sv/hub.json';
 
 const resources = {
   en: {
@@ -44,6 +46,7 @@ const resources = {
     profile: enProfile,
     progress: enProgress,
     validation: enValidation,
+    hub: enHub,
   },
   sv: {
     common: svCommon,
@@ -57,6 +60,7 @@ const resources = {
     profile: svProfile,
     progress: svProgress,
     validation: svValidation,
+    hub: svHub,
   },
 };
 
@@ -78,7 +82,7 @@ i18n
     lng: getInitialLanguage(),
     fallbackLng: 'en',
     defaultNS: 'common',
-    ns: ['common', 'auth', 'checkin', 'circles', 'coach', 'dashboard', 'errors', 'learning', 'profile', 'progress', 'validation'],
+    ns: ['common', 'auth', 'checkin', 'circles', 'coach', 'dashboard', 'errors', 'learning', 'profile', 'progress', 'validation', 'hub'],
     interpolation: {
       escapeValue: false, // React already escapes values
     },

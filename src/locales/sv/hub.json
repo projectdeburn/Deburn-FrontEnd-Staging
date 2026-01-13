@@ -1,0 +1,268 @@
+{
+  "title": "Hub",
+  "subtitle": "Global administration",
+  "loading": "Kontrollerar åtkomst...",
+  "signedInAs": "Inloggad som",
+
+  "tabs": {
+    "hub-admins": "Hub-administratörer",
+    "organizations": "Organisationer",
+    "ask-eve": "Fråga Eve",
+    "content": "Innehållsbibliotek",
+    "compliance": "Efterlevnad"
+  },
+
+  "unauthorized": {
+    "title": "Åtkomst nekad",
+    "message": "Du har inte behörighet att komma åt Hub.",
+    "returnButton": "Tillbaka till appen"
+  },
+
+  "admins": {
+    "title": "Hub-administratörer",
+    "subtitle": "Användare med åtkomst till denna globala administrationssektion",
+    "addAdmin": "Lägg till Hub-admin",
+    "addButton": "Lägg till admin",
+    "emailPlaceholder": "Ange e-postadress",
+    "currentUser": "Nuvarande användare",
+    "table": {
+      "email": "E-post",
+      "addedBy": "Tillagd av",
+      "added": "Tillagd"
+    },
+    "empty": "Inga hub-administratörer hittades",
+    "success": {
+      "added": "Hub-admin {{email}} har lagts till",
+      "removed": "Hub-admin {{email}} har tagits bort"
+    },
+    "error": {
+      "load": "Kunde inte ladda hub-administratörer",
+      "add": "Kunde inte lägga till hub-admin",
+      "remove": "Kunde inte ta bort hub-admin"
+    },
+    "confirm": {
+      "remove": "Är du säker på att du vill ta bort {{email}} som hub-admin?"
+    }
+  },
+
+  "orgs": {
+    "createTitle": "Skapa organisation",
+    "createSubtitle": "Lägg till en ny organisation på plattformen",
+    "createButton": "Skapa organisation",
+    "existing": "Befintliga organisationer",
+    "noOrgs": "Inga organisationer ännu",
+    "memberCount": "{{count}} medlemmar",
+    "form": {
+      "name": "Organisationsnamn",
+      "namePlaceholder": "t.ex. Acme Corp",
+      "domain": "Domän (valfritt)",
+      "domainPlaceholder": "t.ex. acme.com"
+    },
+    "adminsTitle": "Organisationsadministratörer",
+    "adminsSubtitle": "Användare som kan hantera organisationer och cirklar",
+    "noAdmins": "Inga organisationsadministratörer hittades",
+    "adminForm": {
+      "email": "E-post",
+      "emailPlaceholder": "Ange e-postadress",
+      "org": "Organisation",
+      "selectOrg": "Välj organisation...",
+      "addButton": "Lägg till admin"
+    },
+    "table": {
+      "user": "Användare",
+      "organizations": "Organisationer"
+    },
+    "removeFromOrg": "Ta bort admin från {{org}}",
+    "success": {
+      "created": "Organisation {{name}} har skapats",
+      "adminAdded": "{{email}} tillagd som admin för {{org}}",
+      "adminRemoved": "{{email}} borttagen från {{org}}"
+    },
+    "error": {
+      "load": "Kunde inte ladda organisationer",
+      "create": "Kunde inte skapa organisation",
+      "addAdmin": "Kunde inte lägga till organisationsadmin",
+      "removeAdmin": "Kunde inte ta bort organisationsadmin"
+    },
+    "confirm": {
+      "removeAdmin": "Är du säker på att du vill ta bort {{email}} från {{org}}?"
+    }
+  },
+
+  "eve": {
+    "limitsTitle": "Samtalsgränser",
+    "limitsSubtitle": "Dagliga meddelandegränser för Fråga Eve",
+    "dailyLimit": "Dagliga utbyten per användare",
+    "limitHelper": "Användare kommer att se ett meddelande när de når sin dagliga gräns och bli ombedda att återkomma imorgon.",
+    "configTitle": "Coach-konfiguration",
+    "configSubtitle": "Aktuell AI-modell och ämnesdetekteringsinställningar",
+    "config": {
+      "model": "AI-modell",
+      "maxTokens": "Max tokens",
+      "temperature": "Temperatur",
+      "methodology": "Coachingmetodik",
+      "primary": "Primär",
+      "ethical": "Etiska standarder",
+      "frameworks": "Vetenskapliga ramverk",
+      "topics": "Stödda ämnen",
+      "crisisKeywords": "Krisnyckelord (Nivå 3 - Stoppa coaching)",
+      "softKeywords": "Mjuka eskaleringsnyckelord (Nivå 1 - Försiktighet)",
+      "hardBoundaries": "Hårda gränser (Tillhandahåll aldrig)"
+    },
+    "promptsTitle": "Systemprompter",
+    "promptsSubtitle": "Coach-personlighet och beteendeprompter per språk",
+    "noPrompts": "Inga prompter hittades",
+    "contentTitle": "Innehållsrekommendationer",
+    "contentSubtitle": "Innehåll som coachen rekommenderar baserat på samtalsämnen",
+    "contentInfo": "Eve rekommenderar innehåll från innehållsbiblioteket baserat på upptäckta ämnen i samtal.",
+    "contentInstructions": "För att göra innehåll tillgängligt för coachen:",
+    "step1": "Gå till fliken Innehållsbibliotek",
+    "step2": "Redigera ett innehållsobjekt och ange dess Coach-ämnen",
+    "step3": "Sätt status till \"Publicerad\" för att göra det tillgängligt",
+    "availableTopics": "Tillgängliga ämnen",
+    "success": {
+      "limitSaved": "Daglig gräns sparad",
+      "promptSaved": "Prompt sparad"
+    },
+    "error": {
+      "load": "Kunde inte ladda coach-inställningar",
+      "limitRange": "Daglig gräns måste vara mellan 1 och 100",
+      "saveFailed": "Kunde inte spara inställningar",
+      "promptSaveFailed": "Kunde inte spara prompt"
+    }
+  },
+
+  "prompts": {
+    "editTitle": "Redigera prompt"
+  },
+
+  "content": {
+    "title": "Innehållsbibliotek",
+    "subtitle": "Mikrolärande kurser och resurser",
+    "addContent": "Lägg till innehåll",
+    "noItems": "Inga innehållsobjekt hittades",
+    "noItemsHint": "Klicka på \"+ Lägg till innehåll\" för att skapa nytt mikrolärande innehåll",
+    "filters": {
+      "category": "Kategori",
+      "type": "Innehållstyp",
+      "status": "Status",
+      "allCategories": "Alla kategorier",
+      "allTypes": "Alla typer",
+      "allStatuses": "Alla statusar"
+    },
+    "modal": {
+      "createTitle": "Skapa innehållsobjekt",
+      "editTitle": "Redigera innehållsobjekt",
+      "create": "Skapa"
+    },
+    "form": {
+      "contentType": "Innehållstyp",
+      "category": "Kategori",
+      "status": "Status",
+      "titleEn": "Titel (engelska)",
+      "titleSv": "Titel (svenska)",
+      "length": "Längd (minuter)",
+      "framework": "Relaterat ramverk",
+      "purpose": "Syfte",
+      "outcome": "Önskat resultat",
+      "coachTopics": "Coach-ämnen (för Fråga Eve-rekommendationer)",
+      "priority": "Coach-prioritet (0-10, högre = mer rekommenderad)",
+      "enableCoach": "Aktivera för coach-rekommendationer",
+      "textContent": "Textinnehåll",
+      "contentEn": "Innehåll (engelska)",
+      "contentSv": "Innehåll (svenska)",
+      "voiceover": "Röstöverföringsmanus",
+      "scriptEn": "Manus (engelska)",
+      "scriptSv": "Manus (svenska)",
+      "ttsSettings": "TTS-genereringsinställningar",
+      "speed": "Talhastighet",
+      "voice": "Röst",
+      "video": "Video",
+      "videoUrl": "Video-URL",
+      "embedCode": "Inbäddningskod"
+    },
+    "success": {
+      "created": "Innehållsobjekt skapat",
+      "updated": "Innehållsobjekt uppdaterat",
+      "deleted": "Innehållsobjekt raderat"
+    },
+    "error": {
+      "load": "Kunde inte ladda innehåll",
+      "loadItem": "Kunde inte ladda innehållsobjekt",
+      "create": "Kunde inte skapa innehåll",
+      "update": "Kunde inte uppdatera innehåll",
+      "delete": "Kunde inte radera innehåll",
+      "titleRequired": "Engelsk titel krävs"
+    },
+    "confirm": {
+      "delete": "Är du säker på att du vill radera detta innehållsobjekt? Denna åtgärd kan inte ångras."
+    }
+  },
+
+  "compliance": {
+    "dashboardTitle": "Efterlevnadspanel",
+    "dashboardSubtitle": "GDPR-efterlevnadsstatus och statistik",
+    "refreshStats": "Uppdatera statistik",
+    "stats": {
+      "totalUsers": "Totala användare",
+      "pendingDeletions": "Väntande raderingar",
+      "auditLogs": "Granskningsloggposter",
+      "activeSessions": "Aktiva sessioner"
+    },
+    "userDataTitle": "Användardatahantering",
+    "userDataSubtitle": "Sök, exportera och radera användardata (GDPR artikel 17 & 20)",
+    "findUser": "Hitta användare via e-post",
+    "search": "Sök",
+    "userInfo": "Användarinformation",
+    "field": {
+      "email": "E-post",
+      "organization": "Organisation",
+      "status": "Status",
+      "created": "Skapad",
+      "lastLogin": "Senaste inloggning",
+      "sessions": "Sessioner",
+      "checkins": "Incheckningar",
+      "consents": "Samtycken"
+    },
+    "deletionRequested": "Radering begärd",
+    "scheduledFor": "Schemalagd",
+    "exportData": "Exportera användardata (GDPR)",
+    "exporting": "Exporterar användardata...",
+    "deleteAccount": "Radera konto",
+    "pendingTitle": "Väntande kontoradering",
+    "pendingSubtitle": "Användare som har begärt kontoradering (30 dagars uppsägningstid)",
+    "noPending": "Inga väntande raderingar",
+    "table": {
+      "email": "E-post",
+      "requested": "Begärd",
+      "scheduledFor": "Schemalagd för",
+      "actions": "Åtgärder"
+    },
+    "executeNow": "Utför nu",
+    "securityTitle": "Säkerhetskontroller",
+    "securitySubtitle": "Manuella säkerhetsunderhållsåtgärder",
+    "cleanupSessions": "Rensa utgångna sessioner",
+    "viewConfig": "Visa säkerhetskonfiguration",
+    "hideConfig": "Dölj säkerhetskonfiguration",
+    "success": {
+      "exported": "Användardata exporterad",
+      "deleted": "Konto {{email}} schemalagt för radering",
+      "cleanup": "Rensade {{count}} utgångna sessioner"
+    },
+    "error": {
+      "loadStats": "Kunde inte ladda efterlevnadsstatistik",
+      "userNotFound": "Användare hittades inte",
+      "export": "Kunde inte exportera användardata",
+      "delete": "Kunde inte radera konto",
+      "loadDeletions": "Kunde inte ladda väntande raderingar",
+      "cleanup": "Kunde inte rensa sessioner",
+      "loadConfig": "Kunde inte ladda säkerhetskonfiguration",
+      "emailMismatch": "E-postadressen matchar inte. Radering avbruten."
+    },
+    "confirm": {
+      "delete": "Är du säker på att du vill radera kontot för {{email}}? Denna åtgärd kan inte ångras.",
+      "typeEmail": "Skriv e-postadressen för att bekräfta: {{email}}",
+      "executeNow": "Är du säker på att du vill omedelbart radera kontot för {{email}}?"
+    }
+  }
+}
