@@ -6008,3 +6008,781 @@ body > .toast-notification.fade-out {
         color: var(--color-deep-forest);
     }
 }
+
+/* ==========================================================================
+   Circles Page - Enhanced Components
+   ========================================================================== */
+
+/* Availability Banner - Inline Expandable */
+.availability-banner {
+    background: var(--color-warm-white);
+    border: 1px solid var(--neutral-200);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-6);
+    overflow: hidden;
+}
+
+.availability-banner--set {
+    background: rgba(90, 154, 130, 0.05);
+    border-color: rgba(90, 154, 130, 0.2);
+}
+
+.availability-banner--expanded {
+    border-color: var(--color-deep-forest);
+}
+
+.availability-banner-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-5);
+    cursor: pointer;
+    transition: background var(--duration-fast);
+}
+
+.availability-banner-header:hover {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.availability-banner-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(45, 74, 71, 0.1);
+    border-radius: var(--radius-md);
+    color: var(--color-deep-forest);
+    flex-shrink: 0;
+}
+
+.availability-banner-icon--success {
+    background: rgba(90, 154, 130, 0.15);
+    color: var(--color-success);
+}
+
+.availability-banner-content {
+    flex: 1;
+}
+
+.availability-banner-title {
+    margin: 0 0 var(--space-1) 0;
+    font-size: var(--text-body);
+    font-weight: 600;
+    color: var(--color-ink);
+}
+
+.availability-banner-description {
+    margin: 0;
+    font-size: var(--text-body-sm);
+    color: var(--neutral-600);
+}
+
+.availability-banner-toggle {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    background: transparent;
+    border: 1px solid var(--neutral-200);
+    border-radius: var(--radius-md);
+    font-size: var(--text-body-sm);
+    color: var(--neutral-600);
+    cursor: pointer;
+    transition: all var(--duration-fast);
+}
+
+.availability-banner-toggle:hover {
+    background: var(--neutral-100);
+    border-color: var(--neutral-300);
+}
+
+.availability-banner-body {
+    padding: 0 var(--space-5) var(--space-5);
+    border-top: 1px solid var(--neutral-200);
+    background: var(--neutral-50);
+}
+
+.availability-grid-inline {
+    padding-top: var(--space-4);
+    overflow-x: auto;
+}
+
+.availability-banner-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: var(--space-4);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--neutral-200);
+}
+
+.availability-slot-count {
+    font-size: var(--text-body-sm);
+    color: var(--neutral-600);
+}
+
+.availability-banner-actions {
+    display: flex;
+    gap: var(--space-3);
+}
+
+/* Circle Card - Enhanced with consistent layout */
+.circles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: var(--space-5);
+}
+
+.circle-card {
+    background: var(--color-warm-white);
+    border: 1px solid var(--neutral-200);
+    border-radius: var(--radius-lg);
+    padding: var(--space-5);
+    transition: border-color var(--duration-normal);
+    display: flex;
+    flex-direction: column;
+}
+
+.circle-card:hover {
+    border-color: var(--neutral-300);
+}
+
+.circle-card-header {
+    margin-bottom: var(--space-3);
+}
+
+.circle-card-name {
+    margin: 0 0 var(--space-1) 0;
+    font-size: var(--text-h4);
+    font-weight: 600;
+    color: var(--color-ink);
+}
+
+.circle-card-meta {
+    margin: 0;
+    font-size: var(--text-body-sm);
+    color: var(--neutral-500);
+}
+
+/* Meeting badge on its own row */
+.circle-card-meeting {
+    margin-bottom: var(--space-3);
+}
+
+.circle-card-meeting-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    background: rgba(45, 74, 71, 0.1);
+    border-radius: var(--radius-md);
+    font-size: var(--text-caption);
+    color: var(--color-deep-forest);
+    font-weight: 500;
+}
+
+.circle-card-meeting-badge svg {
+    flex-shrink: 0;
+}
+
+/* Circle Card Avatars */
+.circle-card-avatars {
+    display: flex;
+    margin-bottom: var(--space-3);
+}
+
+.circle-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--text-caption);
+    font-weight: 600;
+    color: white;
+    border: 2px solid var(--color-warm-white);
+    margin-left: -8px;
+}
+
+.circle-avatar:first-child {
+    margin-left: 0;
+}
+
+.circle-avatar-more {
+    background: var(--neutral-300);
+    color: var(--neutral-600);
+    font-size: 11px;
+}
+
+/* Circle Card Topic */
+.circle-card-topic {
+    background: var(--color-clay);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-3);
+}
+
+.circle-card-topic-label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-caption);
+    color: var(--neutral-500);
+    margin-bottom: var(--space-1);
+}
+
+.circle-card-topic-text {
+    margin: 0;
+    font-size: var(--text-body-sm);
+    font-weight: 500;
+    color: var(--color-ink);
+}
+
+/* Circle Card Actions - always at bottom */
+.circle-card-actions {
+    display: flex;
+    gap: var(--space-3);
+    margin-top: auto;
+    padding-top: var(--space-3);
+}
+
+.circle-card-actions .btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+}
+
+/* Invitation Card - In-page Version */
+.invitations-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.invitation-card {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-5);
+    background: var(--color-warm-white);
+    border: 1px solid var(--neutral-200);
+    border-radius: var(--radius-lg);
+}
+
+.invitation-card--expired {
+    opacity: 0.6;
+}
+
+.invitation-card-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(45, 74, 71, 0.1);
+    border-radius: var(--radius-md);
+    color: var(--color-deep-forest);
+    flex-shrink: 0;
+}
+
+.invitation-card-content {
+    flex: 1;
+}
+
+.invitation-card-title {
+    margin: 0 0 var(--space-1) 0;
+    font-size: var(--text-body);
+    font-weight: 600;
+    color: var(--color-ink);
+}
+
+.invitation-card-description {
+    margin: 0 0 var(--space-2) 0;
+    font-size: var(--text-body-sm);
+    color: var(--neutral-600);
+}
+
+.invitation-card-expires {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0;
+    font-size: var(--text-caption);
+    color: var(--neutral-500);
+}
+
+.invitation-card-actions {
+    display: flex;
+    gap: var(--space-3);
+    flex-shrink: 0;
+}
+
+/* Availability Modal */
+.availability-modal-content {
+    /* Container for modal body */
+}
+
+.availability-modal-description {
+    margin: 0 0 var(--space-5) 0;
+    color: var(--neutral-600);
+    font-size: var(--text-body-sm);
+}
+
+.availability-grid-wrapper {
+    overflow-x: auto;
+    margin: 0 calc(-1 * var(--space-6));
+    padding: 0 var(--space-6);
+}
+
+.availability-grid {
+    min-width: 400px;
+}
+
+.availability-grid-header {
+    display: grid;
+    grid-template-columns: 60px repeat(7, 1fr);
+    gap: var(--space-1);
+    margin-bottom: var(--space-2);
+}
+
+.availability-day-label {
+    text-align: center;
+    font-size: var(--text-caption);
+    font-weight: 600;
+    color: var(--neutral-500);
+    padding: var(--space-2);
+}
+
+.availability-time-label {
+    font-size: var(--text-caption);
+    color: var(--neutral-500);
+    padding: var(--space-2);
+    text-align: right;
+}
+
+.availability-grid-row {
+    display: grid;
+    grid-template-columns: 60px repeat(7, 1fr);
+    gap: var(--space-1);
+    margin-bottom: var(--space-1);
+}
+
+.availability-slot {
+    aspect-ratio: 1;
+    min-height: 32px;
+    background: var(--neutral-100);
+    border: 1px solid var(--neutral-200);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--duration-fast);
+}
+
+.availability-slot:hover {
+    background: var(--neutral-200);
+    border-color: var(--neutral-300);
+}
+
+.availability-slot--selected {
+    background: var(--color-deep-forest);
+    border-color: var(--color-deep-forest);
+}
+
+.availability-slot--selected:hover {
+    background: var(--color-slate);
+    border-color: var(--color-slate);
+}
+
+.availability-modal-summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: var(--space-4);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--neutral-200);
+}
+
+.availability-modal-count {
+    font-size: var(--text-body-sm);
+    color: var(--neutral-600);
+}
+
+/* Group Details Modal */
+.group-details-content {
+    /* Container */
+}
+
+.group-details-meta {
+    display: flex;
+    gap: var(--space-4);
+    margin-bottom: var(--space-5);
+}
+
+.group-details-meta-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-body-sm);
+    color: var(--neutral-600);
+}
+
+.group-details-topic {
+    background: var(--color-clay);
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-5);
+}
+
+.group-details-topic h4 {
+    margin: 0 0 var(--space-2) 0;
+    font-size: var(--text-caption);
+    font-weight: 500;
+    color: var(--neutral-500);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.group-details-topic p {
+    margin: 0;
+    font-size: var(--text-body);
+    color: var(--color-ink);
+}
+
+.group-details-section {
+    margin-bottom: var(--space-5);
+}
+
+.group-details-section:last-child {
+    margin-bottom: 0;
+}
+
+.group-details-section h4 {
+    margin: 0 0 var(--space-3) 0;
+    font-size: var(--text-body-sm);
+    font-weight: 600;
+    color: var(--color-ink);
+}
+
+.group-details-members {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+}
+
+.group-details-member {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    background: var(--neutral-100);
+    border-radius: var(--radius-full);
+}
+
+.group-details-member-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: white;
+}
+
+.group-details-member-name {
+    font-size: var(--text-body-sm);
+    color: var(--color-ink);
+}
+
+.group-details-meetings {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.group-details-meeting {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-3) var(--space-4);
+    background: var(--neutral-50);
+    border-left: 3px solid var(--color-deep-forest);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.group-details-meeting--past {
+    opacity: 0.7;
+    border-left-color: var(--neutral-300);
+}
+
+.group-details-meeting-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.group-details-meeting-title {
+    font-size: var(--text-body-sm);
+    font-weight: 500;
+    color: var(--color-ink);
+}
+
+.group-details-meeting-date {
+    font-size: var(--text-caption);
+    color: var(--neutral-500);
+}
+
+.group-details-meeting-status {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    font-size: var(--text-caption);
+    color: var(--neutral-500);
+}
+
+.group-details-loading,
+.group-details-empty {
+    font-size: var(--text-body-sm);
+    color: var(--neutral-500);
+    font-style: italic;
+}
+
+.btn-small {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-caption);
+}
+
+/* Schedule Meeting Modal */
+.schedule-meeting-content {
+    /* Container */
+}
+
+.schedule-meeting-subtitle {
+    margin: 0 0 var(--space-5) 0;
+    font-size: var(--text-body-sm);
+    color: var(--neutral-500);
+}
+
+.schedule-meeting-loading {
+    text-align: center;
+    padding: var(--space-8);
+}
+
+.schedule-meeting-no-availability {
+    text-align: center;
+    padding: var(--space-6);
+    background: var(--neutral-50);
+    border-radius: var(--radius-lg);
+}
+
+.schedule-meeting-no-availability svg {
+    display: block;
+    margin: 0 auto var(--space-4);
+    color: var(--neutral-400);
+}
+
+.schedule-meeting-no-availability h4 {
+    margin: 0 0 var(--space-2) 0;
+    font-size: var(--text-body);
+    font-weight: 600;
+    color: var(--color-ink);
+}
+
+.schedule-meeting-no-availability p {
+    margin: 0;
+    font-size: var(--text-body-sm);
+    color: var(--neutral-600);
+}
+
+.schedule-meeting-field {
+    margin-bottom: var(--space-5);
+}
+
+.schedule-meeting-field label {
+    display: block;
+    margin-bottom: var(--space-2);
+    font-size: var(--text-body-sm);
+    font-weight: 500;
+    color: var(--color-ink);
+}
+
+.schedule-meeting-input {
+    width: 100%;
+    padding: var(--space-3);
+    border: 1px solid var(--neutral-200);
+    border-radius: var(--radius-md);
+    font-size: var(--text-body);
+    transition: border-color var(--duration-fast);
+}
+
+.schedule-meeting-input:focus {
+    outline: none;
+    border-color: var(--color-deep-forest);
+}
+
+.schedule-meeting-slots {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    max-height: 280px;
+    overflow-y: auto;
+}
+
+.schedule-meeting-slot {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    background: var(--neutral-50);
+    border: 2px solid transparent;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--duration-fast);
+    text-align: left;
+}
+
+.schedule-meeting-slot:hover {
+    background: var(--neutral-100);
+}
+
+.schedule-meeting-slot--selected {
+    border-color: var(--color-deep-forest);
+    background: rgba(45, 74, 71, 0.05);
+}
+
+.schedule-meeting-slot-date,
+.schedule-meeting-slot-time {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-body-sm);
+}
+
+.schedule-meeting-slot-date {
+    flex: 1;
+    font-weight: 500;
+    color: var(--color-ink);
+}
+
+.schedule-meeting-slot-time {
+    color: var(--neutral-600);
+}
+
+.schedule-meeting-slot-count {
+    font-size: var(--text-caption);
+    color: var(--neutral-500);
+    background: var(--neutral-100);
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-full);
+}
+
+/* Circles Empty States */
+.circles-error-state,
+.circles-waiting-state {
+    text-align: center;
+    padding: var(--space-10) var(--space-6);
+    background: var(--color-warm-white);
+    border: 1px solid var(--neutral-200);
+    border-radius: var(--radius-lg);
+}
+
+.circles-error-icon,
+.circles-waiting-icon,
+.circles-empty-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 80px;
+    margin: 0 auto var(--space-5);
+    background: var(--neutral-100);
+    border-radius: 50%;
+    color: var(--neutral-400);
+}
+
+.circles-error-icon {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--color-error);
+}
+
+.circles-waiting-icon {
+    background: rgba(90, 154, 130, 0.15);
+    color: var(--color-success);
+}
+
+.circles-error-state h2,
+.circles-waiting-state h3,
+.circles-empty-state h2 {
+    margin: 0 0 var(--space-3) 0;
+    font-size: var(--text-h4);
+    color: var(--color-ink);
+}
+
+.circles-error-state p,
+.circles-waiting-state p,
+.circles-empty-state p {
+    margin: 0 0 var(--space-5) 0;
+    color: var(--neutral-600);
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.circles-waiting-description {
+    font-style: italic;
+}
+
+/* Responsive Circles */
+@media (max-width: 768px) {
+    .circles-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .availability-banner-header {
+        flex-direction: column;
+        text-align: center;
+        gap: var(--space-3);
+    }
+
+    .availability-banner-toggle {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .availability-banner-footer {
+        flex-direction: column;
+        gap: var(--space-3);
+    }
+
+    .availability-banner-actions {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .availability-banner-actions .btn {
+        width: 100%;
+    }
+
+    .invitation-card {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .invitation-card-actions {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .circle-card-actions {
+        flex-direction: column;
+    }
+
+    .group-details-meta {
+        flex-direction: column;
+        gap: var(--space-2);
+    }
+}

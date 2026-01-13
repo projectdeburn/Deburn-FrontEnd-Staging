@@ -10,6 +10,7 @@ The Hub is the **Global Administration** panel for the Deburn platform. It is ac
 ## Design Philosophy
 
 The Hub follows Deburn's **Scandinavian Minimalism** design:
+
 - Clean, minimal interface with warm neutral colors
 - Card-based layout with subtle 1px borders (no drop shadows)
 - Maximum width of 1200px, centered
@@ -20,13 +21,16 @@ The Hub follows Deburn's **Scandinavian Minimalism** design:
 ## Layout Structure
 
 ### Header
+
 - **Title:** "Hub" (28px, 600 weight)
 - **Subtitle:** "Global Administration" (14px, secondary color)
 - **User info:** "Signed in as [email]" (right-aligned)
 - Horizontal divider below header
 
 ### Tab Navigation
+
 Five primary tabs:
+
 1. **Hub Admins** (default)
 2. **Organizations**
 3. **Ask Eve**
@@ -42,6 +46,7 @@ Active tab has colored border-bottom with primary color.
 **Purpose:** Manage users with global Hub admin access.
 
 ### Components
+
 - **Card: Hub Administrators**
   - Subtitle: "Users with access to this global admin section"
   - Form to add new admin (email input + "Add Admin" button)
@@ -50,6 +55,7 @@ Active tab has colored border-bottom with primary color.
   - Current user shows "Current user" label instead of remove button
 
 ### Functionality
+
 - Add hub admin by email
 - Remove hub admin (with confirmation)
 - Cannot remove yourself
@@ -63,6 +69,7 @@ Active tab has colored border-bottom with primary color.
 ### Components
 
 #### Card 1: Create Organization
+
 - Subtitle: "Add a new organization to the platform"
 - Form fields:
   - Organization Name (required)
@@ -74,6 +81,7 @@ Active tab has colored border-bottom with primary color.
   - Member count
 
 #### Card 2: Organization Administrators
+
 - Subtitle: "Users who can manage organizations and circles"
 - Form to add org admin:
   - Email input
@@ -91,12 +99,14 @@ Active tab has colored border-bottom with primary color.
 ### Components
 
 #### Card 1: Conversation Limits
+
 - Subtitle: "Daily message limits for Ask Eve"
 - Number input: "Daily exchanges per user" (min: 1, max: 100, default: 15)
 - Save button
 - Helper text: "Users will see a message when they reach their daily limit..."
 
 #### Card 2: Coach Configuration
+
 - Subtitle: "Current AI model and topic detection settings"
 - Display grid:
   - AI MODEL (e.g., claude-sonnet-4-5-20250929)
@@ -112,6 +122,7 @@ Active tab has colored border-bottom with primary color.
 - **Hard Boundaries** (Never Provide): List of forbidden advice types
 
 #### Card 3: System Prompts
+
 - Subtitle: "Coach personality and behavior prompts by language"
 - Organized by language (EN, SV)
 - Each prompt shows:
@@ -121,6 +132,7 @@ Active tab has colored border-bottom with primary color.
 - Edit opens modal with full textarea editor
 
 #### Card 4: Content Recommendations
+
 - Subtitle: "Content the coach recommends based on conversation topics"
 - Instructions for linking content to coach
 - Display of available topics (same 12 as above)
@@ -134,20 +146,25 @@ Active tab has colored border-bottom with primary color.
 ### Components
 
 #### Header Section
+
 - Title: "Content Library"
 - Subtitle: "Microlearning courses and resources"
 - "+ Add Content" button (opens create modal)
 
 #### Filters Row
+
 Three dropdowns:
+
 - **Category:** All Categories, Featured, Leadership, Breath Techniques, Meditation, Burnout, Wellbeing, Other
 - **Content Type:** All Types, Text Article, Audio Article, Audio Exercise, Video Link
 - **Status:** All Statuses, Draft, In Review, Published, Archived
 
 #### Content List
+
 Grouped by category with count (e.g., "Leadership (31)")
 
 Each content card displays:
+
 - **Type badge** (uppercase, small): TEXT, AUDIO, EXERCISE, VIDEO
 - **Status** (colored): Published (green), Draft (gray), etc.
 - **Title** (bold)
@@ -157,7 +174,9 @@ Each content card displays:
 - **Actions:** Edit | Delete buttons
 
 ### Create/Edit Content Modal
+
 Large modal (900px) with sections:
+
 - Content type, category, status dropdowns
 - Title fields (English & Swedish)
 - Length (minutes), related framework
@@ -179,6 +198,7 @@ Large modal (900px) with sections:
 ### Components
 
 #### Card 1: Compliance Dashboard
+
 - Subtitle: "GDPR compliance status and statistics"
 - "Refresh Stats" button
 - Stats grid (4 boxes):
@@ -188,6 +208,7 @@ Large modal (900px) with sections:
   - ACTIVE SESSIONS
 
 #### Card 2: User Data Management
+
 - Subtitle: "Search, export, and delete user data (GDPR Articles 17 & 20)"
 - Search form: "Find User by Email" input + Search button
 - User details section (shown after search):
@@ -196,12 +217,14 @@ Large modal (900px) with sections:
   - Action buttons: "Export User Data" | "Delete Account"
 
 #### Card 3: Pending Account Deletions
+
 - Subtitle: "Users who have requested account deletion (30-day grace period)"
 - "Refresh" button
 - Table: EMAIL | REQUESTED | SCHEDULED FOR | ACTIONS
 - "Execute Now" button for immediate deletion
 
 #### Card 4: Security Controls
+
 - Subtitle: "Manual security maintenance actions"
 - Buttons: "Cleanup Expired Sessions" | "View Security Config"
 - Collapsible security config display (JSON)
@@ -213,11 +236,13 @@ Large modal (900px) with sections:
 All endpoints prefixed with `/api/hub/`
 
 ### Hub Admins
+
 - `GET /admins` - List hub admins
 - `POST /admins` - Add hub admin
 - `DELETE /admins/:email` - Remove hub admin
 
 ### Organizations
+
 - `GET /organizations` - List organizations
 - `POST /organizations` - Create organization
 - `GET /org-admins` - List org admins
@@ -225,6 +250,7 @@ All endpoints prefixed with `/api/hub/`
 - `DELETE /org-admins/:email/:orgId` - Remove org admin from org
 
 ### Ask Eve
+
 - `GET /coach/config` - Get coach configuration
 - `GET /coach/limits` - Get conversation limits
 - `PUT /coach/limits` - Update conversation limits
@@ -232,6 +258,7 @@ All endpoints prefixed with `/api/hub/`
 - `PUT /coach/prompts/:id` - Update system prompt
 
 ### Content Library
+
 - `GET /content` - List content (with filters)
 - `POST /content` - Create content
 - `PUT /content/:id` - Update content
@@ -239,6 +266,7 @@ All endpoints prefixed with `/api/hub/`
 - `POST /content/:id/audio` - Upload audio file
 
 ### Compliance
+
 - `GET /compliance/stats` - Get compliance statistics
 - `GET /compliance/user/:email` - Get user data
 - `POST /compliance/user/:email/export` - Export user data
@@ -264,13 +292,16 @@ All endpoints prefixed with `/api/hub/`
 ## States
 
 ### Loading State
+
 - Centered spinner with "Checking access..." text
 
 ### Unauthorized State
+
 - Access denied message
 - "Return to Dashboard" button
 
 ### Empty States
+
 - Hub Admins: "No administrators" (shouldn't happen)
 - Organizations: "No organizations yet"
 - Content Library: "No content items" with create prompt
@@ -295,38 +326,19 @@ Question: Answer (DD/MM/YY)
 
 ## Components (AI)
 
-### File Structure
-```
-src/
-  components/
-    hub/
-      HubAdminsTab.jsx       # Tab 1: Hub admin management
-      OrganizationsTab.jsx   # Tab 2: Org & org admin management
-      AskEveTab.jsx          # Tab 3: AI coach configuration
-      ContentLibraryTab.jsx  # Tab 4: Content management
-      ComplianceTab.jsx      # Tab 5: GDPR compliance
-      ContentModal.jsx       # Create/edit content modal
-      PromptEditModal.jsx    # Edit system prompt modal
-  features/
-    hub/
-      hubApi.js              # API layer for all Hub endpoints
-  pages/
-    Hub.jsx                  # Main page, orchestrates tabs
-  hub.css                    # Hub-specific styles (existing, don't modify)
-```
+Internal components:
 
-### Component Responsibilities (SOLID - Single Responsibility)
-- **Hub.jsx**: Main page layout, tab navigation, auth check
-- **HubAdminsTab.jsx**: Add/remove hub admins, admin table
-- **OrganizationsTab.jsx**: Create orgs, manage org admins
-- **AskEveTab.jsx**: Conversation limits, coach config display, system prompts
-- **ContentLibraryTab.jsx**: Content filtering, listing, CRUD operations
-- **ComplianceTab.jsx**: Stats dashboard, user search, deletions, security
-- **ContentModal.jsx**: Full content create/edit form with type-specific fields
-- **PromptEditModal.jsx**: Textarea editor for system prompts
-- **hubApi.js**: All API calls, centralized error handling
+- HubAdminsTab
+- OrganizationsTab
+- AskEveTab
+- ContentLibraryTab
+- ComplianceTab
+- ContentCard
+- ContentModal
+- PromptEditModal
 
-### Shared UI (from existing components)
+Shared UI:
+
 - Card containers with 1px borders
 - Form inputs with consistent styling
 - Primary buttons (deep forest)
@@ -335,9 +347,3 @@ src/
 - Badge components for topics/status
 - Table components for data display
 - Modal system for editing
-
-### i18n
-Full translation support using `useTranslation(['hub', 'common'])` with keys like:
-- `hub:tabs.hubAdmins`, `hub:tabs.organizations`, etc.
-- `hub:admins.title`, `hub:admins.addAdmin`, etc.
-- `hub:content.addContent`, `hub:content.filters.category`, etc.

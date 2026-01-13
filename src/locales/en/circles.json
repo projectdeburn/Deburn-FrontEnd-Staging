@@ -3,6 +3,76 @@
     "title": "Leadership Circles",
     "tagline": "Connect with peers who understand"
   },
+  "availability": {
+    "setTitle": "Set Your Availability",
+    "setDescription": "Mark when you're free to meet with your circle. This helps find times that work for everyone.",
+    "setButton": "Set Availability",
+    "doneTitle": "Availability Set",
+    "doneDescription": "You've marked {{count}} time slots as available.",
+    "modalTitle": "Set Your Availability",
+    "modalDescription": "Select the times you are typically available for circle meetings. Your availability helps find meeting times that work for everyone.",
+    "slotsSelected": "{{count}} slots selected",
+    "clearAll": "Clear All",
+    "saveButton": "Save Availability",
+    "days": {
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "sun": "Sun"
+    }
+  },
+  "invitations": {
+    "title": "Pending Invitations",
+    "description": "You've been invited to join a leadership circle",
+    "expires": "Expires: {{date}}",
+    "expired": "Expired",
+    "accept": "Accept",
+    "decline": "Decline"
+  },
+  "groups": {
+    "title": "Your Circles",
+    "members": "members",
+    "weekly": "Weekly",
+    "biWeekly": "Bi-weekly",
+    "monthly": "Monthly",
+    "discussionTopic": "Discussion topic",
+    "joinCall": "Join Video Call",
+    "scheduleMeeting": "Schedule Meeting",
+    "viewDetails": "View Details",
+    "membersTitle": "Members",
+    "currentTopic": "Current Discussion Topic",
+    "upcomingMeetings": "Upcoming Meetings",
+    "pastMeetings": "Past Meetings",
+    "noUpcoming": "No upcoming meetings scheduled.",
+    "join": "Join",
+    "completed": "Completed",
+    "cancelled": "Cancelled"
+  },
+  "schedule": {
+    "title": "Schedule Meeting",
+    "for": "For: {{groupName}}",
+    "meetingTitle": "Meeting Title",
+    "defaultTitle": "Circle Discussion",
+    "selectTime": "Select a Time",
+    "available": "{{count}} available",
+    "noAvailability": "No Common Availability",
+    "noAvailabilityDesc": "There are no time slots where all members are available. Ask members to update their availability.",
+    "scheduleButton": "Schedule"
+  },
+  "empty": {
+    "title": "No circles yet",
+    "description": "You haven't been assigned to any leadership circles yet. When your organization admin creates a circle and assigns groups, you'll see your circle here.",
+    "acceptedTitle": "Invitation Accepted",
+    "acceptedFor": "Accepted for: {{poolName}}",
+    "acceptedDescription": "You'll be notified when your circle group is formed."
+  },
+  "error": {
+    "title": "Something went wrong",
+    "load": "Failed to load circles"
+  },
   "yourCircle": {
     "title": "Your Circle",
     "meetsBiweekly": "Meets bi-weekly",

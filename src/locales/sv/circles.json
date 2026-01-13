@@ -3,6 +3,76 @@
     "title": "Ledarskapscirklar",
     "tagline": "Koppla samman med kollegor som förstår"
   },
+  "availability": {
+    "setTitle": "Ange din tillgänglighet",
+    "setDescription": "Markera när du är ledig för möten med din cirkel. Detta hjälper till att hitta tider som fungerar för alla.",
+    "setButton": "Ange tillgänglighet",
+    "doneTitle": "Tillgänglighet angiven",
+    "doneDescription": "Du har markerat {{count}} tidsintervall som tillgängliga.",
+    "modalTitle": "Ange din tillgänglighet",
+    "modalDescription": "Välj de tider du vanligtvis är tillgänglig för cirkelmöten. Din tillgänglighet hjälper till att hitta mötestider som fungerar för alla.",
+    "slotsSelected": "{{count}} tider valda",
+    "clearAll": "Rensa alla",
+    "saveButton": "Spara tillgänglighet",
+    "days": {
+      "mon": "Mån",
+      "tue": "Tis",
+      "wed": "Ons",
+      "thu": "Tor",
+      "fri": "Fre",
+      "sat": "Lör",
+      "sun": "Sön"
+    }
+  },
+  "invitations": {
+    "title": "Väntande inbjudningar",
+    "description": "Du har blivit inbjuden att gå med i en ledarskapscirkel",
+    "expires": "Utgår: {{date}}",
+    "expired": "Utgången",
+    "accept": "Acceptera",
+    "decline": "Avböj"
+  },
+  "groups": {
+    "title": "Dina cirklar",
+    "members": "medlemmar",
+    "weekly": "Varje vecka",
+    "biWeekly": "Varannan vecka",
+    "monthly": "Varje månad",
+    "discussionTopic": "Diskussionsämne",
+    "joinCall": "Gå med i videosamtal",
+    "scheduleMeeting": "Boka möte",
+    "viewDetails": "Visa detaljer",
+    "membersTitle": "Medlemmar",
+    "currentTopic": "Aktuellt diskussionsämne",
+    "upcomingMeetings": "Kommande möten",
+    "pastMeetings": "Tidigare möten",
+    "noUpcoming": "Inga kommande möten planerade.",
+    "join": "Gå med",
+    "completed": "Genomfört",
+    "cancelled": "Inställt"
+  },
+  "schedule": {
+    "title": "Boka möte",
+    "for": "För: {{groupName}}",
+    "meetingTitle": "Mötestitel",
+    "defaultTitle": "Cirkeldiskussion",
+    "selectTime": "Välj en tid",
+    "available": "{{count}} tillgängliga",
+    "noAvailability": "Ingen gemensam tillgänglighet",
+    "noAvailabilityDesc": "Det finns inga tider där alla medlemmar är tillgängliga. Be medlemmarna att uppdatera sin tillgänglighet.",
+    "scheduleButton": "Boka"
+  },
+  "empty": {
+    "title": "Inga cirklar ännu",
+    "description": "Du har inte blivit tilldelad några ledarskapscirklar ännu. När din organisationsadministratör skapar en cirkel och tilldelar grupper kommer du att se din cirkel här.",
+    "acceptedTitle": "Inbjudan accepterad",
+    "acceptedFor": "Accepterad för: {{poolName}}",
+    "acceptedDescription": "Du kommer att meddelas när din cirkelgrupp är bildad."
+  },
+  "error": {
+    "title": "Något gick fel",
+    "load": "Kunde inte ladda cirklar"
+  },
   "yourCircle": {
     "title": "Din cirkel",
     "meetsBiweekly": "Möts varannan vecka",

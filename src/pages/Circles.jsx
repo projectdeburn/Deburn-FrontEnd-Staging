@@ -1,11 +1,18 @@
 /**
  * Circles Page
- * Peer support groups and scheduled meetings
+ * Leadership Circles - peer support groups and scheduled meetings
  */
 
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { get } from '@/utils/api';
+import { circlesApi } from '@/features/circles/circlesApi';
+
+// Components
+import CircleCard from '@/components/circles/CircleCard';
+import AvailabilityBanner from '@/components/circles/AvailabilityBanner';
+import InvitationCard from '@/components/circles/InvitationCard';
+import GroupDetailsModal from '@/components/circles/GroupDetailsModal';
+import ScheduleMeetingModal from '@/components/circles/ScheduleMeetingModal';
 
 // Hero image import
 import heroCircles from '@/assets/images/hero-circles.jpg';
@@ -13,42 +20,24 @@ import heroCircles from '@/assets/images/hero-circles.jpg';
 // SVG Icons
 const icons = {
   users: (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
       <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
       <circle cx="9" cy="7" r="4"></circle>
       <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
       <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
     </svg>
   ),
-  calendar: (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect>
-      <line x1="16" x2="16" y1="2" y2="6"></line>
-      <line x1="8" x2="8" y1="2" y2="6"></line>
-      <line x1="3" x2="21" y1="10" y2="10"></line>
+  check: (
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+      <polyline points="22 4 12 14.01 9 11.01"></polyline>
     </svg>
   ),
-  video: (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="m22 8-6 4 6 4V8Z"></path>
-      <rect width="14" height="12" x="2" y="6" rx="2" ry="2"></rect>
-    </svg>
-  ),
-  mail: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect width="20" height="16" x="2" y="4" rx="2"></rect>
-      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
-    </svg>
-  ),
-  plus: (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="12" x2="12" y1="5" y2="19"></line>
-      <line x1="5" x2="19" y1="12" y2="12"></line>
-    </svg>
-  ),
-  chevronRight: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="9 18 15 12 9 6"></polyline>
+  alertCircle: (
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="12" x2="12" y1="8" y2="12"></line>
+      <line x1="12" x2="12.01" y1="16" y2="16"></line>
     </svg>
   ),
 };
@@ -56,10 +45,19 @@ const icons = {
 export default function Circles() {
   const { t } = useTranslation(['circles', 'common']);
 
+  // Data state
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [groups, setGroups] = useState([]);
-  const [invitations, setInvitations] = useState([]);
-  const [upcomingMeetings, setUpcomingMeetings] = useState([]);
+  const [pendingInvitations, setPendingInvitations] = useState([]);
+  const [acceptedInvitations, setAcceptedInvitations] = useState([]);
+  const [availability, setAvailability] = useState([]);
+
+  // Modal state
+  const [showGroupDetailsModal, setShowGroupDetailsModal] = useState(false);
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState(null);
+  const [isSavingAvailability, setIsSavingAvailability] = useState(false);
 
   useEffect(() => {
     loadCirclesData();
@@ -67,38 +65,107 @@ export default function Circles() {
 
   async function loadCirclesData() {
     setIsLoading(true);
+    setError(null);
     try {
-      const [groupsRes, invitesRes] = await Promise.all([
-        get(`${import.meta.env.VITE_ENDPOINT}/api/circles/groups`).catch(() => ({ success: false })),
-        get(`${import.meta.env.VITE_ENDPOINT}/api/circles/invitations`).catch(() => ({ success: false })),
+      const [groupsRes, invitesRes, availRes] = await Promise.all([
+        circlesApi.getMyGroups().catch(() => ({ success: false })),
+        circlesApi.getMyInvitations().catch(() => ({ success: false })),
+        circlesApi.getAvailability().catch(() => ({ success: false })),
       ]);
 
       if (groupsRes.success) {
         setGroups(groupsRes.data.groups || []);
-        setUpcomingMeetings(groupsRes.data.upcomingMeetings || []);
       }
 
       if (invitesRes.success) {
-        setInvitations(invitesRes.data.invitations || []);
+        setPendingInvitations(invitesRes.data.pending || []);
+        setAcceptedInvitations(invitesRes.data.accepted || []);
       }
-    } catch (error) {
-      console.error('Error loading circles:', error);
+
+      if (availRes.success) {
+        setAvailability(availRes.data.slots || []);
+      }
+    } catch (err) {
+      console.error('Error loading circles:', err);
+      setError(err.message || t('circles:error.load', 'Failed to load circles'));
     } finally {
       setIsLoading(false);
     }
   }
 
-  function formatMeetingDate(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-    });
+  // Invitation handlers
+  async function handleAcceptInvitation(token) {
+    try {
+      const result = await circlesApi.acceptInvitation(token);
+      if (result.success) {
+        // Refresh data
+        await loadCirclesData();
+      }
+    } catch (err) {
+      console.error('Error accepting invitation:', err);
+    }
   }
 
+  async function handleDeclineInvitation(token) {
+    try {
+      const result = await circlesApi.declineInvitation(token);
+      if (result.success) {
+        // Remove from pending
+        setPendingInvitations(prev => prev.filter(inv => inv.token !== token));
+      }
+    } catch (err) {
+      console.error('Error declining invitation:', err);
+    }
+  }
+
+  // Availability handlers
+  async function handleSaveAvailability(slots) {
+    setIsSavingAvailability(true);
+    try {
+      const result = await circlesApi.updateAvailability(slots);
+      if (result.success) {
+        setAvailability(slots);
+      }
+    } catch (err) {
+      console.error('Error saving availability:', err);
+    } finally {
+      setIsSavingAvailability(false);
+    }
+  }
+
+  // Meeting handlers
+  function handleViewDetails(group) {
+    setSelectedGroup(group);
+    setShowGroupDetailsModal(true);
+  }
+
+  function handleScheduleMeeting(group) {
+    setSelectedGroup(group);
+    setShowScheduleModal(true);
+  }
+
+  function handleJoinCall(group, meeting) {
+    if (meeting?.meetingLink) {
+      window.open(meeting.meetingLink, '_blank', 'noopener,noreferrer');
+    }
+  }
+
+  async function handleScheduleSubmit(meetingData) {
+    try {
+      const result = await circlesApi.scheduleMeeting(meetingData.groupId, {
+        title: meetingData.title,
+        scheduledAt: meetingData.scheduledAt,
+      });
+      if (result.success) {
+        // Refresh to get updated meeting data
+        await loadCirclesData();
+      }
+    } catch (err) {
+      console.error('Error scheduling meeting:', err);
+    }
+  }
+
+  // Loading state
   if (isLoading) {
     return (
       <div className="loading-overlay">
@@ -108,6 +175,26 @@ export default function Circles() {
     );
   }
 
+  // Error state
+  if (error) {
+    return (
+      <div className="circles-content" id="circles-content">
+        <div className="circles-error-state">
+          <div className="circles-error-icon">{icons.alertCircle}</div>
+          <h2>{t('circles:error.title', 'Something went wrong')}</h2>
+          <p>{error}</p>
+          <button className="btn btn-primary" onClick={loadCirclesData}>
+            {t('common:refresh', 'Try Again')}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const hasGroups = groups.length > 0;
+  const hasPendingInvitations = pendingInvitations.length > 0;
+  const hasAcceptedInvitations = acceptedInvitations.length > 0;
+
   return (
     <div className="circles-content" id="circles-content">
       {/* Hero Section */}
@@ -115,147 +202,111 @@ export default function Circles() {
         <div className="hero-image-container">
           <img
             src={heroCircles}
-            alt="Circles"
+            alt="Leadership Circles"
             className="hero-image"
           />
           <div className="hero-overlay"></div>
         </div>
         <div className="hero-content">
-          <h1 className="hero-greeting">{t('circles:hero.title', 'Circles')}</h1>
+          <h1 className="hero-greeting">{t('circles:hero.title', 'Leadership Circles')}</h1>
           <p className="hero-tagline">
-            {t('circles:hero.tagline', 'Connect with your peer support groups')}
+            {t('circles:hero.tagline', 'Connect with peers who understand')}
           </p>
         </div>
       </div>
 
-      {/* Invitations */}
-      {invitations.length > 0 && (
+      {/* Availability Banner - only show if user has groups */}
+      {hasGroups && (
+        <AvailabilityBanner
+          availability={availability}
+          onSaveAvailability={handleSaveAvailability}
+          isSaving={isSavingAvailability}
+        />
+      )}
+
+      {/* Pending Invitations */}
+      {hasPendingInvitations && (
         <section className="circles-section">
           <h2 className="section-title">
             {t('circles:invitations.title', 'Pending Invitations')}
           </h2>
           <div className="invitations-list">
-            {invitations.map((invite) => (
-              <div key={invite.id} className="invitation-card">
-                <div className="invitation-info">
-                  <div className="invitation-icon">
-                    {icons.mail}
-                  </div>
-                  <div className="invitation-details">
-                    <h3>{invite.groupName}</h3>
-                    <p>{t('circles:invitations.from', 'Invited by')} {invite.invitedBy}</p>
-                  </div>
-                </div>
-                <div className="invitation-actions">
-                  <button className="btn btn-ghost">
-                    {t('common:decline', 'Decline')}
-                  </button>
-                  <button className="btn btn-primary">
-                    {t('common:accept', 'Accept')}
-                  </button>
-                </div>
-              </div>
+            {pendingInvitations.map((invite) => (
+              <InvitationCard
+                key={invite.token}
+                invitation={invite}
+                onAccept={handleAcceptInvitation}
+                onDecline={handleDeclineInvitation}
+              />
             ))}
           </div>
         </section>
       )}
 
-      {/* Upcoming Meetings */}
-      {upcomingMeetings.length > 0 && (
-        <section className="circles-section">
-          <h2 className="section-title">
-            {t('circles:meetings.upcoming', 'Upcoming Meetings')}
-          </h2>
-          <div className="meetings-list">
-            {upcomingMeetings.map((meeting) => (
-              <div key={meeting.id} className="meeting-item">
-                <div className="meeting-icon">
-                  {icons.video}
-                </div>
-                <div className="meeting-info">
-                  <h3 className="meeting-title">{meeting.title}</h3>
-                  <p className="meeting-topic">{meeting.groupName}</p>
-                  <div className="meeting-date">
-                    {icons.calendar}
-                    <span>{formatMeetingDate(meeting.date)}</span>
-                  </div>
-                </div>
-                {icons.chevronRight}
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* My Groups */}
+      {/* Your Circles */}
       <section className="circles-section">
-        <div className="section-header">
-          <h2 className="section-title">
-            {t('circles:groups.myGroups', 'My Groups')}
-          </h2>
-          <button className="btn btn-ghost">
-            {icons.plus}
-            <span>{t('circles:groups.create', 'Create')}</span>
-          </button>
-        </div>
+        <h2 className="section-title">
+          {t('circles:groups.title', 'Your Circles')}
+        </h2>
 
-        {groups.length > 0 ? (
-          <div className="circles-groups-list">
+        {hasGroups ? (
+          <div className="circles-grid">
             {groups.map((group) => (
-              <div key={group.id} className="circle-card">
-                <div className="circle-card-header">
-                  <div className="circle-icon">
-                    {icons.users}
-                  </div>
-                  <div className="circle-info">
-                    <h3>{group.name}</h3>
-                    <p>{group.memberCount} {t('circles:groups.members', 'members')}</p>
-                  </div>
-                  {icons.chevronRight}
-                </div>
-
-                {/* Member Avatars */}
-                {group.members && group.members.length > 0 && (
-                  <div className="circle-members">
-                    <div className="avatar-stack">
-                      {group.members.slice(0, 4).map((member, i) => (
-                        <div key={i} className="avatar">
-                          {member.name?.charAt(0) || 'U'}
-                        </div>
-                      ))}
-                    </div>
-                    {group.members.length > 4 && (
-                      <span className="more-members">
-                        +{group.members.length - 4} {t('common:more', 'more')}
-                      </span>
-                    )}
-                  </div>
-                )}
-
-                {/* Next Meeting */}
-                {group.nextMeeting && (
-                  <div className="circle-next-meeting">
-                    {icons.calendar}
-                    <span>{t('circles:groups.nextMeeting', 'Next:')} {group.nextMeeting}</span>
-                  </div>
-                )}
-              </div>
+              <CircleCard
+                key={group.id}
+                group={group}
+                onScheduleMeeting={handleScheduleMeeting}
+                onViewDetails={handleViewDetails}
+                onJoinCall={handleJoinCall}
+              />
             ))}
+          </div>
+        ) : hasAcceptedInvitations ? (
+          // Accepted invitation, waiting for group formation
+          <div className="circles-waiting-state">
+            <div className="circles-waiting-icon">{icons.check}</div>
+            <h3>{t('circles:empty.acceptedTitle', 'Invitation Accepted')}</h3>
+            <p>
+              {t('circles:empty.acceptedFor', 'Accepted for: {{poolName}}', {
+                poolName: acceptedInvitations[0]?.poolName || 'Leadership Circle'
+              })}
+            </p>
+            <p className="circles-waiting-description">
+              {t('circles:empty.acceptedDescription', "You'll be notified when your circle group is formed.")}
+            </p>
           </div>
         ) : (
+          // No circles at all
           <div className="circles-empty-state">
-            <div className="empty-state-icon">
-              {icons.users}
-            </div>
-            <h2>{t('circles:groups.noGroups', 'No groups yet')}</h2>
-            <p>{t('circles:groups.joinPrompt', 'Join a circle to connect with peers')}</p>
-            <button className="btn btn-primary">
-              {icons.plus}
-              <span>{t('circles:groups.create', 'Create a Circle')}</span>
-            </button>
+            <div className="circles-empty-icon">{icons.users}</div>
+            <h2>{t('circles:empty.title', 'No circles yet')}</h2>
+            <p>
+              {t('circles:empty.description', "You haven't been assigned to any leadership circles yet. When your organization admin creates a circle and assigns groups, you'll see your circle here.")}
+            </p>
           </div>
         )}
       </section>
+
+      {/* Modals */}
+      <GroupDetailsModal
+        isOpen={showGroupDetailsModal}
+        onClose={() => {
+          setShowGroupDetailsModal(false);
+          setSelectedGroup(null);
+        }}
+        group={selectedGroup}
+        onScheduleMeeting={handleScheduleMeeting}
+      />
+
+      <ScheduleMeetingModal
+        isOpen={showScheduleModal}
+        onClose={() => {
+          setShowScheduleModal(false);
+          setSelectedGroup(null);
+        }}
+        group={selectedGroup}
+        onSchedule={handleScheduleSubmit}
+      />
     </div>
   );
 }
