@@ -2109,6 +2109,14 @@ p {
    Learning Page
    ========================================================================== */
 
+.learning-section {
+    margin-bottom: var(--space-8);
+}
+
+.learning-section + .learning-section {
+    margin-top: var(--space-10);
+}
+
 .learning-card {
     background: var(--color-warm-white);
     border: 1px solid var(--neutral-200);
@@ -2238,7 +2246,7 @@ p {
 .learning-card-icon svg {
     width: 24px;
     height: 24px;
-    color: var(--color-sage);
+    color: var(--color-ink);
 }
 
 .learning-grid .learning-card-title {

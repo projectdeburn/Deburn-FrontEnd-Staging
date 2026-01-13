@@ -53,6 +53,7 @@ export default function Coach() {
   const { t, i18n } = useTranslation(['coach', 'common']);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const streamingContentRef = useRef('');
 
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
@@ -96,6 +97,7 @@ export default function Coach() {
     setQuickReplies([]);
     setIsLoading(true);
     setStreamingContent('');
+    streamingContentRef.current = '';
 
     try {
       const assistantId = Date.now() + 1;
@@ -108,7 +110,8 @@ export default function Coach() {
         },
         {
           onText: (content) => {
-            setStreamingContent((prev) => prev + content);
+            streamingContentRef.current += content;
+            setStreamingContent(streamingContentRef.current);
           },
           onQuickReplies: (replies) => {
             setQuickReplies(replies);
@@ -119,15 +122,18 @@ export default function Coach() {
             }
           },
           onDone: () => {
+            // Capture the final content from the ref before clearing
+            const finalContent = streamingContentRef.current;
             setMessages((prev) => [
               ...prev,
               {
                 id: assistantId,
                 role: 'assistant',
-                content: '',
+                content: finalContent,
               },
             ]);
             setStreamingContent('');
+            streamingContentRef.current = '';
             setIsLoading(false);
           },
           onError: (error) => {
@@ -136,15 +142,6 @@ export default function Coach() {
           },
         }
       );
-
-      setMessages((prev) => {
-        const updated = [...prev];
-        const lastMessage = updated[updated.length - 1];
-        if (lastMessage && lastMessage.id === assistantId) {
-          lastMessage.content = streamingContent;
-        }
-        return updated;
-      });
     } catch (error) {
       console.error('Error sending message:', error);
       setIsLoading(false);
