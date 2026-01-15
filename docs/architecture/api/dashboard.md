@@ -37,3 +37,28 @@ No request body.
   }
 }
 ```
+
+**Response Types:**
+```typescript
+{
+  success: boolean,
+  data: {
+    todaysCheckin: {
+      mood: number,           // 1-5 scale
+      physicalEnergy: number, // 1-10 scale
+      mentalEnergy: number,   // 1-10 scale
+      sleep: number,          // 1-5 scale
+      stress: number          // 1-10 scale
+    } | null,                 // null if no check-in today
+    streak: number,           // Current check-in streak
+    insightsCount: number,    // Number of unread insights
+    todaysFocus: {
+      title: string,          // Module title
+      progress: number        // Progress percentage (0-100)
+    } | null,
+    nextCircle: {
+      date: string            // Formatted date string
+    } | null
+  }
+}
+```

@@ -99,9 +99,13 @@ No request body.
 Updates user's availability slots.
 
 **Frontend Input** (src/features/circles/circlesApi.js):
-```json
+```typescript
 {
-  "slots": [ ... ]
+  slots: Array<{
+    dayOfWeek: number,   // 0-6 (Sunday-Saturday)
+    startTime: string,   // HH:MM format
+    endTime: string      // HH:MM format
+  }>
 }
 ```
 
@@ -112,6 +116,10 @@ Updates user's availability slots.
 Fetches group details.
 
 **Frontend Input** (src/features/circles/circlesApi.js):
+```typescript
+// Path parameter
+groupId: string  // Group ID
+```
 No request body.
 
 ---
@@ -121,6 +129,10 @@ No request body.
 Fetches group's meetings.
 
 **Frontend Input** (src/features/circles/circlesApi.js):
+```typescript
+// Path parameter
+groupId: string  // Group ID
+```
 No request body.
 
 ---
@@ -130,6 +142,10 @@ No request body.
 Fetches group's common availability.
 
 **Frontend Input** (src/features/circles/circlesApi.js):
+```typescript
+// Path parameter
+groupId: string  // Group ID
+```
 No request body.
 
 ---
@@ -139,12 +155,19 @@ No request body.
 Schedules a new meeting for the group.
 
 **Frontend Input** (src/features/circles/circlesApi.js):
-```json
+```typescript
+// Path parameter
+groupId: string  // Group ID
+
+// Request body
 {
-  "meetingData": { ... }
+  title: string,           // Meeting title
+  description?: string,    // Optional description
+  scheduledAt: string,     // ISO 8601 datetime
+  duration: number,        // Duration in minutes
+  location?: string        // Optional location/link
 }
 ```
-Note: Exact structure depends on meeting requirements.
 
 ---
 
@@ -153,6 +176,10 @@ Note: Exact structure depends on meeting requirements.
 Fetches invitation details by token.
 
 **Frontend Input** (src/features/circles/circlesApi.js):
+```typescript
+// Path parameter
+token: string  // Invitation token
+```
 No request body.
 
 ---
@@ -162,8 +189,12 @@ No request body.
 Accepts an invitation.
 
 **Frontend Input** (src/features/circles/circlesApi.js):
-```json
-{}
+```typescript
+// Path parameter
+token: string  // Invitation token
+
+// Request body
+{}  // Empty object
 ```
 
 ---
@@ -173,8 +204,12 @@ Accepts an invitation.
 Declines an invitation.
 
 **Frontend Input** (src/features/circles/circlesApi.js):
-```json
-{}
+```typescript
+// Path parameter
+token: string  // Invitation token
+
+// Request body
+{}  // Empty object
 ```
 
 ---
@@ -184,8 +219,12 @@ Declines an invitation.
 Cancels a meeting.
 
 **Frontend Input** (src/features/circles/circlesApi.js):
-```json
-{}
+```typescript
+// Path parameter
+meetingId: string  // Meeting ID
+
+// Request body
+{}  // Empty object
 ```
 
 ---
@@ -195,8 +234,12 @@ Cancels a meeting.
 Updates meeting attendance.
 
 **Frontend Input** (src/features/circles/circlesApi.js):
-```json
+```typescript
+// Path parameter
+meetingId: string  // Meeting ID
+
+// Request body
 {
-  "attending": true
+  attending: boolean  // Whether user is attending
 }
 ```

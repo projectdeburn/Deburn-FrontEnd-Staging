@@ -81,9 +81,9 @@ No request body.
 Adds a hub admin.
 
 **Frontend Input** (src/features/hub/hubApi.js):
-```json
+```typescript
 {
-  "email": "admin@example.com"
+  email: string  // Email address of user to add as admin
 }
 ```
 
@@ -94,7 +94,11 @@ Adds a hub admin.
 Removes a hub admin.
 
 **Frontend Input** (src/features/hub/hubApi.js):
-No request body. Email is URL-encoded in path.
+```typescript
+// Path parameter
+email: string  // URL-encoded email address
+```
+No request body.
 
 ---
 
@@ -121,10 +125,10 @@ No request body.
 Adds an organization admin.
 
 **Frontend Input** (src/features/hub/hubApi.js):
-```json
+```typescript
 {
-  "email": "admin@example.com",
-  "organizationId": "org_123"
+  email: string,          // Email address of user to add
+  organizationId: string  // Organization ID to add them to
 }
 ```
 
@@ -135,6 +139,10 @@ Adds an organization admin.
 Removes an organization admin.
 
 **Frontend Input** (src/features/hub/hubApi.js):
+```typescript
+// Path parameter
+membershipId: string  // Membership ID to remove
+```
 No request body.
 
 ---
@@ -144,10 +152,10 @@ No request body.
 Creates a new organization.
 
 **Frontend Input** (src/features/hub/hubApi.js):
-```json
+```typescript
 {
-  "name": "Acme Corporation",
-  "domain": "acme.com"
+  name: string,   // Organization name
+  domain: string  // Organization email domain (e.g., "acme.com")
 }
 ```
 
@@ -167,12 +175,16 @@ No request body.
 Updates AI coach settings.
 
 **Frontend Input** (src/features/hub/hubApi.js):
-```json
+```typescript
 {
-  "settings": { ... }
+  // Settings object - structure depends on coach configuration
+  model?: string,           // AI model to use
+  temperature?: number,     // Response creativity (0-1)
+  maxTokens?: number,       // Max response length
+  systemPrompt?: string,    // Custom system prompt
+  // ... additional settings
 }
 ```
-Note: Exact structure depends on coach configuration requirements.
 
 ---
 
@@ -190,9 +202,14 @@ No request body.
 Updates a coach prompt.
 
 **Frontend Input** (src/features/hub/hubApi.js):
-```json
+```typescript
+// Path parameters
+language: string    // Language code: "en" | "sv"
+promptName: string  // Prompt identifier
+
+// Request body
 {
-  "content": "Updated prompt content..."
+  content: string  // New prompt content
 }
 ```
 
@@ -212,9 +229,16 @@ No request body.
 Updates coach exercises.
 
 **Frontend Input** (src/features/hub/hubApi.js):
-```json
+```typescript
 {
-  "exercises": [ ... ]
+  exercises: Array<{
+    id: string,
+    title: string,
+    description: string,
+    duration: number,      // Duration in minutes
+    category: string,
+    instructions: string[]
+  }>
 }
 ```
 
@@ -234,10 +258,14 @@ No request body.
 Fetches content library items.
 
 **Frontend Input** (src/features/hub/hubApi.js):
-Query parameters:
-- `contentType` (string, optional): Filter by content type
-- `status` (string, optional): Filter by status
-- `category` (string, optional): Filter by category
+```typescript
+// Query parameters (all optional)
+{
+  contentType?: string,  // Filter by type: "video" | "audio" | "article" | "exercise"
+  status?: string,       // Filter by status: "draft" | "published" | "archived"
+  category?: string      // Filter by category
+}
+```
 
 ---
 
@@ -246,6 +274,10 @@ Query parameters:
 Fetches a single content item.
 
 **Frontend Input** (src/features/hub/hubApi.js):
+```typescript
+// Path parameter
+id: string  // Content ID
+```
 No request body.
 
 ---
@@ -255,12 +287,18 @@ No request body.
 Creates new content.
 
 **Frontend Input** (src/features/hub/hubApi.js):
-```json
+```typescript
 {
-  "data": { ... }
+  title: string,
+  description: string,
+  contentType: string,    // "video" | "audio" | "article" | "exercise"
+  category: string,
+  duration?: number,      // Duration in minutes
+  thumbnail?: string,     // URL to thumbnail image
+  status: string,         // "draft" | "published"
+  content: object         // Type-specific content data
 }
 ```
-Note: Exact structure depends on content type.
 
 ---
 
@@ -269,12 +307,21 @@ Note: Exact structure depends on content type.
 Updates content.
 
 **Frontend Input** (src/features/hub/hubApi.js):
-```json
+```typescript
+// Path parameter
+id: string  // Content ID
+
+// Request body
 {
-  "data": { ... }
+  title?: string,
+  description?: string,
+  category?: string,
+  duration?: number,
+  thumbnail?: string,
+  status?: string,
+  content?: object
 }
 ```
-Note: Exact structure depends on content type.
 
 ---
 
@@ -283,6 +330,10 @@ Note: Exact structure depends on content type.
 Deletes content.
 
 **Frontend Input** (src/features/hub/hubApi.js):
+```typescript
+// Path parameter
+id: string  // Content ID
+```
 No request body.
 
 ---
@@ -292,8 +343,16 @@ No request body.
 Uploads audio for content.
 
 **Frontend Input** (src/features/hub/hubApi.js):
-FormData with:
-- `audio` (File): Audio file
+```typescript
+// Path parameters
+contentId: string  // Content ID
+lang: string       // Language code: "en" | "sv"
+
+// Request body
+FormData {
+  audio: File  // Audio file (MP3, WAV, etc.)
+}
+```
 
 ---
 
@@ -302,6 +361,11 @@ FormData with:
 Removes audio from content.
 
 **Frontend Input** (src/features/hub/hubApi.js):
+```typescript
+// Path parameters
+contentId: string  // Content ID
+lang: string       // Language code: "en" | "sv"
+```
 No request body.
 
 ---
@@ -320,7 +384,11 @@ No request body.
 Fetches compliance info for a user.
 
 **Frontend Input** (src/features/hub/hubApi.js):
-No request body. Email is URL-encoded in path.
+```typescript
+// Path parameter
+email: string  // URL-encoded email address
+```
+No request body.
 
 ---
 
@@ -329,8 +397,12 @@ No request body. Email is URL-encoded in path.
 Exports user data.
 
 **Frontend Input** (src/features/hub/hubApi.js):
-```json
-{}
+```typescript
+// Path parameter
+userId: string  // User ID
+
+// Request body
+{}  // Empty object
 ```
 
 ---
@@ -340,8 +412,12 @@ Exports user data.
 Deletes user account.
 
 **Frontend Input** (src/features/hub/hubApi.js):
-```json
-{}
+```typescript
+// Path parameter
+userId: string  // User ID
+
+// Request body
+{}  // Empty object
 ```
 
 ---
@@ -360,8 +436,8 @@ No request body.
 Cleans up expired sessions.
 
 **Frontend Input** (src/features/hub/hubApi.js):
-```json
-{}
+```typescript
+{}  // Empty object
 ```
 
 ---

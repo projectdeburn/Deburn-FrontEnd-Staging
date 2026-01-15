@@ -24,6 +24,19 @@ No request body.
 }
 ```
 
+**Response Types:**
+```typescript
+{
+  success: boolean,
+  data: {
+    totalUsers: number,      // Total registered users
+    activeUsers: number,     // Users active in last 30 days
+    totalCheckins: number,   // Total check-ins submitted
+    totalSessions: number    // Total coaching sessions
+  }
+}
+```
+
 **Error (403):**
 ```json
 {

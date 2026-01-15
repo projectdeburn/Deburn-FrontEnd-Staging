@@ -19,12 +19,12 @@ Streams AI coach response using Server-Sent Events.
 ```
 
 **Frontend Input** (src/features/coach/coachApi.js):
-```json
+```typescript
 {
-  "message": "I want to work on my leadership skills",
-  "conversationId": "conv_123abc",
-  "context": {},
-  "language": "en"
+  message: string,              // User's message to the coach
+  conversationId: string | null, // Existing conversation ID or null for new
+  context: object,              // Additional context (default: {})
+  language: string              // Language code: "en" | "sv" (default: "en")
 }
 ```
 
@@ -58,12 +58,12 @@ Non-streaming message endpoint (alternative to stream).
 ```
 
 **Frontend Input** (src/features/coach/coachApi.js):
-```json
+```typescript
 {
-  "message": "Hello",
-  "conversationId": null,
-  "context": {},
-  "language": "en"
+  message: string,              // User's message to the coach
+  conversationId: string | null, // Existing conversation ID or null for new
+  context: object,              // Additional context (default: {})
+  language: string              // Language code: "en" | "sv" (default: "en")
 }
 ```
 
@@ -93,14 +93,14 @@ Fetches conversation starter suggestions.
 - `stress` (number): Current stress (if includeWellbeing)
 
 **Frontend Input** (src/features/coach/coachApi.js):
-Query string built from:
-```js
+```typescript
+// Query parameters
 {
-  language: "en",
-  includeWellbeing: "true",  // if wellbeing provided
-  mood: 3,                    // default if not specified
-  energy: 5,                  // default if not specified
-  stress: 5                   // default if not specified
+  language: string,           // "en" | "sv" (default: "en")
+  includeWellbeing?: "true",  // String "true" if wellbeing provided
+  mood?: number,              // 1-5 scale (default: 3)
+  energy?: number,            // 1-10 scale (default: 5)
+  stress?: number             // 1-10 scale (default: 5)
 }
 ```
 
@@ -130,9 +130,13 @@ Query string built from:
 Fetches conversation history.
 
 **Frontend Input** (src/features/coach/coachApi.js):
-Query parameters:
-- `conversationId` (string): The conversation ID
-- `limit` (number): Max messages to return (default: 50)
+```typescript
+// Query parameters
+{
+  conversationId: string,  // The conversation ID
+  limit: number            // Max messages to return (default: 50)
+}
+```
 
 ---
 
@@ -141,12 +145,12 @@ Query parameters:
 Submits feedback for a message.
 
 **Frontend Input** (src/features/coach/coachApi.js):
-```json
+```typescript
 {
-  "messageId": "msg_123",
-  "rating": 5,
-  "feedback": "Very helpful advice!",
-  "category": "coaching_quality"
+  messageId: string,   // ID of the message being rated
+  rating: number,      // Rating value (e.g., 1-5)
+  feedback: string,    // Optional feedback text (default: "")
+  category: string     // Feedback category (default: "coaching_quality")
 }
 ```
 

@@ -40,6 +40,24 @@ No request body.
 }
 ```
 
+**Response Types:**
+```typescript
+{
+  success: boolean,
+  data: {
+    modules: Array<{
+      id: string,              // Module ID
+      title: string,           // Module title
+      description: string,     // Module description
+      type: string,            // "video" | "audio" | "article" | "exercise"
+      duration: number,        // Duration in minutes
+      thumbnail: string | null, // Thumbnail URL or null
+      progress: number         // Progress percentage (0-100)
+    }>
+  }
+}
+```
+
 ---
 
 ## Module Types

@@ -24,6 +24,19 @@ No request body.
 }
 ```
 
+**Response Types:**
+```typescript
+{
+  success: boolean,
+  data: {
+    streak: number,    // Current check-in streak (days)
+    checkins: number,  // Total check-ins completed
+    lessons: number,   // Learning modules completed
+    sessions: number   // Coaching sessions completed
+  }
+}
+```
+
 ---
 
 ## GET /api/progress/insights
@@ -48,6 +61,19 @@ No request body.
         "description": "You report highest energy levels between 9-11am. Schedule your most demanding tasks during this window."
       }
     ]
+  }
+}
+```
+
+**Response Types:**
+```typescript
+{
+  success: boolean,
+  data: {
+    insights: Array<{
+      title: string,       // Insight headline
+      description: string  // Detailed insight with recommendation
+    }>
   }
 }
 ```
