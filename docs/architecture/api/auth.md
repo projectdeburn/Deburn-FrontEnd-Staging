@@ -17,6 +17,15 @@ Authenticates user and creates session.
 }
 ```
 
+**Frontend Input** (src/features/auth/authApi.js → src/pages/auth/Login.jsx):
+```json
+{
+  "email": "user@example.com",
+  "password": "securepassword",
+  "rememberMe": false
+}
+```
+
 **Response:**
 ```json
 {
@@ -56,6 +65,25 @@ Creates new user account.
 }
 ```
 
+**Frontend Input** (src/features/auth/authApi.js → src/pages/auth/Register.jsx):
+```json
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "user@example.com",
+  "password": "securepassword",
+  "passwordConfirm": "securepassword",
+  "organization": "Acme Corp",
+  "country": "SE",
+  "consents": {
+    "termsOfService": true,
+    "privacyPolicy": true,
+    "dataProcessing": true,
+    "marketing": false
+  }
+}
+```
+
 **Response:**
 ```json
 {
@@ -71,6 +99,13 @@ Creates new user account.
 Initiates password reset flow.
 
 **Request:**
+```json
+{
+  "email": "user@example.com"
+}
+```
+
+**Frontend Input** (src/pages/auth/ForgotPassword.jsx):
 ```json
 {
   "email": "user@example.com"
@@ -98,6 +133,16 @@ Resets password with token.
 }
 ```
 
+**Frontend Input** (src/pages/auth/ResetPassword.jsx):
+```json
+{
+  "token": "reset_token_abc123",
+  "password": "newsecurepassword"
+}
+```
+
+**Note:** authApi.js also supports `passwordConfirm` field but ResetPassword.jsx does not send it.
+
 **Response:**
 ```json
 {
@@ -116,6 +161,13 @@ Resets password with token.
 Verifies email with token.
 
 **Request:**
+```json
+{
+  "token": "verify_token_abc123"
+}
+```
+
+**Frontend Input** (src/pages/auth/VerifyEmail.jsx):
 ```json
 {
   "token": "verify_token_abc123"
@@ -142,6 +194,13 @@ Resends verification email.
 }
 ```
 
+**Frontend Input** (src/pages/auth/VerifyEmail.jsx):
+```json
+{
+  "email": "user@example.com"
+}
+```
+
 **Response:**
 ```json
 {
@@ -157,9 +216,93 @@ Logs out user and destroys session.
 
 **Request:** None
 
+**Frontend Input** (src/features/auth/authApi.js):
+```json
+{}
+```
+
 **Response:**
 ```json
 {
   "success": true
 }
+```
+
+---
+
+## GET /api/auth/session
+
+Gets current session info.
+
+**Frontend Input** (src/features/auth/authApi.js):
+No request body.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "user": { ... }
+  }
+}
+```
+
+---
+
+## GET /api/auth/sessions
+
+Gets all active sessions for the user.
+
+**Frontend Input** (src/features/auth/authApi.js):
+No request body.
+
+---
+
+## DELETE /api/auth/sessions/:sessionId
+
+Revokes a specific session.
+
+**Frontend Input** (src/features/auth/authApi.js):
+No request body.
+
+---
+
+## DELETE /api/auth/sessions
+
+Revokes all other sessions.
+
+**Frontend Input** (src/features/auth/authApi.js):
+No request body.
+
+---
+
+## GET /api/auth/data-export
+
+Exports user data (GDPR).
+
+**Frontend Input** (src/features/auth/authApi.js):
+No request body.
+
+---
+
+## POST /api/auth/delete-account
+
+Requests account deletion (GDPR).
+
+**Frontend Input** (src/features/auth/authApi.js):
+```json
+{
+  "reason": "optional reason string or null"
+}
+```
+
+---
+
+## POST /api/auth/refresh
+
+Refreshes access token.
+
+**Frontend Input** (src/features/auth/authApi.js):
+```json
+{}
 ```

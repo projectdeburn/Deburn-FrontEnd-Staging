@@ -10,6 +10,9 @@ Fetches dashboard overview data including today's check-in status, streak, insig
 
 **Request:** None (uses session authentication)
 
+**Frontend Input** (src/pages/Dashboard.jsx):
+No request body.
+
 **Response:**
 ```json
 {

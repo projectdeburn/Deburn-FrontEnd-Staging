@@ -19,6 +19,17 @@ Updates user profile information.
 }
 ```
 
+**Frontend Input** (src/pages/Profile.jsx):
+```json
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "organization": "Acme Corp",
+  "role": "Engineering Manager",
+  "bio": "Passionate about building great teams"
+}
+```
+
 **Response:**
 ```json
 {
@@ -46,6 +57,10 @@ Uploads user avatar image.
 **Request:** `multipart/form-data`
 - `avatar` (File): Image file (JPG/PNG, max 1MB)
 
+**Frontend Input** (src/pages/Profile.jsx):
+FormData with:
+- `avatar` (File): Image file (JPG or PNG only)
+
 **Response:**
 ```json
 {
@@ -63,6 +78,13 @@ Uploads user avatar image.
 Removes user avatar.
 
 **Request:**
+```json
+{
+  "remove": true
+}
+```
+
+**Frontend Input** (src/pages/Profile.jsx):
 ```json
 {
   "remove": true

@@ -19,6 +19,17 @@ Submits a daily check-in with mood, energy, sleep, and stress data.
 }
 ```
 
+**Frontend Input** (src/pages/Checkin.jsx):
+```json
+{
+  "mood": 4,
+  "physicalEnergy": 7,
+  "mentalEnergy": 6,
+  "sleep": 4,
+  "stress": 3
+}
+```
+
 **Response:**
 ```json
 {
@@ -39,6 +50,9 @@ Fetches wellbeing trend data for a specified time period.
 
 **Query Parameters:**
 - `period` (number): Number of days (7, 30, or 90)
+
+**Frontend Input** (src/pages/Dashboard.jsx, src/pages/Progress.jsx):
+Query parameter: `?period=7` or `?period=30` or `?period=90`
 
 **Response:**
 ```json

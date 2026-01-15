@@ -8,6 +8,9 @@ Endpoints for learning modules and content management.
 
 Fetches list of available learning modules with progress.
 
+**Frontend Input** (src/pages/Learning.jsx):
+No request body.
+
 **Response:**
 ```json
 {

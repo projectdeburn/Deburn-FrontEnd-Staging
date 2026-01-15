@@ -8,6 +8,9 @@ Endpoints for user progress statistics and AI-generated insights.
 
 Fetches user's overall statistics.
 
+**Frontend Input** (src/pages/Progress.jsx):
+No request body.
+
 **Response:**
 ```json
 {
@@ -26,6 +29,9 @@ Fetches user's overall statistics.
 ## GET /api/progress/insights
 
 Fetches AI-generated insights based on user's check-in history.
+
+**Frontend Input** (src/pages/Progress.jsx):
+No request body.
 
 **Response:**
 ```json

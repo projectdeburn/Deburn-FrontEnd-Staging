@@ -8,6 +8,9 @@ Admin endpoints for platform statistics and management. Requires admin role.
 
 Fetches platform-wide statistics.
 
+**Frontend Input** (src/pages/Admin.jsx):
+No request body.
+
 **Response:**
 ```json
 {

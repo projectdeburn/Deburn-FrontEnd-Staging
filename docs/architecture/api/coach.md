@@ -18,6 +18,16 @@ Streams AI coach response using Server-Sent Events.
 }
 ```
 
+**Frontend Input** (src/features/coach/coachApi.js):
+```json
+{
+  "message": "I want to work on my leadership skills",
+  "conversationId": "conv_123abc",
+  "context": {},
+  "language": "en"
+}
+```
+
 **Response (SSE Stream):**
 ```
 data: {"type":"metadata","content":{"conversationId":"conv_123abc"}}
@@ -38,6 +48,16 @@ data: [DONE]
 Non-streaming message endpoint (alternative to stream).
 
 **Request:**
+```json
+{
+  "message": "Hello",
+  "conversationId": null,
+  "context": {},
+  "language": "en"
+}
+```
+
+**Frontend Input** (src/features/coach/coachApi.js):
 ```json
 {
   "message": "Hello",
@@ -72,6 +92,18 @@ Fetches conversation starter suggestions.
 - `energy` (number): Current energy (if includeWellbeing)
 - `stress` (number): Current stress (if includeWellbeing)
 
+**Frontend Input** (src/features/coach/coachApi.js):
+Query string built from:
+```js
+{
+  language: "en",
+  includeWellbeing: "true",  // if wellbeing provided
+  mood: 3,                    // default if not specified
+  energy: 5,                  // default if not specified
+  stress: 5                   // default if not specified
+}
+```
+
 **Response:**
 ```json
 {
@@ -90,3 +122,39 @@ Fetches conversation starter suggestions.
   }
 }
 ```
+
+---
+
+## GET /api/coach/history
+
+Fetches conversation history.
+
+**Frontend Input** (src/features/coach/coachApi.js):
+Query parameters:
+- `conversationId` (string): The conversation ID
+- `limit` (number): Max messages to return (default: 50)
+
+---
+
+## POST /api/coach/feedback
+
+Submits feedback for a message.
+
+**Frontend Input** (src/features/coach/coachApi.js):
+```json
+{
+  "messageId": "msg_123",
+  "rating": 5,
+  "feedback": "Very helpful advice!",
+  "category": "coaching_quality"
+}
+```
+
+---
+
+## GET /api/coach/exercises
+
+Fetches available exercises.
+
+**Frontend Input** (src/features/coach/coachApi.js):
+No request body.
