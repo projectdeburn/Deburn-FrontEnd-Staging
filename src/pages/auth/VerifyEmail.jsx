@@ -5,6 +5,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { getApiBaseUrl } from '@/utils/api';
 
 export default function VerifyEmail() {
   const { t } = useTranslation('auth');
@@ -28,7 +29,7 @@ export default function VerifyEmail() {
 
   async function verifyToken() {
     try {
-      const response = await fetch(`${import.meta.env.VITE_ENDPOINT}/api/auth/verify-email`, {
+      const response = await fetch(`${getApiBaseUrl()}/api/auth/verify-email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token }),
@@ -51,7 +52,7 @@ export default function VerifyEmail() {
 
     setIsResending(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_ENDPOINT}/api/auth/resend-verification`, {
+      const response = await fetch(`${getApiBaseUrl()}/api/auth/resend-verification`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),

@@ -5,6 +5,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { getApiBaseUrl } from '@/utils/api';
 
 export default function ForgotPassword() {
   const { t } = useTranslation('auth');
@@ -20,7 +21,7 @@ export default function ForgotPassword() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_ENDPOINT}/api/auth/forgot-password`, {
+      const response = await fetch(`${getApiBaseUrl()}/api/auth/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),

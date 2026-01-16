@@ -91,9 +91,9 @@ export default function Progress() {
     setIsLoading(true);
     try {
       const [statsRes, trendsRes, insightsRes] = await Promise.all([
-        get(`${import.meta.env.VITE_ENDPOINT}/api/progress/stats`).catch(() => ({ success: false })),
-        get(`${import.meta.env.VITE_ENDPOINT}/api/checkin/trends?period=${period}`).catch(() => ({ success: false })),
-        get(`${import.meta.env.VITE_ENDPOINT}/api/progress/insights`).catch(() => ({ success: false })),
+        get('/api/progress/stats').catch(() => ({ success: false })),
+        get(`/api/checkin/trends?period=${period}`).catch(() => ({ success: false })),
+        get('/api/progress/insights').catch(() => ({ success: false })),
       ]);
 
       if (statsRes.success) {

@@ -5,7 +5,7 @@
 
 import { get, post, put, del } from '@/utils/api';
 
-const BASE = `${import.meta.env.VITE_ENDPOINT}/api/circles`;
+const BASE = '/api/circles';
 
 export const circlesApi = {
   // ============================================================================

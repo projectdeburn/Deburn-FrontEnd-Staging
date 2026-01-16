@@ -5,7 +5,7 @@
 
 import { get, post, getApiBaseUrl } from '@/utils/api';
 
-const BASE = `${import.meta.env.VITE_ENDPOINT}/api/coach`;
+const BASE = '/api/coach';
 
 export const coachApi = {
   /**
