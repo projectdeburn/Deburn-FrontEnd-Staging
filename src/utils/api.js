@@ -13,6 +13,24 @@ export function getApiBaseUrl() {
 }
 
 /**
+ * Auth token management
+ * Token is stored in memory for API requests
+ */
+let authToken = null;
+
+export function setAuthToken(token) {
+  authToken = token;
+}
+
+export function clearAuthToken() {
+  authToken = null;
+}
+
+export function getAuthToken() {
+  return authToken;
+}
+
+/**
  * Custom error class for API errors
  */
 export class ApiError extends Error {
@@ -41,6 +59,11 @@ export async function apiRequest(endpoint, options = {}) {
     },
     credentials: 'include', // Include cookies for session management
   };
+
+  // Add Authorization header if token exists
+  if (authToken) {
+    defaultOptions.headers['Authorization'] = `Bearer ${authToken}`;
+  }
 
   const mergedOptions = {
     ...defaultOptions,

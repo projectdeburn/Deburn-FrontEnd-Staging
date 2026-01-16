@@ -7,6 +7,10 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { get } from '@/utils/api';
 
+// Modal components
+import ArticleModal from '@/components/learning/ArticleModal';
+import AudioModal from '@/components/learning/AudioModal';
+
 // Hero image import
 import heroLearning from '@/assets/images/hero-learning.jpg';
 
@@ -46,7 +50,18 @@ const contentIcons = {
   video: icons.playCircle,
   audio: icons.headphones,
   article: icons.fileText,
-  exercise: icons.bookOpen,
+  exercise: icons.headphones, // exercises use headphones icon like audio
+};
+
+// Category display names
+const categoryNames = {
+  featured: 'Featured',
+  leadership: 'Leadership',
+  breath: 'Breath Techniques',
+  meditation: 'Meditation',
+  burnout: 'Burnout Prevention',
+  wellbeing: 'Wellbeing',
+  other: 'Other',
 };
 
 export default function Learning() {
@@ -55,6 +70,11 @@ export default function Learning() {
   const [isLoading, setIsLoading] = useState(true);
   const [modules, setModules] = useState([]);
 
+  // Modal state
+  const [selectedModule, setSelectedModule] = useState(null);
+  const [showArticleModal, setShowArticleModal] = useState(false);
+  const [showAudioModal, setShowAudioModal] = useState(false);
+
   useEffect(() => {
     loadLearningContent();
   }, []);
@@ -62,15 +82,42 @@ export default function Learning() {
   async function loadLearningContent() {
     setIsLoading(true);
     try {
-      const response = await get('/api/learning/modules');
+      const response = await get('/api/learning/content');
       if (response.success) {
-        setModules(response.data.modules || []);
+        setModules(response.data.items || []);
       }
     } catch (error) {
       console.error('Error loading learning content:', error);
     } finally {
       setIsLoading(false);
     }
+  }
+
+  function handleCardClick(module) {
+    // Don't open modal if no content
+    if (!module.hasContent) return;
+
+    setSelectedModule(module);
+
+    // Open appropriate modal based on content type
+    if (module.contentType === 'text_article') {
+      setShowArticleModal(true);
+    } else if (module.contentType === 'audio_article' || module.contentType === 'audio_exercise') {
+      setShowAudioModal(true);
+    } else if (module.contentType === 'video_link' && module.videoUrl) {
+      // Open video in new tab
+      window.open(module.videoUrl, '_blank');
+    }
+  }
+
+  function closeArticleModal() {
+    setShowArticleModal(false);
+    setSelectedModule(null);
+  }
+
+  function closeAudioModal() {
+    setShowAudioModal(false);
+    setSelectedModule(null);
   }
 
   if (isLoading) {
@@ -81,6 +128,17 @@ export default function Learning() {
       </div>
     );
   }
+
+  // Group modules by category
+  const groupedModules = modules.reduce((acc, module) => {
+    const category = module.category || 'other';
+    if (!acc[category]) acc[category] = [];
+    acc[category].push(module);
+    return acc;
+  }, {});
+
+  // Define category order
+  const categoryOrder = ['featured', 'leadership', 'breath', 'meditation', 'burnout', 'wellbeing', 'other'];
 
   return (
     <div className="learning-content">
@@ -104,43 +162,28 @@ export default function Learning() {
 
       {/* Learning Content Container */}
       <div id="learning-content-container">
-        {/* Featured Section */}
-        <section className="learning-section">
-          <h2 className="section-title">
-            {t('learning:featured', 'Featured')}
-          </h2>
-          <div className="learning-grid">
-            {modules
-              .filter((m) => m.featured)
-              .slice(0, 3)
-              .map((module) => (
-                <LearningCard key={module.id} module={module} />
-              ))}
-            {modules.filter((m) => m.featured).length === 0 &&
-              modules.slice(0, 3).map((module) => (
-                <LearningCard key={module.id} module={module} />
-              ))}
-          </div>
-        </section>
+        {/* Render categories in order */}
+        {categoryOrder.map((category) => {
+          const categoryModules = groupedModules[category];
+          if (!categoryModules || categoryModules.length === 0) return null;
 
-        {/* Group remaining modules by category */}
-        {Object.entries(
-          modules.reduce((acc, module) => {
-            const category = module.category || 'Leadership';
-            if (!acc[category]) acc[category] = [];
-            acc[category].push(module);
-            return acc;
-          }, {})
-        ).map(([category, categoryModules]) => (
-          <section key={category} className="learning-section">
-            <h2 className="section-title">{category}</h2>
-            <div className="learning-grid">
-              {categoryModules.map((module) => (
-                <LearningCard key={module.id} module={module} />
-              ))}
-            </div>
-          </section>
-        ))}
+          return (
+            <section key={category} className="learning-section">
+              <h2 className="section-title">
+                {categoryNames[category] || category}
+              </h2>
+              <div className="learning-grid">
+                {categoryModules.map((module) => (
+                  <LearningCard
+                    key={module.id}
+                    module={module}
+                    onClick={() => handleCardClick(module)}
+                  />
+                ))}
+              </div>
+            </section>
+          );
+        })}
 
         {modules.length === 0 && (
           <div className="card empty-state">
@@ -149,20 +192,61 @@ export default function Learning() {
           </div>
         )}
       </div>
+
+      {/* Article Modal */}
+      {showArticleModal && selectedModule && (
+        <ArticleModal
+          module={selectedModule}
+          onClose={closeArticleModal}
+        />
+      )}
+
+      {/* Audio Modal */}
+      {showAudioModal && selectedModule && (
+        <AudioModal
+          module={selectedModule}
+          onClose={closeAudioModal}
+        />
+      )}
     </div>
   );
 }
 
+// Map content type to display type
+function getDisplayType(contentType) {
+  const mapping = {
+    text_article: 'article',
+    audio_article: 'audio',
+    audio_exercise: 'exercise',
+    video_link: 'video',
+  };
+  return mapping[contentType] || 'article';
+}
+
 // Learning Card Component
-function LearningCard({ module }) {
-  const contentIcon = contentIcons[module.type] || icons.fileText;
+function LearningCard({ module, onClick }) {
+  const displayType = getDisplayType(module.contentType);
+  const contentIcon = contentIcons[displayType] || icons.fileText;
+  const isDisabled = !module.hasContent;
+
+  // Build class names
+  const cardClasses = [
+    'learning-card',
+    isDisabled ? 'learning-card-disabled' : '',
+    displayType === 'audio' || displayType === 'exercise' ? 'learning-card-playable' : '',
+    displayType === 'article' ? 'learning-card-readable' : '',
+  ].filter(Boolean).join(' ');
 
   return (
-    <div className="learning-card">
+    <div
+      className={cardClasses}
+      onClick={isDisabled ? undefined : onClick}
+      style={{ cursor: isDisabled ? 'not-allowed' : 'pointer' }}
+    >
       <div className="learning-card-icon">
         {contentIcon}
       </div>
-      <h3 className="learning-card-title">{module.title}</h3>
+      <h3 className="learning-card-title">{module.titleEn}</h3>
     </div>
   );
 }
