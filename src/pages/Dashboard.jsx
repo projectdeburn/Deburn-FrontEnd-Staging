@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/context/AuthContext';
 import { get } from '@/utils/api';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 
 // Hero image import
 import heroImage from '@/assets/images/hero-nordic-calm.jpg';
@@ -198,12 +199,7 @@ export default function Dashboard() {
   }
 
   if (isLoading) {
-    return (
-      <div className="loading-overlay">
-        <div className="loading-spinner"></div>
-        <p>{t('common:loading', 'Loading...')}</p>
-      </div>
-    );
+    return <LoadingSpinner text={t('common:loading', 'Loading...')} />;
   }
 
   const hasCheckedIn = dashboardData?.todaysCheckin != null;

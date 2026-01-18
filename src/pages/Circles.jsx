@@ -13,6 +13,7 @@ import AvailabilityBanner from '@/components/circles/AvailabilityBanner';
 import InvitationCard from '@/components/circles/InvitationCard';
 import GroupDetailsModal from '@/components/circles/GroupDetailsModal';
 import ScheduleMeetingModal from '@/components/circles/ScheduleMeetingModal';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 
 // Hero image import
 import heroCircles from '@/assets/images/hero-circles.jpg';
@@ -167,12 +168,7 @@ export default function Circles() {
 
   // Loading state
   if (isLoading) {
-    return (
-      <div className="loading-overlay">
-        <div className="loading-spinner"></div>
-        <p>{t('common:loading', 'Loading...')}</p>
-      </div>
-    );
+    return <LoadingSpinner text={t('common:loading', 'Loading...')} />;
   }
 
   // Error state

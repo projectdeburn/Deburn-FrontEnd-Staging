@@ -10,6 +10,7 @@ import { get } from '@/utils/api';
 // Modal components
 import ArticleModal from '@/components/learning/ArticleModal';
 import AudioModal from '@/components/learning/AudioModal';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 
 // Hero image import
 import heroLearning from '@/assets/images/hero-learning.jpg';
@@ -121,12 +122,7 @@ export default function Learning() {
   }
 
   if (isLoading) {
-    return (
-      <div className="loading-overlay">
-        <div className="loading-spinner"></div>
-        <p>{t('common:loading', 'Loading...')}</p>
-      </div>
-    );
+    return <LoadingSpinner text={t('common:loading', 'Loading...')} />;
   }
 
   // Group modules by category

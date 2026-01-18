@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { circlesAdminApi } from '@/features/circles/circles-adminApi';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 
 // Hero image import
 import heroCircles from '@/assets/images/hero-circles.jpg';
@@ -278,12 +279,7 @@ export default function CirclesAdmin() {
 
   // Loading state
   if (isLoading) {
-    return (
-      <div className="loading-overlay">
-        <div className="loading-spinner"></div>
-        <p>{t('common:loading', 'Loading...')}</p>
-      </div>
-    );
+    return <LoadingSpinner text={t('common:loading', 'Loading...')} />;
   }
 
   // Error state

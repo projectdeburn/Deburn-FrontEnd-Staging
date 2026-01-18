@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/context/AuthContext';
 import { get } from '@/utils/api';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 
 // SVG Icons
 const icons = {
@@ -114,12 +115,7 @@ export default function Admin() {
   }
 
   if (isLoading) {
-    return (
-      <div className="loading-overlay">
-        <div className="loading-spinner"></div>
-        <p>{t('common:loading', 'Loading...')}</p>
-      </div>
-    );
+    return <LoadingSpinner text={t('common:loading', 'Loading...')} />;
   }
 
   return (

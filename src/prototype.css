@@ -5276,35 +5276,36 @@ body > .toast-notification.fade-out {
     overflow: visible;
 }
 
-.spinner-orb {
+.spinner-inline .spinner-orb {
     fill: none;
     stroke-width: 2;
+    stroke-dasharray: none;
     /* Off-center pivot - like a hand holding hula hoops */
     transform-origin: 25px 50px;
 }
 
 /* Each orb has different timing creating wave effect */
-.spinner-orb-1 {
+.spinner-inline .spinner-orb-1 {
     stroke: var(--color-deep-forest);
     animation: hula-wave-1 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
-.spinner-orb-2 {
+.spinner-inline .spinner-orb-2 {
     stroke: var(--color-sage);
     animation: hula-wave-2 3s cubic-bezier(0.4, 0, 0.2, 1) infinite 0.15s;
 }
 
-.spinner-orb-3 {
+.spinner-inline .spinner-orb-3 {
     stroke: var(--color-ember);
     animation: hula-wave-3 3s cubic-bezier(0.4, 0, 0.2, 1) infinite 0.3s;
 }
 
-.spinner-orb-4 {
+.spinner-inline .spinner-orb-4 {
     stroke: var(--color-dawn);
     animation: hula-wave-4 3s cubic-bezier(0.4, 0, 0.2, 1) infinite 0.45s;
 }
 
-.spinner-orb-5 {
+.spinner-inline .spinner-orb-5 {
     stroke: var(--color-sky);
     animation: hula-wave-5 3s cubic-bezier(0.4, 0, 0.2, 1) infinite 0.6s;
 }

@@ -6,6 +6,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { get } from '@/utils/api';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 
 // Hero image import
 import heroProgress from '@/assets/images/hero-progress.jpg';
@@ -152,12 +153,7 @@ export default function Progress() {
   }
 
   if (isLoading) {
-    return (
-      <div className="loading-overlay">
-        <div className="loading-spinner"></div>
-        <p>{t('common:loading', 'Loading...')}</p>
-      </div>
-    );
+    return <LoadingSpinner text={t('common:loading', 'Loading...')} />;
   }
 
   return (
