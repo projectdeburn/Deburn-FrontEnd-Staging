@@ -185,8 +185,9 @@ export default function AudioModal({ module, onClose }) {
           <CloseIcon />
         </button>
 
-        <div className="audio-player">
-          <div className="audio-visualizer">
+        <div className={`audio-player ${loading ? 'loading' : 'ready'}`}>
+          {/* Meditative Visualization */}
+          <div className={`audio-visualizer ${isPlaying ? 'playing' : ''}`}>
             <svg viewBox="0 0 200 200" className="audio-viz-svg">
               <defs>
                 <filter id="glow">
@@ -197,17 +198,16 @@ export default function AudioModal({ module, onClose }) {
                   </feMerge>
                 </filter>
               </defs>
-              <circle className={`viz-orb viz-orb-1 ${isPlaying ? 'playing' : ''}`} cx="100" cy="100" r="40" filter="url(#glow)"/>
-              <circle className={`viz-orb viz-orb-2 ${isPlaying ? 'playing' : ''}`} cx="100" cy="100" r="35" filter="url(#glow)"/>
-              <circle className={`viz-orb viz-orb-3 ${isPlaying ? 'playing' : ''}`} cx="100" cy="100" r="30" filter="url(#glow)"/>
-              <circle className={`viz-orb viz-orb-4 ${isPlaying ? 'playing' : ''}`} cx="100" cy="100" r="25" filter="url(#glow)"/>
-              <circle className={`viz-orb viz-orb-5 ${isPlaying ? 'playing' : ''}`} cx="100" cy="100" r="20" filter="url(#glow)"/>
+              <circle className="viz-orb viz-orb-1" cx="100" cy="100" r="40" filter="url(#glow)"/>
+              <circle className="viz-orb viz-orb-2" cx="100" cy="100" r="35" filter="url(#glow)"/>
+              <circle className="viz-orb viz-orb-3" cx="100" cy="100" r="30" filter="url(#glow)"/>
+              <circle className="viz-orb viz-orb-4" cx="100" cy="100" r="25" filter="url(#glow)"/>
+              <circle className="viz-orb viz-orb-5" cx="100" cy="100" r="20" filter="url(#glow)"/>
             </svg>
           </div>
 
           <div className="audio-player-title">{module.titleEn}</div>
 
-          {loading && <div className="audio-loading">Loading audio...</div>}
           {error && <div className="audio-error">{error}</div>}
 
           <div className="audio-progress-container" onClick={handleProgressClick}>
@@ -226,8 +226,17 @@ export default function AudioModal({ module, onClose }) {
             <button className="audio-control-btn" onClick={() => skip(-10)}>
               <RewindIcon />
             </button>
-            <button className="audio-control-btn audio-play-btn" onClick={togglePlay} disabled={!audioSrc || loading}>
+            <button
+              className={`audio-play-btn ${loading ? 'loading' : ''}`}
+              onClick={togglePlay}
+            >
               {isPlaying ? <PauseIcon /> : <PlayIcon />}
+              {/* Loading spinner inside play button */}
+              <svg className="audio-loading-spinner" viewBox="0 0 48 48">
+                <circle className="spinner-orb spinner-orb-1" cx="24" cy="24" r="20" fill="none" strokeWidth="2.5"/>
+                <circle className="spinner-orb spinner-orb-2" cx="24" cy="24" r="15" fill="none" strokeWidth="2.5"/>
+                <circle className="spinner-orb spinner-orb-3" cx="24" cy="24" r="10" fill="none" strokeWidth="2.5"/>
+              </svg>
             </button>
             <button className="audio-control-btn" onClick={() => skip(10)}>
               <ForwardIcon />
