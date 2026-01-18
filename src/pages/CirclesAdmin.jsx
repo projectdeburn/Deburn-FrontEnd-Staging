@@ -289,15 +289,13 @@ export default function CirclesAdmin() {
   // Error state
   if (error) {
     return (
-      <div className="content-area">
-        <div className="circles-error-state">
-          <div className="circles-error-icon">{icons.alertCircle}</div>
-          <h2>{t('circlesAdmin:error.title', 'Something went wrong')}</h2>
-          <p>{error}</p>
-          <button className="btn btn-primary" onClick={checkAdminAndLoad}>
-            {t('common:refresh', 'Try Again')}
-          </button>
-        </div>
+      <div className="circles-error-state">
+        <div className="circles-error-icon">{icons.alertCircle}</div>
+        <h2>{t('circlesAdmin:error.title', 'Something went wrong')}</h2>
+        <p>{error}</p>
+        <button className="btn btn-primary" onClick={checkAdminAndLoad}>
+          {t('common:refresh', 'Try Again')}
+        </button>
       </div>
     );
   }
@@ -308,7 +306,7 @@ export default function CirclesAdmin() {
   }
 
   return (
-    <div className="content-area">
+    <>
       {/* Hero Section */}
       <div className="hero-section">
         <div className="hero-image-container">
@@ -491,6 +489,6 @@ export default function CirclesAdmin() {
           </div>
         </section>
       )}
-    </div>
+    </>
   );
 }

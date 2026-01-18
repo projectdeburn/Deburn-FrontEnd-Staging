@@ -178,15 +178,13 @@ export default function Circles() {
   // Error state
   if (error) {
     return (
-      <div className="circles-content" id="circles-content">
-        <div className="circles-error-state">
-          <div className="circles-error-icon">{icons.alertCircle}</div>
-          <h2>{t('circles:error.title', 'Something went wrong')}</h2>
-          <p>{error}</p>
-          <button className="btn btn-primary" onClick={loadCirclesData}>
-            {t('common:refresh', 'Try Again')}
-          </button>
-        </div>
+      <div className="circles-error-state">
+        <div className="circles-error-icon">{icons.alertCircle}</div>
+        <h2>{t('circles:error.title', 'Something went wrong')}</h2>
+        <p>{error}</p>
+        <button className="btn btn-primary" onClick={loadCirclesData}>
+          {t('common:refresh', 'Try Again')}
+        </button>
       </div>
     );
   }
@@ -196,7 +194,7 @@ export default function Circles() {
   const hasAcceptedInvitations = acceptedInvitations.length > 0;
 
   return (
-    <div className="circles-content" id="circles-content">
+    <>
       {/* Hero Section */}
       <div className="hero-section">
         <div className="hero-image-container">
@@ -226,7 +224,7 @@ export default function Circles() {
 
       {/* Pending Invitations */}
       {hasPendingInvitations && (
-        <section className="circles-section">
+        <section className="section">
           <h2 className="section-title">
             {t('circles:invitations.title', 'Pending Invitations')}
           </h2>
@@ -244,7 +242,7 @@ export default function Circles() {
       )}
 
       {/* Your Circles */}
-      <section className="circles-section">
+      <section className="section">
         <h2 className="section-title">
           {t('circles:groups.title', 'Your Circles')}
         </h2>
@@ -307,6 +305,6 @@ export default function Circles() {
         group={selectedGroup}
         onSchedule={handleScheduleSubmit}
       />
-    </div>
+    </>
   );
 }
