@@ -29,7 +29,20 @@ export function AuthProvider({ children }) {
     try {
       const result = await authApi.getSession();
       if (result.success && result.data?.user) {
-        setUser(result.data.user);
+        let userData = result.data.user;
+
+        // Check org admin status (SRP: separate endpoint)
+        try {
+          const adminResult = await authApi.getAdminStatus();
+          if (adminResult.success && adminResult.data) {
+            userData = { ...userData, isOrgAdmin: adminResult.data.isAdmin };
+          }
+        } catch {
+          // If admin status check fails, continue without it
+          userData = { ...userData, isOrgAdmin: false };
+        }
+
+        setUser(userData);
         setIsAuthenticated(true);
       } else {
         setUser(null);
@@ -51,7 +64,21 @@ export function AuthProvider({ children }) {
         localStorage.setItem(TOKEN_KEY, result.data.token);
         setAuthToken(result.data.token);
       }
-      setUser(result.data.user);
+
+      let userData = result.data.user;
+
+      // Check org admin status (SRP: separate endpoint)
+      try {
+        const adminResult = await authApi.getAdminStatus();
+        if (adminResult.success && adminResult.data) {
+          userData = { ...userData, isOrgAdmin: adminResult.data.isAdmin };
+        }
+      } catch {
+        // If admin status check fails, continue without it
+        userData = { ...userData, isOrgAdmin: false };
+      }
+
+      setUser(userData);
       setIsAuthenticated(true);
     }
     return result;

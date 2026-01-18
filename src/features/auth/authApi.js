@@ -65,6 +65,14 @@ export const authApi = {
   },
 
   /**
+   * Get organization admin status
+   * @returns {Promise<{success: boolean, data: {isAdmin: boolean, organizations: Array}}>}
+   */
+  getAdminStatus() {
+    return get(`${BASE}/admin-status`);
+  },
+
+  /**
    * Get all active sessions
    */
   getSessions() {

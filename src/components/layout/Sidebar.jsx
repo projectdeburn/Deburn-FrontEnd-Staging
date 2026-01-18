@@ -98,15 +98,15 @@ export function Sidebar({ isOpen, onClose }) {
           </NavLink>
         ))}
 
-        {/* Admin link - only show if admin */}
+        {/* Circles Admin link - only show if org admin */}
         {isAdmin && (
           <NavLink
-            to="/admin"
+            to="/circles/admin"
             onClick={onClose}
             className={({ isActive }) => `nav-item admin-only ${isActive ? 'active' : ''}`}
           >
             {icons['shield']}
-            <span>Admin</span>
+            <span>{t('common:nav.admin', 'Admin')}</span>
           </NavLink>
         )}
       </nav>

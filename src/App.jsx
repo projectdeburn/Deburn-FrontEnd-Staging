@@ -17,6 +17,7 @@ import Checkin from '@/pages/Checkin';
 import Coach from '@/pages/Coach';
 import Learning from '@/pages/Learning';
 import Circles from '@/pages/Circles';
+import CirclesAdmin from '@/pages/CirclesAdmin';
 import Progress from '@/pages/Progress';
 import Profile from '@/pages/Profile';
 import Admin from '@/pages/Admin';
@@ -136,6 +137,7 @@ function AppRoutes() {
         <Route path="/coach" element={<Coach />} />
         <Route path="/learning" element={<Learning />} />
         <Route path="/circles" element={<Circles />} />
+        <Route path="/circles/admin" element={<CirclesAdmin />} />
         <Route path="/progress" element={<Progress />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/admin" element={<Admin />} />

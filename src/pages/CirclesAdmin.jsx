@@ -1,0 +1,496 @@
+/**
+ * Circles Admin Page
+ * Admin interface for managing circle pools, invitations, and groups
+ */
+
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { circlesAdminApi } from '@/features/circles/circles-adminApi';
+
+// Hero image import
+import heroCircles from '@/assets/images/hero-circles.jpg';
+
+// SVG Icons
+const icons = {
+  users: (
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+      <circle cx="9" cy="7" r="4"></circle>
+      <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+      <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+    </svg>
+  ),
+  send: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="22" y1="2" x2="11" y2="13"></line>
+      <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+    </svg>
+  ),
+  trash: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="3 6 5 6 21 6"></polyline>
+      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+    </svg>
+  ),
+  shuffle: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="16 3 21 3 21 8"></polyline>
+      <line x1="4" y1="20" x2="21" y2="3"></line>
+      <polyline points="21 16 21 21 16 21"></polyline>
+      <line x1="15" y1="15" x2="21" y2="21"></line>
+      <line x1="4" y1="4" x2="9" y2="9"></line>
+    </svg>
+  ),
+  user: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+      <circle cx="12" cy="7" r="4"></circle>
+    </svg>
+  ),
+  alertCircle: (
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="12" x2="12" y1="8" y2="12"></line>
+      <line x1="12" x2="12.01" y1="16" y2="16"></line>
+    </svg>
+  ),
+};
+
+/**
+ * Parse emails from text input
+ * Supports comma, semicolon, newline, and whitespace separators
+ */
+function parseEmails(text) {
+  const parts = text.split(/[,;\n\r]+/);
+  const emails = [];
+
+  for (const part of parts) {
+    const trimmed = part.trim().toLowerCase();
+    // Basic email validation
+    if (trimmed && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      emails.push(trimmed);
+    }
+  }
+
+  // Remove duplicates
+  return [...new Set(emails)];
+}
+
+export default function CirclesAdmin() {
+  const { t } = useTranslation(['circlesAdmin', 'common']);
+  const navigate = useNavigate();
+
+  // Admin state
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  // Pool state
+  const [pools, setPools] = useState([]);
+  const [currentPool, setCurrentPool] = useState(null);
+
+  // Invitation state
+  const [invitations, setInvitations] = useState([]);
+  const [emailInput, setEmailInput] = useState('');
+  const [isSending, setIsSending] = useState(false);
+
+  // Group state
+  const [groups, setGroups] = useState([]);
+  const [isAssigning, setIsAssigning] = useState(false);
+
+  // Check admin status on mount
+  useEffect(() => {
+    checkAdminAndLoad();
+  }, []);
+
+  /**
+   * Check admin status and load data
+   */
+  async function checkAdminAndLoad() {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Check admin status
+      const statusRes = await circlesAdminApi.getAdminStatus();
+
+      if (!statusRes.success || !statusRes.data?.isAdmin) {
+        setIsAdmin(false);
+        // Redirect non-admins to dashboard
+        navigate('/', { replace: true });
+        return;
+      }
+
+      setIsAdmin(true);
+
+      // Load pools
+      const poolsRes = await circlesAdminApi.getPools();
+
+      if (poolsRes.success && poolsRes.data?.pools?.length > 0) {
+        setPools(poolsRes.data.pools);
+        const pool = poolsRes.data.pools[0];
+        setCurrentPool(pool);
+
+        // Load pool data
+        await loadPoolData(pool.id);
+      } else {
+        setPools([]);
+        setCurrentPool(null);
+      }
+    } catch (err) {
+      console.error('Error loading admin data:', err);
+      setError(err.message || 'Failed to load admin data');
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  /**
+   * Load invitations and groups for a pool
+   */
+  async function loadPoolData(poolId) {
+    try {
+      const [invitesRes, groupsRes] = await Promise.all([
+        circlesAdminApi.getPoolInvitations(poolId).catch(() => ({ success: false })),
+        circlesAdminApi.getPoolGroups(poolId).catch(() => ({ success: false })),
+      ]);
+
+      if (invitesRes.success) {
+        setInvitations(invitesRes.data?.invitations || []);
+      }
+
+      if (groupsRes.success) {
+        setGroups(groupsRes.data?.groups || []);
+      }
+    } catch (err) {
+      console.error('Error loading pool data:', err);
+    }
+  }
+
+  /**
+   * Send invitations
+   */
+  async function handleSendInvitations() {
+    const emails = parseEmails(emailInput);
+
+    if (emails.length === 0) {
+      alert(t('circlesAdmin:invite.noEmails', 'Please enter at least one valid email address'));
+      return;
+    }
+
+    if (!currentPool) {
+      alert(t('circlesAdmin:invite.noPool', 'No pool selected'));
+      return;
+    }
+
+    setIsSending(true);
+
+    try {
+      const invitees = emails.map(email => ({ email }));
+      const result = await circlesAdminApi.sendInvitations(currentPool.id, invitees);
+
+      if (result.success) {
+        const sent = result.data?.sent?.length || 0;
+        const failed = result.data?.failed?.length || 0;
+        const duplicate = result.data?.duplicate?.length || 0;
+
+        let message = t('circlesAdmin:invite.sentSuccess', 'Sent {{count}} invitations', { count: sent });
+        if (failed > 0) {
+          message += `\n${t('circlesAdmin:invite.failed', '{{count}} failed', { count: failed })}`;
+        }
+        if (duplicate > 0) {
+          message += `\n${t('circlesAdmin:invite.duplicate', '{{count}} duplicates skipped', { count: duplicate })}`;
+        }
+
+        alert(message);
+        setEmailInput('');
+
+        // Reload invitations
+        await loadPoolData(currentPool.id);
+      }
+    } catch (err) {
+      console.error('Error sending invitations:', err);
+      alert(err.message || 'Failed to send invitations');
+    } finally {
+      setIsSending(false);
+    }
+  }
+
+  /**
+   * Remove an invitation
+   */
+  async function handleRemoveInvitation(invitationId) {
+    if (!confirm(t('circlesAdmin:invite.confirmRemove', 'Remove this invitation?'))) {
+      return;
+    }
+
+    try {
+      const result = await circlesAdminApi.cancelInvitation(invitationId);
+
+      if (result.success) {
+        // Remove from local state
+        setInvitations(prev => prev.filter(inv => inv.id !== invitationId));
+      }
+    } catch (err) {
+      console.error('Error removing invitation:', err);
+      alert(err.message || 'Failed to remove invitation');
+    }
+  }
+
+  /**
+   * Assign groups
+   */
+  async function handleAssignGroups() {
+    if (!currentPool) return;
+
+    if (!confirm(t('circlesAdmin:groups.confirmAssign', 'Assign members to groups? This cannot be undone.'))) {
+      return;
+    }
+
+    setIsAssigning(true);
+
+    try {
+      const result = await circlesAdminApi.assignGroups(currentPool.id);
+
+      if (result.success) {
+        alert(result.message || t('circlesAdmin:groups.assignSuccess', 'Groups assigned successfully'));
+
+        // Reload pool data
+        await loadPoolData(currentPool.id);
+      }
+    } catch (err) {
+      console.error('Error assigning groups:', err);
+      alert(err.message || 'Failed to assign groups');
+    } finally {
+      setIsAssigning(false);
+    }
+  }
+
+  // Calculate parsed emails count
+  const parsedEmails = parseEmails(emailInput);
+  const emailCount = parsedEmails.length;
+
+  // Calculate if can assign groups
+  const acceptedCount = invitations.filter(inv => inv.status === 'accepted').length;
+  const minRequired = currentPool?.targetGroupSize || 3;
+  const canAssign = acceptedCount >= minRequired && currentPool?.status === 'inviting';
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="loading-overlay">
+        <div className="loading-spinner"></div>
+        <p>{t('common:loading', 'Loading...')}</p>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="content-area">
+        <div className="circles-error-state">
+          <div className="circles-error-icon">{icons.alertCircle}</div>
+          <h2>{t('circlesAdmin:error.title', 'Something went wrong')}</h2>
+          <p>{error}</p>
+          <button className="btn btn-primary" onClick={checkAdminAndLoad}>
+            {t('common:refresh', 'Try Again')}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Not admin (should redirect, but show message just in case)
+  if (!isAdmin) {
+    return null;
+  }
+
+  return (
+    <div className="content-area">
+      {/* Hero Section */}
+      <div className="hero-section">
+        <div className="hero-image-container">
+          <img
+            src={heroCircles}
+            alt="Admin Panel"
+            className="hero-image"
+          />
+          <div className="hero-overlay"></div>
+        </div>
+        <div className="hero-content">
+          <h1 className="hero-greeting">{t('circlesAdmin:hero.title', 'Admin Panel')}</h1>
+          <p className="hero-tagline">
+            {t('circlesAdmin:hero.tagline', 'Manage circle invitations')}
+          </p>
+        </div>
+      </div>
+
+      {/* Pool Info Section */}
+      <section className="section" id="admin-pool-section">
+        <div className="admin-pool-header">
+          <h2 className="section-title" style={{ marginBottom: 0 }}>
+            {currentPool?.name || t('circlesAdmin:pool.noPool', 'No pool configured')}
+          </h2>
+          <div className="admin-pool-status">
+            {currentPool ? (
+              <>
+                <span className={`admin-status-badge status-${currentPool.status}`}>
+                  {currentPool.status}
+                </span>
+                <span className="admin-status-info">
+                  {t('circlesAdmin:pool.targetSize', 'Target group size: {{size}}', { size: currentPool.targetGroupSize || 4 })}
+                </span>
+              </>
+            ) : (
+              <span className="admin-status-info">
+                {t('circlesAdmin:pool.contactSupport', 'Contact support to set up your organization.')}
+              </span>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Send Invitations Section */}
+      {currentPool && (
+        <section className="section" id="admin-invite-section">
+          <h2 className="section-title">{t('circlesAdmin:invite.title', 'Send Invitations')}</h2>
+          <div className="admin-invite-form">
+            <div className="form-group">
+              <label className="form-label">
+                {t('circlesAdmin:invite.label', 'Paste emails (comma or newline separated)')}
+              </label>
+              <textarea
+                id="admin-emails-input"
+                className="form-textarea"
+                rows="5"
+                placeholder={t('circlesAdmin:invite.placeholder', 'email1@example.com, email2@example.com\nemail3@example.com')}
+                value={emailInput}
+                onChange={(e) => setEmailInput(e.target.value)}
+              />
+            </div>
+            <div className="admin-invite-actions">
+              <span id="admin-email-count" className="admin-email-count">
+                {t('circlesAdmin:invite.emailCount', '{{count}} email(s) detected', { count: emailCount })}
+              </span>
+              <button
+                className="btn btn-primary"
+                onClick={handleSendInvitations}
+                disabled={isSending || emailCount === 0}
+              >
+                {icons.send}
+                <span style={{ marginLeft: '8px' }}>
+                  {isSending
+                    ? t('circlesAdmin:invite.sending', 'Sending...')
+                    : t('circlesAdmin:invite.sendButton', 'Send Invitations')
+                  }
+                </span>
+              </button>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Invited Users Section */}
+      {currentPool && (
+        <section className="section" id="admin-invitations-section">
+          <h2 className="section-title">
+            {t('circlesAdmin:invitations.title', 'Invited Users')}{' '}
+            <span className="admin-count-badge">{invitations.length}</span>
+          </h2>
+          <div className="admin-invitations-list" id="admin-invitations-list">
+            {invitations.length === 0 ? (
+              <div className="admin-empty-state">
+                {icons.users}
+                <p>{t('circlesAdmin:invitations.empty', 'No invitations yet')}</p>
+              </div>
+            ) : (
+              <div className="admin-invitations-table">
+                <div className="admin-table-header">
+                  <span>{t('circlesAdmin:invitations.email', 'Email')}</span>
+                  <span>{t('circlesAdmin:invitations.status', 'Status')}</span>
+                  <span>{t('circlesAdmin:invitations.action', 'Action')}</span>
+                </div>
+                {invitations.map((inv) => (
+                  <div key={inv.id} className="admin-table-row">
+                    <span className="admin-invitation-email">{inv.email}</span>
+                    <span className={`admin-invitation-status status-${inv.status}`}>
+                      {inv.status}
+                    </span>
+                    <button
+                      className="btn btn-sm btn-danger"
+                      onClick={() => handleRemoveInvitation(inv.id)}
+                      title={t('circlesAdmin:invitations.remove', 'Remove')}
+                    >
+                      {icons.trash}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* Groups Section */}
+      {currentPool && (
+        <section className="section" id="admin-groups-section">
+          <div className="admin-groups-header">
+            <h2 className="section-title">
+              {t('circlesAdmin:groups.title', 'Groups')}{' '}
+              <span className="admin-count-badge">{groups.length}</span>
+            </h2>
+            {canAssign && (
+              <button
+                className="btn btn-secondary"
+                onClick={handleAssignGroups}
+                disabled={isAssigning}
+              >
+                {icons.shuffle}
+                <span style={{ marginLeft: '8px' }}>
+                  {isAssigning
+                    ? t('circlesAdmin:groups.assigning', 'Assigning...')
+                    : t('circlesAdmin:groups.assignButton', 'Assign Groups ({{count}} accepted)', { count: acceptedCount })
+                  }
+                </span>
+              </button>
+            )}
+          </div>
+          <div className="admin-groups-list" id="admin-groups-list">
+            {groups.length === 0 ? (
+              <div className="admin-empty-state">
+                {icons.users}
+                <p>{t('circlesAdmin:groups.empty', 'No groups assigned yet')}</p>
+              </div>
+            ) : (
+              groups.map((group) => (
+                <div key={group.id} className="admin-group-card">
+                  <div className="admin-group-header">
+                    <h4>{group.name}</h4>
+                    <span className="admin-group-count">
+                      {t('circlesAdmin:groups.memberCount', '{{count}} members', { count: group.members?.length || 0 })}
+                    </span>
+                  </div>
+                  <ul className="admin-group-members">
+                    {(group.members || []).map((member, idx) => (
+                      <li key={member.id || idx}>
+                        {icons.user}
+                        <span style={{ marginLeft: '8px' }}>
+                          {member.firstName
+                            ? `${member.firstName} ${member.lastName || ''}`
+                            : member.email
+                          }
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))
+            )}
+          </div>
+        </section>
+      )}
+    </div>
+  );
+}
