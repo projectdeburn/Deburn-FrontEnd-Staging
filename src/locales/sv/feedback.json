@@ -1,0 +1,18 @@
+{
+  "title": "Dela din feedback",
+  "subtitle": "Hjälp oss förbättra Eve genom att dela dina tankar",
+  "ratingLabel": "Hur är din upplevelse med Eve?",
+  "textLabel": "Berätta mer (valfritt)",
+  "placeholder": "Vad tänker du på?",
+  "anonymous": "Skicka anonymt",
+  "submit": "Skicka feedback",
+  "success": {
+    "title": "Tack!",
+    "message": "Din feedback har skickats.",
+    "submitAnother": "Skicka fler"
+  },
+  "error": {
+    "empty": "Vänligen ge ett betyg eller skriv feedback",
+    "submit": "Det gick inte att skicka feedback"
+  }
+}

@@ -13,6 +13,7 @@ const navItems = [
   { key: 'coach', path: '/coach', icon: 'message-circle', labelKey: 'common:nav.coach', label: 'Ask Eve' },
   { key: 'learning', path: '/learning', icon: 'book-open', labelKey: 'common:nav.learning', label: 'Learning' },
   { key: 'circles', path: '/circles', icon: 'users', labelKey: 'common:nav.circles', label: 'Circles' },
+  { key: 'feedback', path: '/feedback', icon: 'message-square', labelKey: 'common:nav.feedback', label: 'Feedback' },
 ];
 
 // SVG icons matching Lucide icons used in original
@@ -48,6 +49,11 @@ const icons = {
       <circle cx="9" cy="7" r="4"></circle>
       <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
       <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+    </svg>
+  ),
+  'message-square': (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
     </svg>
   ),
   'shield': (

@@ -7,6 +7,7 @@
     "circles": "Cirklar",
     "progress": "Framsteg",
     "settings": "Inställningar",
+    "feedback": "Feedback",
     "home": "Hem",
     "learn": "Lär"
   },
@@ -72,5 +73,6 @@
   "delete": "Radera",
   "edit": "Redigera",
   "refresh": "Uppdatera",
-  "logout": "Logga ut"
+  "logout": "Logga ut",
+  "submitting": "Skickar..."
 }

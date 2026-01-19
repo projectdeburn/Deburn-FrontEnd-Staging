@@ -147,5 +147,10 @@
     "timeNinja": {
       "title": "Tidsninja: Bemästra ditt schema"
     }
+  },
+  "rating": {
+    "title": "Hur hjälpsamt var detta innehåll?",
+    "anonymous": "Skicka anonymt",
+    "thanks": "Tack för din feedback!"
   }
 }

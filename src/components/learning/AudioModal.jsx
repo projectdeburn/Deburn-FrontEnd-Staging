@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { getAuthToken } from '../../utils/api';
+import SmileyRating from './SmileyRating';
 
 const CloseIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -254,6 +255,11 @@ export default function AudioModal({ module, onClose }) {
               onPause={() => setIsPlaying(false)}
             />
           )}
+
+          <SmileyRating
+            contentId={module._id || module.id}
+            contentTitle={module.titleEn}
+          />
         </div>
       </div>
     </div>

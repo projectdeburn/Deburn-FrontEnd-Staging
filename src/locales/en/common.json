@@ -7,6 +7,7 @@
     "circles": "Circles",
     "progress": "Progress",
     "settings": "Settings",
+    "feedback": "Feedback",
     "home": "Home",
     "learn": "Learn"
   },
@@ -72,5 +73,6 @@
   "delete": "Delete",
   "edit": "Edit",
   "refresh": "Refresh",
-  "logout": "Sign Out"
+  "logout": "Sign Out",
+  "submitting": "Submitting..."
 }

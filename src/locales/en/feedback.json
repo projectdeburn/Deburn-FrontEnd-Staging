@@ -1,0 +1,18 @@
+{
+  "title": "Share Your Feedback",
+  "subtitle": "Help us improve Eve by sharing your thoughts",
+  "ratingLabel": "How is your experience with Eve?",
+  "textLabel": "Tell us more (optional)",
+  "placeholder": "What's on your mind?",
+  "anonymous": "Submit anonymously",
+  "submit": "Submit Feedback",
+  "success": {
+    "title": "Thank you!",
+    "message": "Your feedback has been submitted successfully.",
+    "submitAnother": "Submit Another"
+  },
+  "error": {
+    "empty": "Please provide a rating or feedback",
+    "submit": "Failed to submit feedback"
+  }
+}

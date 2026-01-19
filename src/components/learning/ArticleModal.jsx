@@ -4,6 +4,7 @@
  */
 
 import { useEffect } from 'react';
+import SmileyRating from './SmileyRating';
 
 // File text icon
 const FileTextIcon = () => (
@@ -85,6 +86,11 @@ export default function ArticleModal({ module, onClose }) {
           <div
             className="text-content-article"
             dangerouslySetInnerHTML={{ __html: formatArticleContent(module.textContentEn) }}
+          />
+
+          <SmileyRating
+            contentId={module._id || module.id}
+            contentTitle={module.titleEn}
           />
         </div>
 

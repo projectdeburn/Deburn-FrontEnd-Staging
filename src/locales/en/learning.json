@@ -147,5 +147,10 @@
     "timeNinja": {
       "title": "Time Ninja: Master Your Schedule"
     }
+  },
+  "rating": {
+    "title": "How helpful was this content?",
+    "anonymous": "Submit anonymously",
+    "thanks": "Thanks for your feedback!"
   }
 }

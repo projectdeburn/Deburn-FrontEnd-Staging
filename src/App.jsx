@@ -20,6 +20,7 @@ import Circles from '@/pages/Circles';
 import CirclesAdmin from '@/pages/CirclesAdmin';
 import Progress from '@/pages/Progress';
 import Profile from '@/pages/Profile';
+import Feedback from '@/pages/Feedback';
 import Admin from '@/pages/Admin';
 import Hub from '@/pages/Hub';
 
@@ -140,6 +141,7 @@ function AppRoutes() {
         <Route path="/circles/admin" element={<CirclesAdmin />} />
         <Route path="/progress" element={<Progress />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/feedback" element={<Feedback />} />
         <Route path="/admin" element={<Admin />} />
       </Route>
 
