@@ -6,6 +6,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { coachApi } from '@/features/coach/coachApi';
+import { get } from '@/utils/api';
+import ArticleModal from '@/components/learning/ArticleModal';
+import AudioModal from '@/components/learning/AudioModal';
 
 // Hero image import
 import heroCoach from '@/assets/images/hero-coach.jpg';
@@ -48,6 +51,24 @@ const icons = {
       <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
     </svg>
   ),
+  // Action icons
+  playCircle: (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"></circle>
+      <polygon points="10 8 16 12 10 16 10 8"></polygon>
+    </svg>
+  ),
+  headphones: (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3"></path>
+    </svg>
+  ),
+  bookOpen: (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+    </svg>
+  ),
 };
 
 // Coach avatar SVG component
@@ -66,6 +87,7 @@ export default function Coach() {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const streamingContentRef = useRef('');
+  const actionsRef = useRef([]);
 
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
@@ -73,7 +95,14 @@ export default function Coach() {
   const [conversationId, setConversationId] = useState(null);
   const [showStarters, setShowStarters] = useState(true);
   const [quickReplies, setQuickReplies] = useState([]);
+  const [actions, setActions] = useState([]);
   const [streamingContent, setStreamingContent] = useState('');
+  const [learningContent, setLearningContent] = useState([]);
+
+  // Modal state for action content
+  const [selectedModule, setSelectedModule] = useState(null);
+  const [showArticleModal, setShowArticleModal] = useState(false);
+  const [showAudioModal, setShowAudioModal] = useState(false);
 
   // Voice state
   const [isRecording, setIsRecording] = useState(false);
@@ -129,6 +158,21 @@ export default function Coach() {
       }
     };
   }, [i18n.language]);
+
+  // Pre-load learning content for action cards
+  useEffect(() => {
+    async function loadLearningContent() {
+      try {
+        const response = await get('/api/learning/content');
+        if (response.success) {
+          setLearningContent(response.data.items || []);
+        }
+      } catch (error) {
+        console.error('Error loading learning content:', error);
+      }
+    }
+    loadLearningContent();
+  }, []);
 
   // Auto-play TTS when voice input response is ready
   const playTTS = async (text, messageId) => {
@@ -216,9 +260,11 @@ export default function Coach() {
     setInputValue('');
     setShowStarters(false);
     setQuickReplies([]);
+    setActions([]);
     setIsLoading(true);
     setStreamingContent('');
     streamingContentRef.current = '';
+    actionsRef.current = [];
 
     try {
       const assistantId = Date.now() + 1;
@@ -234,6 +280,12 @@ export default function Coach() {
             streamingContentRef.current += content;
             setStreamingContent(streamingContentRef.current);
           },
+          onActions: (actionList) => {
+            if (actionList && actionList.length > 0) {
+              actionsRef.current = actionList;
+              setActions(actionList);
+            }
+          },
           onQuickReplies: (replies) => {
             setQuickReplies(replies);
           },
@@ -243,18 +295,21 @@ export default function Coach() {
             }
           },
           onDone: () => {
-            // Capture the final content from the ref before clearing
+            // Capture the final content and actions from refs before clearing
             const finalContent = streamingContentRef.current;
+            const finalActions = actionsRef.current;
             setMessages((prev) => [
               ...prev,
               {
                 id: assistantId,
                 role: 'assistant',
                 content: finalContent,
+                actions: finalActions,
               },
             ]);
             setStreamingContent('');
             streamingContentRef.current = '';
+            actionsRef.current = [];
             setIsLoading(false);
 
             // Auto-play TTS if input was via voice
@@ -281,6 +336,63 @@ export default function Coach() {
 
   function handleQuickReply(reply) {
     sendMessage(reply);
+  }
+
+  // Get icon based on action type/contentType
+  function getActionIcon(action) {
+    const contentType = action.metadata?.contentType || '';
+    if (contentType === 'audio_article' || contentType === 'audio_exercise') {
+      return icons.playCircle;
+    } else if (action.type === 'exercise') {
+      return icons.headphones;
+    }
+    return icons.bookOpen;
+  }
+
+  // Handle action card click - find module from pre-loaded content and open modal
+  function handleActionClick(action) {
+    // Find matching content from pre-loaded learning content
+    // Match by category and contentType from action metadata
+    const category = action.metadata?.category;
+    const contentType = action.metadata?.contentType;
+
+    let module = null;
+
+    if (category && contentType) {
+      // First try exact match on category and contentType
+      module = learningContent.find(
+        (item) => item.category === category && item.contentType === contentType
+      );
+    }
+
+    if (!module && contentType) {
+      // Fall back to just contentType match
+      module = learningContent.find((item) => item.contentType === contentType);
+    }
+
+    if (!module) {
+      console.error('No matching content found for action:', action.id);
+      return;
+    }
+
+    setSelectedModule(module);
+
+    // Open appropriate modal based on content type
+    if (module.contentType === 'text_article') {
+      setShowArticleModal(true);
+    } else if (module.contentType === 'audio_article' || module.contentType === 'audio_exercise') {
+      setShowAudioModal(true);
+    } else if (module.contentType === 'video_link' && module.videoUrl) {
+      // Open video in new tab
+      window.open(module.videoUrl, '_blank');
+    }
+  }
+
+  // Close modals
+  function closeModals() {
+    setShowArticleModal(false);
+    setShowAudioModal(false);
+    setSelectedModule(null);
   }
 
   function handleSubmit(e) {
@@ -363,6 +475,25 @@ export default function Coach() {
               )}
               <div className="message-content">
                 <p>{message.content}</p>
+                {/* Action Cards for assistant messages */}
+                {message.role === 'assistant' && message.actions && message.actions.length > 0 && (
+                  <div className="coach-content-suggestions">
+                    {message.actions.map((action) => (
+                      <button
+                        key={action.id}
+                        className="coach-content-card"
+                        onClick={() => handleActionClick(action)}
+                      >
+                        <div className="coach-content-card-icon">
+                          {getActionIcon(action)}
+                        </div>
+                        <div className="coach-content-card-title">
+                          {action.label}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
                 {/* Listen Button for assistant messages */}
                 {message.role === 'assistant' && message.content.length > 10 && (
                   <button
@@ -471,6 +602,15 @@ export default function Coach() {
           </p>
         </div>
       </div>
+
+      {/* Content Modals */}
+      {showArticleModal && selectedModule && (
+        <ArticleModal module={selectedModule} onClose={closeModals} />
+      )}
+
+      {showAudioModal && selectedModule && (
+        <AudioModal module={selectedModule} onClose={closeModals} />
+      )}
     </div>
   );
 }

@@ -1773,10 +1773,12 @@ p {
     margin-bottom: var(--space-2);
 }
 
-.coach-content-card-icon i {
+.coach-content-card-icon i,
+.coach-content-card-icon svg {
     width: 24px;
     height: 24px;
     color: var(--color-ember);
+    stroke: var(--color-ember);
 }
 
 .coach-content-card-title {
