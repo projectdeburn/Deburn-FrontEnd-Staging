@@ -3,7 +3,7 @@
  * Handles AI coach communication
  */
 
-import { get, post, getApiBaseUrl } from '@/utils/api';
+import { get, post, getApiBaseUrl, getAuthToken } from '@/utils/api';
 
 const BASE = '/api/coach';
 
@@ -44,11 +44,17 @@ export const coachApi = {
 
     try {
       const baseUrl = getApiBaseUrl();
-      const response = await fetch(`${baseUrl}${BASE}/stream`, {
+      const token = getAuthToken();
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const response = await fetch(`${baseUrl}${BASE}/chat`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         credentials: 'include',
         body: JSON.stringify({
           message,
@@ -169,5 +175,37 @@ export const coachApi = {
    */
   getExercises() {
     return get(`${BASE}/exercises`);
+  },
+
+  /**
+   * Convert text to speech using ElevenLabs
+   * @param {string} text - Text to convert to speech
+   * @param {object} options - Options including voice, language
+   * @returns {Promise<Blob>} Audio blob (MP3)
+   */
+  async textToSpeech(text, options = {}) {
+    const { voice = 'Aria', language = 'en' } = options;
+
+    const baseUrl = getApiBaseUrl();
+    const token = getAuthToken();
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(`${baseUrl}${BASE}/voice`, {
+      method: 'POST',
+      headers,
+      credentials: 'include',
+      body: JSON.stringify({ text, voice, language }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to generate speech');
+    }
+
+    return response.blob();
   },
 };

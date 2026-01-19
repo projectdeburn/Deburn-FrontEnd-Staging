@@ -36,6 +36,18 @@ const icons = {
       <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
     </svg>
   ),
+  volume: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+      <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+      <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+    </svg>
+  ),
+  stop: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+    </svg>
+  ),
 };
 
 // Coach avatar SVG component
@@ -62,6 +74,115 @@ export default function Coach() {
   const [showStarters, setShowStarters] = useState(true);
   const [quickReplies, setQuickReplies] = useState([]);
   const [streamingContent, setStreamingContent] = useState('');
+
+  // Voice state
+  const [isRecording, setIsRecording] = useState(false);
+  const [isVoiceInput, setIsVoiceInput] = useState(false);
+  const [playingMessageId, setPlayingMessageId] = useState(null);
+  const audioRef = useRef(null);
+  const recognitionRef = useRef(null);
+
+  // Initialize speech recognition
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.lang = i18n.language === 'sv' ? 'sv-SE' : 'en-US';
+
+      recognition.onresult = (event) => {
+        const transcript = Array.from(event.results)
+          .map(result => result[0].transcript)
+          .join('');
+
+        setInputValue(transcript);
+
+        // If final result, send the message
+        if (event.results[event.results.length - 1].isFinal) {
+          setIsRecording(false);
+          setIsVoiceInput(true);
+          setTimeout(() => {
+            sendMessage(transcript);
+          }, 100);
+        }
+      };
+
+      recognition.onend = () => {
+        setIsRecording(false);
+      };
+
+      recognition.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        setIsRecording(false);
+      };
+
+      recognitionRef.current = recognition;
+    }
+
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.abort();
+      }
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+    };
+  }, [i18n.language]);
+
+  // Auto-play TTS when voice input response is ready
+  const playTTS = async (text, messageId) => {
+    try {
+      setPlayingMessageId(messageId);
+      const audioBlob = await coachApi.textToSpeech(text, { language: i18n.language });
+      const audioUrl = URL.createObjectURL(audioBlob);
+
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+
+      const audio = new Audio(audioUrl);
+      audioRef.current = audio;
+
+      audio.onended = () => {
+        setPlayingMessageId(null);
+        URL.revokeObjectURL(audioUrl);
+      };
+
+      audio.onerror = () => {
+        setPlayingMessageId(null);
+        URL.revokeObjectURL(audioUrl);
+      };
+
+      await audio.play();
+    } catch (error) {
+      console.error('TTS error:', error);
+      setPlayingMessageId(null);
+    }
+  };
+
+  const stopTTS = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    setPlayingMessageId(null);
+  };
+
+  const toggleVoiceInput = () => {
+    if (!recognitionRef.current) {
+      console.warn('Speech recognition not supported');
+      return;
+    }
+
+    if (isRecording) {
+      recognitionRef.current.stop();
+      setIsRecording(false);
+    } else {
+      recognitionRef.current.start();
+      setIsRecording(true);
+    }
+  };
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -135,6 +256,12 @@ export default function Coach() {
             setStreamingContent('');
             streamingContentRef.current = '';
             setIsLoading(false);
+
+            // Auto-play TTS if input was via voice
+            if (isVoiceInput && finalContent.length > 10) {
+              playTTS(finalContent, assistantId);
+              setIsVoiceInput(false);
+            }
           },
           onError: (error) => {
             console.error('Stream error:', error);
@@ -236,6 +363,26 @@ export default function Coach() {
               )}
               <div className="message-content">
                 <p>{message.content}</p>
+                {/* Listen Button for assistant messages */}
+                {message.role === 'assistant' && message.content.length > 10 && (
+                  <button
+                    className={`coach-listen-btn ${playingMessageId === message.id ? 'playing' : ''}`}
+                    onClick={() => {
+                      if (playingMessageId === message.id) {
+                        stopTTS();
+                      } else {
+                        playTTS(message.content, message.id);
+                      }
+                    }}
+                  >
+                    {playingMessageId === message.id ? icons.stop : icons.volume}
+                    <span className="listen-text">
+                      {playingMessageId === message.id
+                        ? t('coach:stop', 'Stop')
+                        : t('coach:listen', 'Listen')}
+                    </span>
+                  </button>
+                )}
               </div>
             </div>
           ))}
@@ -290,11 +437,14 @@ export default function Coach() {
         <div className="chat-input-container">
           <div className="chat-input-wrapper">
             <button
-              className="voice-input-btn"
+              className={`voice-input-btn ${isRecording ? 'recording' : ''} ${!recognitionRef.current ? 'not-supported' : ''}`}
               id="voice-input-btn"
               title={t('coach:input.voice', 'Voice input')}
+              onClick={toggleVoiceInput}
+              disabled={isLoading}
             >
               {icons.mic}
+              <div className="voice-recording-indicator" id="voice-recording-indicator"></div>
             </button>
             <input
               ref={inputRef}
