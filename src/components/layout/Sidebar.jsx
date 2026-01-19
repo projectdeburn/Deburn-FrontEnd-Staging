@@ -81,6 +81,12 @@ export function Sidebar({ isOpen, onClose }) {
     <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
       <div className="sidebar-header">
         <div className="logo">
+          <svg className="logo-icon" viewBox="0 0 32 32" width="32" height="32">
+            <circle cx="17" cy="16" r="12" fill="none" stroke="#2D4A47" strokeWidth="1.5"/>
+            <circle cx="16.5" cy="16" r="9" fill="none" stroke="#7A9E97" strokeWidth="1.5"/>
+            <circle cx="16" cy="16" r="6" fill="none" stroke="#C4956A" strokeWidth="1.5"/>
+            <circle cx="15.5" cy="16" r="3" fill="none" stroke="#D4A9A0" strokeWidth="1.5"/>
+          </svg>
           <span className="logo-text">Eve</span>
         </div>
       </div>

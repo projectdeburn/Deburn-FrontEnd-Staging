@@ -203,6 +203,7 @@ export default function Coach() {
             id: index,
             role: msg.role,
             content: msg.content,
+            actions: msg.actions || [],
           }));
           const backendConvId = response.data.conversation?.id || null;
 
