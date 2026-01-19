@@ -3399,6 +3399,12 @@ p {
     color: var(--neutral-500);
 }
 
+.profile-success-text {
+    color: var(--color-success);
+    font-weight: 500;
+    margin-top: var(--space-2);
+}
+
 /* Profile Page Responsive */
 @media (max-width: 768px) {
     .profile-picture-card {

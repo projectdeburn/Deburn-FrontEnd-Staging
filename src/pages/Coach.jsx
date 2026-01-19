@@ -6,9 +6,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { coachApi } from '@/features/coach/coachApi';
-import { get } from '@/utils/api';
+import { get, del } from '@/utils/api';
 import ArticleModal from '@/components/learning/ArticleModal';
 import AudioModal from '@/components/learning/AudioModal';
+
+// LocalStorage key for conversation history
+const CONVERSATION_STORAGE_KEY = 'deburn_coach_conversation';
 
 // Hero image import
 import heroCoach from '@/assets/images/hero-coach.jpg';
@@ -174,6 +177,55 @@ export default function Coach() {
     loadLearningContent();
   }, []);
 
+  // Load conversation from localStorage on mount, then sync with backend
+  useEffect(() => {
+    async function loadConversation() {
+      // Step 1: Load from localStorage for instant display
+      const stored = localStorage.getItem(CONVERSATION_STORAGE_KEY);
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (parsed.messages && parsed.messages.length > 0) {
+            setMessages(parsed.messages);
+            setConversationId(parsed.conversationId || null);
+            setShowStarters(false);
+          }
+        } catch (e) {
+          console.error('Error parsing stored conversation:', e);
+        }
+      }
+
+      // Step 2: Sync with backend (backend is source of truth)
+      try {
+        const response = await get('/api/conversations');
+        if (response.success && response.data?.messages?.length > 0) {
+          const backendMessages = response.data.messages.map((msg, index) => ({
+            id: index,
+            role: msg.role,
+            content: msg.content,
+          }));
+          const backendConvId = response.data.conversation?.id || null;
+
+          // Backend has data - update localStorage and state
+          setMessages(backendMessages);
+          setConversationId(backendConvId);
+          setShowStarters(false);
+
+          // Update localStorage with backend data
+          localStorage.setItem(CONVERSATION_STORAGE_KEY, JSON.stringify({
+            messages: backendMessages,
+            conversationId: backendConvId,
+          }));
+        }
+      } catch (error) {
+        // Backend sync failed, keep localStorage data
+        console.error('Error syncing with backend:', error);
+      }
+    }
+
+    loadConversation();
+  }, []);
+
   // Auto-play TTS when voice input response is ready
   const playTTS = async (text, messageId) => {
     try {
@@ -232,6 +284,16 @@ export default function Coach() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, streamingContent]);
+
+  // Save messages to localStorage whenever they change
+  useEffect(() => {
+    if (messages.length > 0) {
+      localStorage.setItem(CONVERSATION_STORAGE_KEY, JSON.stringify({
+        messages,
+        conversationId,
+      }));
+    }
+  }, [messages, conversationId]);
 
   // Conversation starters
   const starters = [

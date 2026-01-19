@@ -7,7 +7,10 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/context/AuthContext';
-import { put, uploadFile } from '@/utils/api';
+import { put, uploadFile, del } from '@/utils/api';
+
+// LocalStorage key for conversation history (must match Coach.jsx)
+const CONVERSATION_STORAGE_KEY = 'deburn_coach_conversation';
 
 // SVG Icons
 const icons = {
@@ -67,6 +70,8 @@ export default function Profile() {
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [error, setError] = useState('');
+  const [isClearingHistory, setIsClearingHistory] = useState(false);
+  const [historyCleared, setHistoryCleared] = useState(false);
 
   // Form state
   const [firstName, setFirstName] = useState('');
@@ -163,6 +168,30 @@ export default function Profile() {
   async function handleLogout() {
     await logout();
     navigate('/login');
+  }
+
+  async function handleClearConversationHistory() {
+    if (!window.confirm(t('profile:conversation.confirmClear', 'Are you sure you want to clear your conversation history? This cannot be undone.'))) {
+      return;
+    }
+
+    setIsClearingHistory(true);
+    setHistoryCleared(false);
+
+    try {
+      // Delete from backend
+      await del('/api/conversations');
+
+      // Clear localStorage
+      localStorage.removeItem(CONVERSATION_STORAGE_KEY);
+
+      setHistoryCleared(true);
+      setTimeout(() => setHistoryCleared(false), 3000);
+    } catch (err) {
+      setError(err.message || t('profile:conversation.clearError', 'Failed to clear conversation history'));
+    } finally {
+      setIsClearingHistory(false);
+    }
   }
 
   const initials = firstName ? firstName.charAt(0).toUpperCase() : 'U';
@@ -364,6 +393,24 @@ export default function Profile() {
             <button className="btn btn-secondary" onClick={() => navigate('/forgot-password')}>
               {icons.key}
               <span>{t('profile:account.changePasswordBtn', 'Change')}</span>
+            </button>
+          </div>
+
+          <div className="profile-account-item">
+            <div className="profile-account-info">
+              <h4>{t('profile:conversation.title', 'Conversation History')}</h4>
+              <p>{t('profile:conversation.hint', 'Clear your AI coach conversation history')}</p>
+              {historyCleared && (
+                <p className="profile-success-text">{t('profile:conversation.cleared', 'Conversation history cleared')}</p>
+              )}
+            </div>
+            <button
+              className="btn btn-ghost"
+              onClick={handleClearConversationHistory}
+              disabled={isClearingHistory}
+            >
+              {icons.trash}
+              <span>{isClearingHistory ? t('common:clearing', 'Clearing...') : t('profile:conversation.clearBtn', 'Clear')}</span>
             </button>
           </div>
 
