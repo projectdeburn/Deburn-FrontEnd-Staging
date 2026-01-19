@@ -89,6 +89,20 @@ export function Header({ onMenuClick }) {
                 <span>{t('common:userMenu.profile', 'Profile')}</span>
               </button>
 
+              <button
+                className="user-menu-dropdown-item"
+                onClick={() => {
+                  navigate('/progress');
+                  setIsMenuOpen(false);
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                  <polyline points="17 6 23 6 23 12"></polyline>
+                </svg>
+                <span>{t('common:nav.progress', 'Progress')}</span>
+              </button>
+
               <div className="user-menu-dropdown-item language-switcher">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <circle cx="12" cy="12" r="10"></circle>

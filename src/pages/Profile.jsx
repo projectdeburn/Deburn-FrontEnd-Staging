@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/context/AuthContext';
-import { put, uploadFile, del } from '@/utils/api';
+import { put, post, uploadFile, del } from '@/utils/api';
 
 // LocalStorage key for conversation history (must match Coach.jsx)
 const CONVERSATION_STORAGE_KEY = 'deburn_coach_conversation';
@@ -72,6 +72,8 @@ export default function Profile() {
   const [error, setError] = useState('');
   const [isClearingHistory, setIsClearingHistory] = useState(false);
   const [historyCleared, setHistoryCleared] = useState(false);
+  const [isSendingReset, setIsSendingReset] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
 
   // Form state
   const [firstName, setFirstName] = useState('');
@@ -191,6 +193,27 @@ export default function Profile() {
       setError(err.message || t('profile:conversation.clearError', 'Failed to clear conversation history'));
     } finally {
       setIsClearingHistory(false);
+    }
+  }
+
+  async function handleChangePassword() {
+    if (!email) {
+      setError(t('profile:password.noEmail', 'No email address found'));
+      return;
+    }
+
+    setIsSendingReset(true);
+    setResetSent(false);
+    setError('');
+
+    try {
+      await post('/api/auth/forgot-password', { email });
+      setResetSent(true);
+      setTimeout(() => setResetSent(false), 5000);
+    } catch (err) {
+      setError(err.message || t('profile:password.resetError', 'Failed to send reset link'));
+    } finally {
+      setIsSendingReset(false);
     }
   }
 
@@ -389,10 +412,17 @@ export default function Profile() {
             <div className="profile-account-info">
               <h4>{t('profile:account.changePassword', 'Change Password')}</h4>
               <p>{t('profile:account.changePasswordHint', 'Update your password to keep your account secure')}</p>
+              {resetSent && (
+                <p className="profile-success-text">{t('profile:password.resetSent', 'Password reset link sent to your email')}</p>
+              )}
             </div>
-            <button className="btn btn-secondary" onClick={() => navigate('/forgot-password')}>
+            <button
+              className="btn btn-secondary"
+              onClick={handleChangePassword}
+              disabled={isSendingReset}
+            >
               {icons.key}
-              <span>{t('profile:account.changePasswordBtn', 'Change')}</span>
+              <span>{isSendingReset ? t('common:sending', 'Sending...') : t('profile:account.changePasswordBtn', 'Change')}</span>
             </button>
           </div>
 
