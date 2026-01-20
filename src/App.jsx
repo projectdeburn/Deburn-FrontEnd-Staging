@@ -64,10 +64,23 @@ function PublicRoute({ children }) {
   }
 
   if (isAuthenticated) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   return children;
+}
+
+/**
+ * Root Redirect - Sends to dashboard if authenticated, login if not
+ */
+function RootRedirect() {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <LoadingOverlay fullScreen message="Loading..." />;
+  }
+
+  return <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />;
 }
 
 /**
@@ -76,6 +89,12 @@ function PublicRoute({ children }) {
 function AppRoutes() {
   return (
     <Routes>
+      {/* Root redirect - to dashboard if authenticated, login if not */}
+      <Route
+        path="/"
+        element={<RootRedirect />}
+      />
+
       {/* Auth routes */}
       <Route element={<AuthLayout />}>
         <Route
@@ -134,7 +153,7 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       >
-        <Route path="/" element={<Dashboard />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/coach" element={<Coach />} />
         <Route path="/learning" element={<Learning />} />
         <Route path="/circles" element={<Circles />} />
@@ -145,8 +164,8 @@ function AppRoutes() {
         <Route path="/admin" element={<Admin />} />
       </Route>
 
-      {/* Catch all - redirect to dashboard */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      {/* Catch all - redirect to login */}
+      <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
 }

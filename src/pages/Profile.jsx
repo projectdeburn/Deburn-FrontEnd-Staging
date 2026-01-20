@@ -223,7 +223,7 @@ export default function Profile() {
     <div className="profile-page">
       {/* Header */}
       <header className="profile-header">
-        <button className="back-btn" onClick={() => navigate('/')}>
+        <button className="back-btn" onClick={() => navigate('/dashboard')}>
           {icons.arrowLeft}
         </button>
         <h1 className="profile-title">{t('profile:title', 'Profile Settings')}</h1>

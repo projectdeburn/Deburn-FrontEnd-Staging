@@ -32,7 +32,7 @@ export default function Login() {
     try {
       const result = await login(email, password, rememberMe);
       if (result.success) {
-        navigate('/');
+        navigate('/dashboard');
       }
     } catch (err) {
       setError(err.message || t('errors.loginFailed', 'Invalid email or password'));

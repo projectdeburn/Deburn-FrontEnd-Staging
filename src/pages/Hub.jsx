@@ -80,7 +80,7 @@ export default function Hub() {
       <div className="hub-unauthorized">
         <h2>{t('hub:unauthorized.title', 'Access Denied')}</h2>
         <p>{t('hub:unauthorized.message', "You don't have permission to access the Hub.")}</p>
-        <button className="hub-btn hub-btn-primary" onClick={() => navigate('/')}>
+        <button className="hub-btn hub-btn-primary" onClick={() => navigate('/dashboard')}>
           {t('hub:unauthorized.returnButton', 'Return to App')}
         </button>
       </div>

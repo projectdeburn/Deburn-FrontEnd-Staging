@@ -1,15 +1,12 @@
 ## API Description
 
-Endpoints for organization administrators to manage circle pools, invitations, and groups. These endpoints require the user to be an organization admin.
+Endpoints for organization administrators to manage circle pools, invitations, and groups. These endpoints require the user to be an organization admin (checked via `organizationMembers` collection with `role: "admin"`).
 
 ---
 
 ## GET /api/auth/admin-status
 
 Checks if the current user is an organization admin.
-
-**Frontend Input** (src/features/circles/circlesAdminApi.js):
-No request body.
 
 **Response:**
 ```json
@@ -28,13 +25,48 @@ No request body.
 }
 ```
 
-**Error Response (not admin):**
+---
+
+## POST /api/circles/pools
+
+Creates a new circle pool (admin only).
+
+**Request Body:**
+```json
+{
+  "name": "Q1 Leadership Cohort",
+  "organizationId": "org_123",
+  "topic": "Leadership Development",
+  "description": "Monthly leadership circles for Q1",
+  "targetGroupSize": 4,
+  "cadence": "biweekly"
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `name` | string | Yes | Pool name |
+| `organizationId` | string | Yes | Organization ID |
+| `topic` | string | No | Discussion topic/theme |
+| `description` | string | No | Pool description |
+| `targetGroupSize` | int | No | Target members per group (3-6, default: 4) |
+| `cadence` | string | No | Meeting frequency: `weekly` or `biweekly` (default: biweekly) |
+
+**Response:**
 ```json
 {
   "success": true,
   "data": {
-    "isAdmin": false,
-    "organizations": []
+    "pool": {
+      "id": "pool_123",
+      "name": "Q1 Leadership Cohort",
+      "topic": "Leadership Development",
+      "status": "draft",
+      "targetGroupSize": 4,
+      "cadence": "biweekly",
+      "organizationId": "org_123",
+      "createdAt": "2026-01-18T10:00:00Z"
+    }
   }
 }
 ```
@@ -45,8 +77,8 @@ No request body.
 
 Fetches pools for the user's organization. Auto-detects organization if user is admin of one org.
 
-**Frontend Input** (src/features/circles/circlesAdminApi.js):
-No request body. Optional query parameter `?status=inviting` to filter by status.
+**Query Parameters:**
+- `status` (optional): Filter by pool status (`draft`, `inviting`, `active`, `completed`, `cancelled`)
 
 **Response:**
 ```json
@@ -80,13 +112,6 @@ No request body. Optional query parameter `?status=inviting` to filter by status
 
 Fetches pool details.
 
-**Frontend Input** (src/features/circles/circlesAdminApi.js):
-```typescript
-// Path parameter
-poolId: string  // Pool ID
-```
-No request body.
-
 **Response:**
 ```json
 {
@@ -115,18 +140,16 @@ No request body.
 
 Sends invitations to the specified emails.
 
-**Frontend Input** (src/features/circles/circlesAdminApi.js):
-```typescript
-// Path parameter
-poolId: string  // Pool ID
-
-// Request body
+**Request Body:**
+```json
 {
-  invitees: Array<{
-    email: string,        // Email address (required)
-    firstName?: string,   // Optional first name
-    lastName?: string     // Optional last name
-  }>
+  "invitees": [
+    {
+      "email": "john@example.com",
+      "firstName": "John",
+      "lastName": "Doe"
+    }
+  ]
 }
 ```
 
@@ -136,8 +159,7 @@ poolId: string  // Pool ID
   "success": true,
   "data": {
     "sent": [
-      { "email": "john@example.com", "token": "abc123..." },
-      { "email": "anna@example.com", "token": "def456..." }
+      { "email": "john@example.com", "token": "abc123..." }
     ],
     "failed": [
       { "email": "invalid-email", "reason": "Invalid email format" }
@@ -154,13 +176,6 @@ poolId: string  // Pool ID
 ## GET /api/circles/pools/:poolId/invitations
 
 Lists all invitations for a pool (admin only).
-
-**Frontend Input** (src/features/circles/circlesAdminApi.js):
-```typescript
-// Path parameter
-poolId: string  // Pool ID
-```
-No request body.
 
 **Response:**
 ```json
@@ -195,37 +210,30 @@ No request body.
 
 ## DELETE /api/circles/invitations/:invitationId
 
-Cancels/removes an invitation (admin only).
-
-**Frontend Input** (src/features/circles/circlesAdminApi.js):
-```typescript
-// Path parameter
-invitationId: string  // Invitation ID
-```
-No request body.
+Deletes an invitation and updates pool stats (admin only). Works for invitations in any status (pending, accepted, declined).
 
 **Response:**
 ```json
 {
   "success": true,
   "data": {
-    "message": "Invitation cancelled successfully"
+    "message": "Invitation deleted successfully"
   }
 }
 ```
+
+**Side Effects:**
+- Invitation record is deleted from `circleinvitations` collection
+- Pool stats are decremented based on invitation status:
+  - Pending: `totalInvited` decremented
+  - Accepted: `totalInvited` and `totalAccepted` decremented
+  - Declined: `totalInvited` and `totalDeclined` decremented
 
 ---
 
 ## POST /api/circles/pools/:poolId/assign
 
-Triggers group assignment for accepted members (admin only). Requires minimum number of accepted invitations.
-
-**Frontend Input** (src/features/circles/circlesAdminApi.js):
-```typescript
-// Path parameter
-poolId: string  // Pool ID
-```
-No request body.
+Triggers group assignment for accepted members (admin only).
 
 **Response:**
 ```json
@@ -259,13 +267,6 @@ No request body.
 
 Lists groups for a pool (admin only).
 
-**Frontend Input** (src/features/circles/circlesAdminApi.js):
-```typescript
-// Path parameter
-poolId: string  // Pool ID
-```
-No request body.
-
 **Response:**
 ```json
 {
@@ -296,8 +297,6 @@ No request body.
 
 ## Error Responses
 
-All endpoints may return error responses:
-
 ```json
 {
   "success": false,
@@ -308,7 +307,6 @@ All endpoints may return error responses:
 }
 ```
 
-**Common Error Codes:**
 | Code | HTTP Status | Description |
 |------|-------------|-------------|
 | `NOT_ADMIN` | 403 | User is not an organization admin |
@@ -317,3 +315,63 @@ All endpoints may return error responses:
 | `INVITATION_NOT_FOUND` | 404 | Invitation does not exist |
 | `NO_INVITEES` | 400 | No valid invitees provided |
 | `INSUFFICIENT_MEMBERS` | 400 | Not enough accepted members for group assignment |
+
+---
+
+---
+
+## Implementation Status
+
+All endpoints have been implemented and tested.
+
+| Endpoint | Status | File | Line |
+|----------|--------|------|------|
+| `GET /api/auth/admin-status` | ✅ Complete | `app_v2/routers/auth.py` | 283-330 |
+| `POST /api/circles/pools` | ✅ Complete | `app_v2/routers/circles.py` | 319-371 |
+| `GET /api/circles/pools` | ✅ Complete | `app_v2/routers/circles.py` | 374-397 |
+| `GET /api/circles/pools/:id` | ✅ Complete | `app_v2/routers/circles.py` | 400-427 |
+| `POST /api/circles/pools/:id/invitations` | ✅ Complete | `app_v2/routers/circles.py` | 430-457 |
+| `GET /api/circles/pools/:id/invitations` | ✅ Complete | `app_v2/routers/circles.py` | 460-495 |
+| `DELETE /api/circles/invitations/:id` | ✅ Complete | `app_v2/routers/circles.py` | 498-529 |
+| `POST /api/circles/pools/:id/assign` | ✅ Complete | `app_v2/routers/circles.py` | 532-582 |
+| `GET /api/circles/pools/:id/groups` | ✅ Complete | `app_v2/routers/circles.py` | 585-635 |
+
+### Key Implementation Notes
+
+1. **ObjectId Handling**: All endpoints convert user IDs to ObjectId before querying MongoDB to avoid type mismatch issues.
+
+2. **Datetime Serialization**: Datetime fields are serialized with robust handling using `isoformat()` with fallback to string conversion.
+
+3. **Delete Invitation**: Completely removes the invitation record and updates pool stats accordingly.
+
+4. **Admin Authorization**: Each endpoint verifies the user is an organization admin via the `organizationmembers` collection.
+
+### Services Used
+
+| Service | File | Key Methods |
+|---------|------|-------------|
+| `PoolService` | `app_v2/services/circles/pool_service.py` | `create_pool()`, `get_pools_for_organization()`, `get_pool()` |
+| `InvitationService` | `app_v2/services/circles/invitation_service.py` | `send_invitations()`, `get_invitations_for_pool()`, `cancel_invitation()` |
+| `GroupService` | `app_v2/services/circles/group_service.py` | `assign_groups()`, `get_groups_for_pool()` |
+
+### Schemas
+
+```python
+# app_v2/schemas/circles.py
+
+class InviteeItem(BaseModel):
+    email: str
+    firstName: Optional[str] = None
+    lastName: Optional[str] = None
+
+class SendInvitationsRequest(BaseModel):
+    invitees: List[InviteeItem]
+
+class CreatePoolRequest(BaseModel):
+    name: str
+    organizationId: str
+    topic: Optional[str] = None
+    description: Optional[str] = None
+    targetGroupSize: int = Field(default=4, ge=3, le=6)
+    cadence: str = Field(default="biweekly", pattern="^(weekly|biweekly)$")
+```

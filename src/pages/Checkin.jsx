@@ -210,7 +210,7 @@ export default function Checkin() {
     } else if (currentStep === totalSteps - 1) {
       await submitCheckin();
     } else {
-      navigate('/');
+      navigate('/dashboard');
     }
   }
 
@@ -247,7 +247,7 @@ export default function Checkin() {
       <div className="checkin-container">
         {/* Check-in Header */}
         <header className="checkin-header">
-        <button className="back-btn" onClick={() => navigate('/')}>
+        <button className="back-btn" onClick={() => navigate('/dashboard')}>
           {icons.arrowLeft}
         </button>
         <h2 className="checkin-title">{t('checkin:title', 'Daily Check-in')}</h2>

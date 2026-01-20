@@ -94,7 +94,7 @@ export default function Admin() {
 
   useEffect(() => {
     if (user && !user.isAdmin) {
-      navigate('/');
+      navigate('/dashboard');
       return;
     }
     loadAdminStats();
@@ -122,7 +122,7 @@ export default function Admin() {
     <div className="admin-page">
       {/* Header */}
       <header className="admin-header">
-        <button className="back-btn" onClick={() => navigate('/')}>
+        <button className="back-btn" onClick={() => navigate('/dashboard')}>
           {icons.arrowLeft}
         </button>
         <div className="admin-title">

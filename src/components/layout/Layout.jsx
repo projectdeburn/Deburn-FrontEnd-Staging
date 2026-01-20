@@ -58,7 +58,7 @@ const mobileNavIcons = {
 };
 
 const mobileNavItems = [
-  { key: 'dashboard', path: '/', labelKey: 'common:nav.dashboard', label: 'Home', end: true },
+  { key: 'dashboard', path: '/dashboard', labelKey: 'common:nav.dashboard', label: 'Home' },
   { key: 'checkin', path: '/checkin', labelKey: 'common:nav.checkin', label: 'Check-in' },
   { key: 'coach', path: '/coach', labelKey: 'common:nav.coach', label: 'Eve' },
   { key: 'learning', path: '/learning', labelKey: 'common:nav.learning', label: 'Learn' },

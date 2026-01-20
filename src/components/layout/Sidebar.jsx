@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/context/AuthContext';
 
 const navItems = [
-  { key: 'dashboard', path: '/', icon: 'layout-dashboard', labelKey: 'common:nav.dashboard', label: 'Dashboard', end: true },
+  { key: 'dashboard', path: '/dashboard', icon: 'layout-dashboard', labelKey: 'common:nav.dashboard', label: 'Dashboard' },
   { key: 'checkin', path: '/checkin', icon: 'heart-pulse', labelKey: 'common:nav.checkin', label: 'Check-in' },
   { key: 'coach', path: '/coach', icon: 'message-circle', labelKey: 'common:nav.coach', label: 'Ask Eve' },
   { key: 'learning', path: '/learning', icon: 'book-open', labelKey: 'common:nav.learning', label: 'Learning' },

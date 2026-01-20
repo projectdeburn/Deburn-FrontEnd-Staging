@@ -119,7 +119,7 @@ export default function CirclesAdmin() {
       if (!statusRes.success || !statusRes.data?.isAdmin) {
         setIsAdmin(false);
         // Redirect non-admins to dashboard
-        navigate('/', { replace: true });
+        navigate('/dashboard', { replace: true });
         return;
       }
 

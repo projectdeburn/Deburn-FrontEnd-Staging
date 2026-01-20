@@ -4,14 +4,14 @@ AI coaching chat endpoints for streaming responses and conversation management.
 
 **Key Features:**
 - SSE streaming responses with actions
-- Encrypted conversation persistence (backend)
-- Local-first display with backend sync
+- Encrypted conversation persistence (AES-256-CBC)
+- Pipeline architecture for storage (SOLID principles)
 
 ---
 
 ## POST /api/coach/chat
 
-Streams AI coach response using Server-Sent Events. Messages are automatically encrypted and stored on backend.
+Streams AI coach response using Server-Sent Events. Messages are automatically encrypted and stored.
 
 **Request:**
 ```json
@@ -72,6 +72,13 @@ data: {"type":"done","content":null}
 }
 ```
 
+**Internal Flow:**
+1. Pipeline: Get/create conversation (decrypt history)
+2. Pipeline: Save user message (encrypted)
+3. CoachService: Generate AI response (pure logic)
+4. Pipeline: Save assistant message (encrypted with actions)
+5. Pipeline: Update topics
+
 ---
 
 ## GET /api/coach/starters
@@ -97,24 +104,29 @@ Fetches conversation starter suggestions based on user wellbeing data.
 
 ---
 
-## GET /api/conversations
+## GET /api/coach/conversations
 
-Fetches user's conversation history (decrypted). Used for syncing local state with backend.
+Fetches user's recent conversations (decrypted).
+
+**Query Parameters:**
+- `limit` (number): Max conversations to return (default: 10, max: 50)
 
 **Response:**
 ```json
 {
   "success": true,
   "data": {
-    "conversation": {
-      "id": "conv_20260119_abc123",
-      "messageCount": 4,
-      "lastMessageAt": "2026-01-19T12:00:00Z",
-      "createdAt": "2026-01-19T10:00:00Z"
-    },
-    "messages": [
-      {"role": "user", "content": "Hello", "timestamp": "...", "actions": null},
-      {"role": "assistant", "content": "Hi there!", "timestamp": "...", "actions": [...]}
+    "conversations": [
+      {
+        "id": "abc123",
+        "conversationId": "conv_20260119_abc123",
+        "userId": "user123",
+        "messages": [...],
+        "topics": ["stress", "leadership"],
+        "status": "active",
+        "lastMessageAt": "2026-01-19T12:00:00Z",
+        "createdAt": "2026-01-19T10:00:00Z"
+      }
     ]
   }
 }
@@ -122,17 +134,23 @@ Fetches user's conversation history (decrypted). Used for syncing local state wi
 
 ---
 
-## DELETE /api/conversations
+## GET /api/coach/conversations/{conversation_id}
 
-Deletes all conversation history for the user.
+Fetches a specific conversation by ID.
 
 **Response:**
 ```json
 {
   "success": true,
   "data": {
-    "deleted": true,
-    "deletedCount": 1
+    "id": "abc123",
+    "conversationId": "conv_20260119_abc123",
+    "messages": [
+      {"role": "user", "content": "Hello", "timestamp": "..."},
+      {"role": "assistant", "content": "Hi there!", "timestamp": "..."}
+    ],
+    "topics": ["greeting"],
+    "status": "active"
   }
 }
 ```
@@ -160,24 +178,64 @@ Converts text to speech using ElevenLabs.
 
 ---
 
-## GET /api/learning/content
+## GET /api/coach/commitments
 
-Pre-loads learning content for action cards in coach responses.
+Fetches active commitments.
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "commit123",
+      "commitment": "Take a 5-minute walk after lunch",
+      "topic": "stress",
+      "status": "active",
+      "followUpDate": "2026-01-20T12:00:00Z"
+    }
+  ]
+}
+```
+
+---
+
+## POST /api/coach/commitments/{commitment_id}/complete
+
+Marks a commitment as completed.
+
+**Request:**
+```json
+{
+  "reflectionNotes": "I felt much better after the walk",
+  "helpfulnessRating": 4
+}
+```
+
+---
+
+## POST /api/coach/commitments/{commitment_id}/dismiss
+
+Dismisses a commitment.
+
+---
+
+## GET /api/coach/patterns
+
+Fetches detected patterns from check-in data.
+
+**Query Parameters:**
+- `days` (number): Analysis period (default: 30, min: 7, max: 90)
 
 **Response:**
 ```json
 {
   "success": true,
   "data": {
-    "items": [
-      {
-        "id": "abc123",
-        "title": "Managing Stress",
-        "category": "wellbeing",
-        "contentType": "audio_article",
-        "duration": "5 min"
-      }
-    ]
+    "streak": 7,
+    "morningCheckins": 5,
+    "stressDayPattern": "Monday",
+    "moodChange": 0.5,
+    "stressChange": -0.3
   }
 }
-```
