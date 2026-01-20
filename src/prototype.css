@@ -889,16 +889,20 @@ p {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    min-height: 100dvh;
     background: var(--color-warm-white);
 }
 
 .checkin-container {
     width: 100%;
     max-width: 560px;
-    min-height: 100vh;
+    height: 100vh;
+    height: 100dvh;
     display: flex;
     flex-direction: column;
     padding: var(--space-6);
+    padding-bottom: 0;
+    overflow: hidden;
 }
 
 .checkin-header {
@@ -987,6 +991,8 @@ p {
     display: flex;
     flex-direction: column;
     animation: fadeIn 0.3s var(--ease-out);
+    overflow-y: auto;
+    min-height: 0;
 }
 
 @keyframes fadeIn {
@@ -1395,9 +1401,11 @@ p {
 .checkin-nav {
     display: flex;
     justify-content: space-between;
-    padding-top: var(--space-6);
+    padding: var(--space-6);
     border-top: 1px solid var(--neutral-200);
     margin-top: auto;
+    background: var(--color-warm-white);
+    flex-shrink: 0;
 }
 
 /* ==========================================================================
@@ -1410,11 +1418,12 @@ p {
     bottom: 0;
     left: 0;
     right: 0;
-    height: var(--mobile-nav-height);
+    height: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom));
     background: var(--color-warm-white);
     border-top: 1px solid var(--neutral-200);
     justify-content: space-around;
-    align-items: center;
+    align-items: flex-start;
+    padding-top: var(--space-2);
     padding-bottom: env(safe-area-inset-bottom);
     z-index: 100;
 }
@@ -1431,7 +1440,8 @@ p {
     padding: var(--space-2);
 }
 
-.mobile-nav-item i {
+.mobile-nav-item i,
+.mobile-nav-item svg {
     width: 24px;
     height: 24px;
 }
@@ -1541,6 +1551,7 @@ p {
 
     .checkin-container {
         padding: var(--space-4);
+        padding-bottom: 0;
     }
 }
 
