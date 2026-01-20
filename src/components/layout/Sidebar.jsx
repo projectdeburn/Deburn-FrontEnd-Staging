@@ -8,11 +8,11 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/context/AuthContext';
 
 const navItems = [
-  { key: 'dashboard', path: '/', icon: 'layout-dashboard', labelKey: 'common:nav.dashboard', label: 'Dashboard' },
+  { key: 'dashboard', path: '/', icon: 'layout-dashboard', labelKey: 'common:nav.dashboard', label: 'Dashboard', end: true },
   { key: 'checkin', path: '/checkin', icon: 'heart-pulse', labelKey: 'common:nav.checkin', label: 'Check-in' },
   { key: 'coach', path: '/coach', icon: 'message-circle', labelKey: 'common:nav.coach', label: 'Ask Eve' },
   { key: 'learning', path: '/learning', icon: 'book-open', labelKey: 'common:nav.learning', label: 'Learning' },
-  { key: 'circles', path: '/circles', icon: 'users', labelKey: 'common:nav.circles', label: 'Circles' },
+  { key: 'circles', path: '/circles', icon: 'users', labelKey: 'common:nav.circles', label: 'Circles', end: true },
   { key: 'feedback', path: '/feedback', icon: 'message-square', labelKey: 'common:nav.feedback', label: 'Feedback' },
 ];
 
@@ -90,6 +90,7 @@ export function Sidebar({ isOpen, onClose }) {
             key={item.key}
             to={item.path}
             onClick={onClose}
+            end={item.end}
             className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
           >
             {icons[item.icon]}

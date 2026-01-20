@@ -58,11 +58,11 @@ const mobileNavIcons = {
 };
 
 const mobileNavItems = [
-  { key: 'dashboard', path: '/', labelKey: 'common:nav.dashboard', label: 'Home' },
+  { key: 'dashboard', path: '/', labelKey: 'common:nav.dashboard', label: 'Home', end: true },
   { key: 'checkin', path: '/checkin', labelKey: 'common:nav.checkin', label: 'Check-in' },
   { key: 'coach', path: '/coach', labelKey: 'common:nav.coach', label: 'Eve' },
   { key: 'learning', path: '/learning', labelKey: 'common:nav.learning', label: 'Learn' },
-  { key: 'circles', path: '/circles', labelKey: 'common:nav.circles', label: 'Circles' },
+  { key: 'circles', path: '/circles', labelKey: 'common:nav.circles', label: 'Circles', end: true },
   { key: 'feedback', path: '/feedback', labelKey: 'common:nav.feedback', label: 'Feedback' },
 ];
 
@@ -100,7 +100,7 @@ export function Layout() {
             key={item.key}
             to={item.path}
             className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}
-            end={item.path === '/'}
+            end={item.end}
           >
             {mobileNavIcons[item.key]}
             <span>{t(item.labelKey, item.label)}</span>
