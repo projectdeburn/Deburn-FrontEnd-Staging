@@ -111,10 +111,10 @@ function AppRoutes() {
       <Route path="/terms-of-service" element={<TermsOfService />} />
       <Route path="/cookie-policy" element={<CookiePolicy />} />
 
-      {/* Hub admin (separate layout) - temporarily public for dev */}
-      <Route element={<HubLayout />}>
+      {/* Hub admin - DISABLED: route commented out, /hub will 404 to dashboard */}
+      {/* <Route element={<HubLayout />}>
         <Route path="/hub" element={<Hub />} />
-      </Route>
+      </Route> */}
 
       {/* Check-in (fullscreen, no sidebar) */}
       <Route
