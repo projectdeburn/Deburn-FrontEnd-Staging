@@ -4,10 +4,15 @@
     "tagline": "Micro-lessons for busy leaders"
   },
   "categories": {
+    "featured": "Featured",
     "leadership": "Leadership",
+    "breath": "Breath Techniques",
     "breathTechniques": "Breath Techniques",
     "meditation": "Meditation",
-    "audio": "Audio Learning"
+    "burnout": "Burnout Prevention",
+    "wellbeing": "Wellbeing",
+    "audio": "Audio Learning",
+    "other": "Other"
   },
   "types": {
     "video": "Video",
@@ -152,5 +157,7 @@
     "title": "How helpful was this content?",
     "anonymous": "Submit anonymously",
     "thanks": "Thanks for your feedback!"
-  }
+  },
+  "minRead": "min read",
+  "noModules": "No learning modules available yet."
 }

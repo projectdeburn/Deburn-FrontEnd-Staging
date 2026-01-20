@@ -4,10 +4,15 @@
     "tagline": "Mikrolektioner för upptagna ledare"
   },
   "categories": {
+    "featured": "Utvalda",
     "leadership": "Ledarskap",
+    "breath": "Andningstekniker",
     "breathTechniques": "Andningstekniker",
     "meditation": "Meditation",
-    "audio": "Ljudinlärning"
+    "burnout": "Utbrändhetsförebyggande",
+    "wellbeing": "Välmående",
+    "audio": "Ljudinlärning",
+    "other": "Övrigt"
   },
   "types": {
     "video": "Video",
@@ -152,5 +157,7 @@
     "title": "Hur hjälpsamt var detta innehåll?",
     "anonymous": "Skicka anonymt",
     "thanks": "Tack för din feedback!"
-  }
+  },
+  "minRead": "min läsning",
+  "noModules": "Inga lärmoduler tillgängliga ännu."
 }

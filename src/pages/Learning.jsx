@@ -5,6 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import i18n from '@/utils/i18n';
 import { get } from '@/utils/api';
 
 // Modal components
@@ -54,16 +55,18 @@ const contentIcons = {
   exercise: icons.headphones, // exercises use headphones icon like audio
 };
 
-// Category display names
-const categoryNames = {
-  featured: 'Featured',
-  leadership: 'Leadership',
-  breath: 'Breath Techniques',
-  meditation: 'Meditation',
-  burnout: 'Burnout Prevention',
-  wellbeing: 'Wellbeing',
-  other: 'Other',
-};
+/**
+ * Get localized field from module based on current language
+ * @param {object} module - The content module
+ * @param {string} field - Base field name (e.g., 'title', 'textContent')
+ * @returns {string} The localized value
+ */
+function getLocalizedField(module, field) {
+  const lang = i18n.language === 'sv' ? 'Sv' : 'En';
+  const localizedField = `${field}${lang}`;
+  const fallbackField = `${field}En`;
+  return module[localizedField] || module[fallbackField] || '';
+}
 
 export default function Learning() {
   const { t } = useTranslation(['learning', 'common']);
@@ -166,7 +169,7 @@ export default function Learning() {
           return (
             <section key={category} className="learning-section">
               <h2 className="section-title">
-                {categoryNames[category] || category}
+                {t(`learning:categories.${category}`, category)}
               </h2>
               <div className="learning-grid">
                 {categoryModules.map((module) => (
@@ -242,7 +245,7 @@ function LearningCard({ module, onClick }) {
       <div className="learning-card-icon">
         {contentIcon}
       </div>
-      <h3 className="learning-card-title">{module.titleEn}</h3>
+      <h3 className="learning-card-title">{getLocalizedField(module, 'title')}</h3>
     </div>
   );
 }

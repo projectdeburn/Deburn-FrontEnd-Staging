@@ -1,0 +1,45 @@
+{
+  "hero": {
+    "title": "Admin Panel",
+    "tagline": "Manage circle invitations"
+  },
+  "pool": {
+    "noPool": "No pool configured",
+    "targetSize": "Target group size: {{size}}",
+    "contactSupport": "Contact support to set up your organization."
+  },
+  "invite": {
+    "title": "Send Invitations",
+    "label": "Paste emails (comma or newline separated)",
+    "placeholder": "email1@example.com, email2@example.com\nemail3@example.com",
+    "emailCount": "{{count}} email(s) detected",
+    "sending": "Sending...",
+    "sendButton": "Send Invitations",
+    "noEmails": "Please enter at least one valid email address",
+    "noPool": "No pool selected",
+    "sentSuccess": "Sent {{count}} invitations",
+    "failed": "{{count}} failed",
+    "duplicate": "{{count}} duplicates skipped",
+    "confirmRemove": "Remove this invitation?"
+  },
+  "invitations": {
+    "title": "Invited Users",
+    "empty": "No invitations yet",
+    "email": "Email",
+    "status": "Status",
+    "action": "Action",
+    "remove": "Remove"
+  },
+  "groups": {
+    "title": "Groups",
+    "empty": "No groups assigned yet",
+    "assigning": "Assigning...",
+    "assignButton": "Assign Groups ({{count}} accepted)",
+    "confirmAssign": "Assign members to groups? This cannot be undone.",
+    "assignSuccess": "Groups assigned successfully",
+    "memberCount": "{{count}} members"
+  },
+  "error": {
+    "title": "Something went wrong"
+  }
+}

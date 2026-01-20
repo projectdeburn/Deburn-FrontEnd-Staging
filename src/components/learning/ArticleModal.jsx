@@ -4,7 +4,19 @@
  */
 
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import i18n from '@/utils/i18n';
 import SmileyRating from './SmileyRating';
+
+/**
+ * Get localized field from module based on current language
+ */
+function getLocalizedField(module, field) {
+  const lang = i18n.language === 'sv' ? 'Sv' : 'En';
+  const localizedField = `${field}${lang}`;
+  const fallbackField = `${field}En`;
+  return module[localizedField] || module[fallbackField] || '';
+}
 
 // File text icon
 const FileTextIcon = () => (
@@ -26,6 +38,8 @@ const CloseIcon = () => (
 );
 
 export default function ArticleModal({ module, onClose }) {
+  const { t } = useTranslation(['learning', 'common']);
+
   // Close on escape key
   useEffect(() => {
     function handleEscape(e) {
@@ -45,8 +59,12 @@ export default function ArticleModal({ module, onClose }) {
     };
   }, []);
 
+  // Get localized content
+  const title = getLocalizedField(module, 'title');
+  const textContent = getLocalizedField(module, 'textContent');
+
   // Calculate reading time (average 200 words per minute)
-  const wordCount = (module.textContentEn || '').split(/\s+/).length;
+  const wordCount = (textContent || '').split(/\s+/).length;
   const readingTime = Math.max(1, Math.ceil(wordCount / 200));
 
   // Handle backdrop click
@@ -67,17 +85,17 @@ export default function ArticleModal({ module, onClose }) {
           <div className="text-content-header">
             <div className="text-content-title-row">
               <FileTextIcon />
-              <h2 className="text-content-title">{module.titleEn}</h2>
+              <h2 className="text-content-title">{title}</h2>
             </div>
             <div className="text-content-meta">
               {module.lengthMinutes > 0 && (
                 <span className="text-content-reading-time">
-                  {module.lengthMinutes} min read
+                  {module.lengthMinutes} {t('learning:minRead', 'min read')}
                 </span>
               )}
               {!module.lengthMinutes && (
                 <span className="text-content-reading-time">
-                  {readingTime} min read
+                  {readingTime} {t('learning:minRead', 'min read')}
                 </span>
               )}
             </div>
@@ -85,18 +103,18 @@ export default function ArticleModal({ module, onClose }) {
 
           <div
             className="text-content-article"
-            dangerouslySetInnerHTML={{ __html: formatArticleContent(module.textContentEn) }}
+            dangerouslySetInnerHTML={{ __html: formatArticleContent(textContent) }}
           />
 
           <SmileyRating
             contentId={module._id || module.id}
-            contentTitle={module.titleEn}
+            contentTitle={title}
           />
         </div>
 
         <div className="text-content-footer">
           <button className="btn btn-secondary" onClick={onClose}>
-            Close
+            {t('common:close', 'Close')}
           </button>
         </div>
       </div>

@@ -1,0 +1,45 @@
+{
+  "hero": {
+    "title": "Adminpanel",
+    "tagline": "Hantera cirkelinbjudningar"
+  },
+  "pool": {
+    "noPool": "Ingen pool konfigurerad",
+    "targetSize": "Målgruppsstorlek: {{size}}",
+    "contactSupport": "Kontakta support för att konfigurera din organisation."
+  },
+  "invite": {
+    "title": "Skicka inbjudningar",
+    "label": "Klistra in e-postadresser (komma- eller radseparerade)",
+    "placeholder": "email1@example.com, email2@example.com\nemail3@example.com",
+    "emailCount": "{{count}} e-postadress(er) upptäckta",
+    "sending": "Skickar...",
+    "sendButton": "Skicka inbjudningar",
+    "noEmails": "Ange minst en giltig e-postadress",
+    "noPool": "Ingen pool vald",
+    "sentSuccess": "Skickade {{count}} inbjudningar",
+    "failed": "{{count}} misslyckades",
+    "duplicate": "{{count}} dubbletter hoppades över",
+    "confirmRemove": "Ta bort denna inbjudan?"
+  },
+  "invitations": {
+    "title": "Inbjudna användare",
+    "empty": "Inga inbjudningar ännu",
+    "email": "E-post",
+    "status": "Status",
+    "action": "Åtgärd",
+    "remove": "Ta bort"
+  },
+  "groups": {
+    "title": "Grupper",
+    "empty": "Inga grupper tilldelade ännu",
+    "assigning": "Tilldelar...",
+    "assignButton": "Tilldela grupper ({{count}} accepterade)",
+    "confirmAssign": "Tilldela medlemmar till grupper? Detta kan inte ångras.",
+    "assignSuccess": "Grupper tilldelade framgångsrikt",
+    "memberCount": "{{count}} medlemmar"
+  },
+  "error": {
+    "title": "Något gick fel"
+  }
+}

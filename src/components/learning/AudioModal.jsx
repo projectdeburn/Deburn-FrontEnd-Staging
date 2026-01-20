@@ -1,6 +1,17 @@
 import { useState, useEffect, useRef } from 'react';
 import { getAuthToken } from '../../utils/api';
+import i18n from '@/utils/i18n';
 import SmileyRating from './SmileyRating';
+
+/**
+ * Get localized field from module based on current language
+ */
+function getLocalizedField(module, field) {
+  const lang = i18n.language === 'sv' ? 'Sv' : 'En';
+  const localizedField = `${field}${lang}`;
+  const fallbackField = `${field}En`;
+  return module[localizedField] || module[fallbackField] || '';
+}
 
 const CloseIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -45,6 +56,10 @@ export default function AudioModal({ module, onClose }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Get current language for audio
+  const audioLang = i18n.language === 'sv' ? 'sv' : 'en';
+  const title = getLocalizedField(module, 'title');
+
   useEffect(() => {
     if (!module.id) return;
 
@@ -57,7 +72,7 @@ export default function AudioModal({ module, onClose }) {
 
       try {
         const response = await fetch(
-          `${import.meta.env.VITE_ENDPOINT || ''}/api/learning/content/${module.id}/audio/en`,
+          `${import.meta.env.VITE_ENDPOINT || ''}/api/learning/content/${module.id}/audio/${audioLang}`,
           {
             headers: {
               'Authorization': `Bearer ${getAuthToken()}`
@@ -96,7 +111,7 @@ export default function AudioModal({ module, onClose }) {
         URL.revokeObjectURL(blobUrl);
       }
     };
-  }, [module.id]);
+  }, [module.id, audioLang]);
 
   useEffect(() => {
     function handleEscape(e) {
@@ -207,7 +222,7 @@ export default function AudioModal({ module, onClose }) {
             </svg>
           </div>
 
-          <div className="audio-player-title">{module.titleEn}</div>
+          <div className="audio-player-title">{title}</div>
 
           {error && <div className="audio-error">{error}</div>}
 
@@ -258,7 +273,7 @@ export default function AudioModal({ module, onClose }) {
 
           <SmileyRating
             contentId={module._id || module.id}
-            contentTitle={module.titleEn}
+            contentTitle={title}
           />
         </div>
       </div>
