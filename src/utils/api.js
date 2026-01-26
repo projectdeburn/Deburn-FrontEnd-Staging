@@ -135,6 +135,17 @@ export function put(endpoint, body, options = {}) {
 }
 
 /**
+ * Make a PATCH request (partial update)
+ */
+export function patch(endpoint, body, options = {}) {
+  return apiRequest(endpoint, {
+    ...options,
+    method: 'PATCH',
+    body: JSON.stringify(body),
+  });
+}
+
+/**
  * Make a DELETE request
  */
 export function del(endpoint, options = {}) {

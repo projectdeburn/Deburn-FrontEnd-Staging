@@ -7,6 +7,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { coachApi } from '@/features/coach/coachApi';
 import { get, del } from '@/utils/api';
+import { FormattedMessage } from '@/utils/formatCoachResponse.jsx';
 import ArticleModal from '@/components/learning/ArticleModal';
 import AudioModal from '@/components/learning/AudioModal';
 
@@ -231,7 +232,9 @@ export default function Coach() {
   const playTTS = async (text, messageId) => {
     try {
       setPlayingMessageId(messageId);
-      const audioBlob = await coachApi.textToSpeech(text, { language: i18n.language });
+      // Get voice preference from localStorage (synced with backend by Profile page)
+      const voice = localStorage.getItem('coachVoice') || 'Alice';
+      const audioBlob = await coachApi.textToSpeech(text, { voice, language: i18n.language });
       const audioUrl = URL.createObjectURL(audioBlob);
 
       if (audioRef.current) {
@@ -537,7 +540,7 @@ export default function Coach() {
                 </div>
               )}
               <div className="message-content">
-                <p>{message.content}</p>
+                <FormattedMessage content={message.content} />
                 {/* Action Cards for assistant messages */}
                 {message.role === 'assistant' && message.actions && message.actions.length > 0 && (
                   <div className="coach-content-suggestions">

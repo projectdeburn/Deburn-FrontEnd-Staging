@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/context/AuthContext';
 import { put, post, uploadFile, del } from '@/utils/api';
+import { userApi } from '@/features/user/userApi';
 
 // LocalStorage key for conversation history (must match Coach.jsx)
 const CONVERSATION_STORAGE_KEY = 'deburn_coach_conversation';
@@ -89,10 +90,10 @@ export default function Profile() {
   const [resetSent, setResetSent] = useState(false);
 
   // Coach voice preferences
-  const [selectedVoice, setSelectedVoice] = useState(() => {
-    return localStorage.getItem('coachVoice') || 'Alice';
-  });
+  const [selectedVoice, setSelectedVoice] = useState('Alice');
   const [isPreviewingVoice, setIsPreviewingVoice] = useState(false);
+  const [isLoadingPreferences, setIsLoadingPreferences] = useState(true);
+  const [isSavingVoice, setIsSavingVoice] = useState(false);
 
   // Form state
   const [firstName, setFirstName] = useState('');
@@ -114,6 +115,28 @@ export default function Profile() {
       setAvatarUrl(user.avatarUrl || '');
     }
   }, [user]);
+
+  // Load voice preferences from backend
+  useEffect(() => {
+    async function loadPreferences() {
+      try {
+        const response = await userApi.getPreferences();
+        if (response.success && response.data?.coachPreferences?.voice) {
+          const voice = response.data.coachPreferences.voice;
+          setSelectedVoice(voice);
+          // Keep localStorage in sync as cache
+          localStorage.setItem('coachVoice', voice);
+        }
+      } catch (err) {
+        // Fallback to localStorage if API fails
+        const cached = localStorage.getItem('coachVoice');
+        if (cached) setSelectedVoice(cached);
+      } finally {
+        setIsLoadingPreferences(false);
+      }
+    }
+    loadPreferences();
+  }, []);
 
   async function handleAvatarUpload(e) {
     const file = e.target.files?.[0];
@@ -215,9 +238,21 @@ export default function Profile() {
     }
   }
 
-  function handleVoiceChange(voice) {
+  async function handleVoiceChange(voice) {
     setSelectedVoice(voice);
-    localStorage.setItem('coachVoice', voice);
+    setIsSavingVoice(true);
+
+    try {
+      await userApi.updatePreferences({ voice });
+      // Keep localStorage in sync as cache
+      localStorage.setItem('coachVoice', voice);
+    } catch (err) {
+      setError(err.message || t('profile:coachPreferences.saveError', 'Failed to save voice preference'));
+      // Still update localStorage as fallback
+      localStorage.setItem('coachVoice', voice);
+    } finally {
+      setIsSavingVoice(false);
+    }
   }
 
   async function handlePreviewVoice() {
@@ -459,6 +494,7 @@ export default function Profile() {
                 className="form-select"
                 value={selectedVoice}
                 onChange={(e) => handleVoiceChange(e.target.value)}
+                disabled={isLoadingPreferences || isSavingVoice}
               >
                 <optgroup label={t('profile:coachPreferences.highPitch', 'High Pitch')}>
                   <option value="Aria">High pitch A</option>
