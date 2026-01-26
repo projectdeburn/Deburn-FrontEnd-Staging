@@ -488,7 +488,7 @@ export default function Coach() {
         <div className="hero-content">
           <h1 className="hero-greeting">{t('coach:hero.title', 'Ask Eve')}</h1>
           <p className="hero-tagline">
-            {t('coach:hero.tagline', 'Your personal leadership companion')}
+            {t('coach:hero.tagline', 'Your leadership coach')}
           </p>
         </div>
       </div>
