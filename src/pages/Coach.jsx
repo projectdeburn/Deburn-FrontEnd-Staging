@@ -12,7 +12,7 @@ import ArticleModal from '@/components/learning/ArticleModal';
 import AudioModal from '@/components/learning/AudioModal';
 
 // LocalStorage key for conversation history
-const CONVERSATION_STORAGE_KEY = 'deburn_coach_conversation';
+const CONVERSATION_STORAGE_KEY = 'hfai_coach_conversation';
 
 // Hero image import
 import heroCoach from '@/assets/images/hero-coach.jpg';

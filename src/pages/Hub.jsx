@@ -1,6 +1,6 @@
 /**
  * Hub Page
- * Global Administration panel for the Deburn platform
+ * Global Administration panel for the Human First AI platform
  * Accessible only to Hub Admins (role-based access control)
  */
 

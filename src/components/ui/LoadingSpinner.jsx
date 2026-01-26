@@ -1,6 +1,6 @@
 /**
  * LoadingSpinner Component
- * Hula-hoop style spinner - exact match to deburnalpha prototype.js
+ * Hula-hoop style spinner
  */
 
 export function LoadingSpinner({ text = 'Loading...' }) {

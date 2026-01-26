@@ -11,7 +11,7 @@ import { put, post, uploadFile, del } from '@/utils/api';
 import { userApi } from '@/features/user/userApi';
 
 // LocalStorage key for conversation history (must match Coach.jsx)
-const CONVERSATION_STORAGE_KEY = 'deburn_coach_conversation';
+const CONVERSATION_STORAGE_KEY = 'hfai_coach_conversation';
 
 // SVG Icons
 const icons = {

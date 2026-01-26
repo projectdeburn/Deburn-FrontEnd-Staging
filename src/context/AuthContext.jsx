@@ -9,7 +9,7 @@ import { setAuthToken, clearAuthToken } from '@/utils/api';
 
 const AuthContext = createContext(null);
 
-const TOKEN_KEY = 'deburn_auth_token';
+const TOKEN_KEY = 'hfai_auth_token';
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);

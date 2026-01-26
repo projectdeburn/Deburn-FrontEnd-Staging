@@ -63,7 +63,7 @@ export default function Login() {
       <div className="auth-container">
         <div className="auth-header">
           <div className="auth-logo">
-            <span className="auth-logo-text">Deburn</span>
+            <span className="auth-logo-text">Human First AI</span>
           </div>
           <h1 className="auth-title">{t('login.title', 'Welcome back')}</h1>
           <p className="auth-subtitle">{t('login.subtitle', 'Sign in to continue your leadership journey')}</p>

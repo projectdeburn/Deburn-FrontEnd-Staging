@@ -11,8 +11,8 @@ const navItems = [
   { key: 'dashboard', path: '/dashboard', icon: 'layout-dashboard', labelKey: 'common:nav.dashboard', label: 'Dashboard' },
   { key: 'checkin', path: '/checkin', icon: 'heart-pulse', labelKey: 'common:nav.checkin', label: 'Check-in' },
   { key: 'coach', path: '/coach', icon: 'message-circle', labelKey: 'common:nav.coach', label: 'Ask Eve' },
-  { key: 'learning', path: '/learning', icon: 'book-open', labelKey: 'common:nav.learning', label: 'Learning' },
-  { key: 'circles', path: '/circles', icon: 'users', labelKey: 'common:nav.circles', label: 'Circles', end: true },
+  { key: 'learning', path: '/learning', icon: 'book-open', labelKey: 'common:nav.learning', label: 'Micro-Courses' },
+  { key: 'circles', path: '/circles', icon: 'users', labelKey: 'common:nav.circles', label: 'Think Tanks', end: true },
   { key: 'feedback', path: '/feedback', icon: 'message-square', labelKey: 'common:nav.feedback', label: 'Feedback' },
 ];
 

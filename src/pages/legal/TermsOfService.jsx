@@ -11,7 +11,7 @@ export default function TermsOfService() {
         {/* Header */}
         <header className="legal-header">
           <Link to="/" className="legal-logo">
-            Deburn
+            Human First AI
           </Link>
           <h1 className="legal-title">Terms of Service</h1>
           <p className="legal-meta">Last updated: January 2025</p>
@@ -22,14 +22,14 @@ export default function TermsOfService() {
           <section className="legal-section">
             <h2>1. Acceptance of Terms</h2>
             <p>
-              By accessing or using Deburn ("Service"), you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use the Service.
+              By accessing or using Human First AI ("Service"), you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use the Service.
             </p>
           </section>
 
           <section className="legal-section">
             <h2>2. Description of Service</h2>
             <p>
-              Deburn is an AI-powered personal development and coaching platform that helps users track their wellbeing, receive personalized coaching, and develop leadership skills. The Service includes:
+              Human First AI is an AI-powered personal development and coaching platform that helps users track their wellbeing, receive personalized coaching, and develop leadership skills. The Service includes:
             </p>
             <ul>
               <li>Daily check-ins and mood tracking</li>
@@ -67,7 +67,7 @@ export default function TermsOfService() {
             <h2>5. Disclaimer</h2>
             <div className="legal-highlight">
               <p>
-                <strong>Important:</strong> Deburn provides AI-powered coaching for personal development purposes only. The Service is not a substitute for professional medical, psychological, or therapeutic advice. If you are experiencing a mental health crisis, please contact a qualified healthcare professional or emergency services.
+                <strong>Important:</strong> Human First AI provides AI-powered coaching for personal development purposes only. The Service is not a substitute for professional medical, psychological, or therapeutic advice. If you are experiencing a mental health crisis, please contact a qualified healthcare professional or emergency services.
               </p>
             </div>
           </section>
@@ -75,7 +75,7 @@ export default function TermsOfService() {
           <section className="legal-section">
             <h2>6. Intellectual Property</h2>
             <p>
-              The Service and its original content, features, and functionality are owned by Deburn and are protected by international copyright, trademark, and other intellectual property laws.
+              The Service and its original content, features, and functionality are owned by Human First AI and are protected by international copyright, trademark, and other intellectual property laws.
             </p>
           </section>
 
@@ -101,7 +101,7 @@ export default function TermsOfService() {
             <line x1="19" y1="12" x2="5" y2="12"></line>
             <polyline points="12 19 5 12 12 5"></polyline>
           </svg>
-          Back to Deburn
+          Back to Human First AI
         </Link>
       </div>
     </div>
