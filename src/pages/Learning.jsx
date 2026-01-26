@@ -73,6 +73,7 @@ export default function Learning() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [modules, setModules] = useState([]);
+  const [activeFilter, setActiveFilter] = useState('all');
 
   // Modal state
   const [selectedModule, setSelectedModule] = useState(null);
@@ -128,8 +129,16 @@ export default function Learning() {
     return <LoadingSpinner text={t('common:loading', 'Loading...')} />;
   }
 
+  // Filter categories for the filter buttons
+  const filterCategories = ['all', 'featured', 'leadership', 'breath', 'meditation'];
+
+  // Filter modules based on active filter
+  const filteredModules = activeFilter === 'all'
+    ? modules
+    : modules.filter(m => m.category === activeFilter);
+
   // Group modules by category
-  const groupedModules = modules.reduce((acc, module) => {
+  const groupedModules = filteredModules.reduce((acc, module) => {
     const category = module.category || 'other';
     if (!acc[category]) acc[category] = [];
     acc[category].push(module);
@@ -157,6 +166,21 @@ export default function Learning() {
             {t('learning:hero.tagline', 'Micro-lessons for busy leaders')}
           </p>
         </div>
+      </div>
+
+      {/* Filter Buttons */}
+      <div className="learning-filters">
+        {filterCategories.map((category) => (
+          <button
+            key={category}
+            className={`filter-btn ${activeFilter === category ? 'active' : ''}`}
+            onClick={() => setActiveFilter(category)}
+          >
+            {category === 'all'
+              ? t('learning:filters.all', 'All')
+              : t(`learning:categories.${category}`, category)}
+          </button>
+        ))}
       </div>
 
       {/* Learning Content Container */}
@@ -224,6 +248,7 @@ function getDisplayType(contentType) {
 
 // Learning Card Component
 function LearningCard({ module, onClick }) {
+  const { t } = useTranslation(['learning', 'common']);
   const displayType = getDisplayType(module.contentType);
   const contentIcon = contentIcons[displayType] || icons.fileText;
   const isDisabled = !module.hasContent;
@@ -236,6 +261,9 @@ function LearningCard({ module, onClick }) {
     displayType === 'article' ? 'learning-card-readable' : '',
   ].filter(Boolean).join(' ');
 
+  // Format duration
+  const duration = module.lengthMinutes;
+
   return (
     <div
       className={cardClasses}
@@ -246,6 +274,11 @@ function LearningCard({ module, onClick }) {
         {contentIcon}
       </div>
       <h3 className="learning-card-title">{getLocalizedField(module, 'title')}</h3>
+      {duration && (
+        <span className="learning-card-duration">
+          {t('common:time.minutes', '{{count}} min', { count: duration })}
+        </span>
+      )}
     </div>
   );
 }

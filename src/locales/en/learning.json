@@ -1,7 +1,10 @@
 {
   "hero": {
-    "title": "Learning",
+    "title": "Micro-Courses",
     "tagline": "Micro-lessons for busy leaders"
+  },
+  "filters": {
+    "all": "All"
   },
   "categories": {
     "featured": "Featured",

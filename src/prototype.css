@@ -2122,6 +2122,38 @@ p {
    Learning Page
    ========================================================================== */
 
+/* Learning Filters */
+.learning-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    padding: var(--space-4) var(--space-6);
+    margin-bottom: var(--space-4);
+}
+
+.filter-btn {
+    padding: var(--space-2) var(--space-4);
+    border: 1px solid var(--neutral-300);
+    border-radius: var(--radius-full);
+    background: var(--color-warm-white);
+    color: var(--neutral-600);
+    font-size: var(--text-body-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--duration-fast) var(--ease-standard);
+}
+
+.filter-btn:hover {
+    border-color: var(--color-deep-forest);
+    color: var(--color-deep-forest);
+}
+
+.filter-btn.active {
+    background: var(--color-deep-forest);
+    border-color: var(--color-deep-forest);
+    color: white;
+}
+
 .learning-section {
     margin-bottom: var(--space-8);
 }
@@ -2194,6 +2226,13 @@ p {
     font-size: var(--text-h4);
     font-weight: 600;
     margin-bottom: var(--space-2);
+}
+
+.learning-card-duration {
+    display: block;
+    font-size: var(--text-caption);
+    color: var(--neutral-500);
+    margin-top: var(--space-2);
 }
 
 .learning-card-description {

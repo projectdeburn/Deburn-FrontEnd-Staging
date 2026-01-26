@@ -1,7 +1,10 @@
 {
   "hero": {
-    "title": "Lärande",
+    "title": "Mikrokurser",
     "tagline": "Mikrolektioner för upptagna ledare"
+  },
+  "filters": {
+    "all": "Alla"
   },
   "categories": {
     "featured": "Utvalda",
