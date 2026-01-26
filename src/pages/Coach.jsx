@@ -7,7 +7,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { coachApi } from '@/features/coach/coachApi';
 import { get, del } from '@/utils/api';
-import { FormattedMessage } from '@/utils/formatCoachResponse.jsx';
+import { FormattedMessage, StreamingMessage } from '@/utils/formatCoachResponse.jsx';
 import ArticleModal from '@/components/learning/ArticleModal';
 import AudioModal from '@/components/learning/AudioModal';
 
@@ -591,7 +591,7 @@ export default function Coach() {
                 <CoachAvatar />
               </div>
               <div className="message-content">
-                <p>{streamingContent}</p>
+                <StreamingMessage content={streamingContent} />
               </div>
             </div>
           )}

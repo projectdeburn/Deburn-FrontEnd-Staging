@@ -72,3 +72,19 @@ export function FormattedMessage({ content }) {
     />
   );
 }
+
+/**
+ * React component for rendering streaming formatted content
+ * Formats progressively without buffering - same approach as Claude/ChatGPT
+ * Incomplete markers briefly show as raw text until closed
+ */
+export function StreamingMessage({ content }) {
+  const formattedHtml = formatCoachResponse(content);
+
+  return (
+    <div
+      className="formatted-message"
+      dangerouslySetInnerHTML={{ __html: formattedHtml }}
+    />
+  );
+}
