@@ -524,11 +524,12 @@ export default function Profile() {
         </section>
 
         {/* Account Actions */}
-        <section className="profile-section profile-account-card">
+        <section className="profile-section">
           <h2 className="profile-section-title">
             {t('profile:account.title', 'Account')}
           </h2>
-          <div className="profile-account-item">
+          <div className="profile-account-card">
+            <div className="profile-account-item">
             <div className="profile-account-info">
               <h4>{t('profile:account.changePassword', 'Change Password')}</h4>
               <p>{t('profile:account.changePasswordHint', 'Update your password to keep your account secure')}</p>
@@ -573,6 +574,7 @@ export default function Profile() {
               {icons.logOut}
               <span>{t('common:logout', 'Sign Out')}</span>
             </button>
+          </div>
           </div>
         </section>
       </div>
