@@ -21,6 +21,7 @@ import enValidation from '@/locales/en/validation.json';
 import enHub from '@/locales/en/hub.json';
 import enFeedback from '@/locales/en/feedback.json';
 import enCirclesAdmin from '@/locales/en/circlesAdmin.json';
+import enAdmin from '@/locales/en/admin.json';
 
 import svCommon from '@/locales/sv/common.json';
 import svAuth from '@/locales/sv/auth.json';
@@ -36,6 +37,7 @@ import svValidation from '@/locales/sv/validation.json';
 import svHub from '@/locales/sv/hub.json';
 import svFeedback from '@/locales/sv/feedback.json';
 import svCirclesAdmin from '@/locales/sv/circlesAdmin.json';
+import svAdmin from '@/locales/sv/admin.json';
 
 const resources = {
   en: {
@@ -53,6 +55,7 @@ const resources = {
     hub: enHub,
     feedback: enFeedback,
     circlesAdmin: enCirclesAdmin,
+    admin: enAdmin,
   },
   sv: {
     common: svCommon,
@@ -69,6 +72,7 @@ const resources = {
     hub: svHub,
     feedback: svFeedback,
     circlesAdmin: svCirclesAdmin,
+    admin: svAdmin,
   },
 };
 
@@ -90,7 +94,7 @@ i18n
     lng: getInitialLanguage(),
     fallbackLng: 'en',
     defaultNS: 'common',
-    ns: ['common', 'auth', 'checkin', 'circles', 'circlesAdmin', 'coach', 'dashboard', 'errors', 'learning', 'profile', 'progress', 'validation', 'hub', 'feedback'],
+    ns: ['common', 'auth', 'checkin', 'circles', 'circlesAdmin', 'coach', 'dashboard', 'errors', 'learning', 'profile', 'progress', 'validation', 'hub', 'feedback', 'admin'],
     interpolation: {
       escapeValue: false, // React already escapes values
     },

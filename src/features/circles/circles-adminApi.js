@@ -97,4 +97,20 @@ export const circlesAdminApi = {
   getPoolGroups(poolId) {
     return get(`${CIRCLES_BASE}/pools/${poolId}/groups`);
   },
+
+  // ============================================================================
+  // DIAGNOSTICS
+  // ============================================================================
+
+  /**
+   * Send a diagnostic test email
+   * @param {Object} params - Email parameters
+   * @param {string} params.to - Recipient email
+   * @param {string} params.subject - Email subject
+   * @param {string} params.message - Email message
+   * @returns {Promise<{success: boolean, data: {message: string}}>}
+   */
+  sendDiagnosticEmail({ to, subject, message }) {
+    return post(`${CIRCLES_BASE}/admin/diagnostic-email`, { to, subject, message });
+  },
 };

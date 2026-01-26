@@ -41,5 +41,19 @@
   },
   "error": {
     "title": "Något gick fel"
+  },
+  "diagnostics": {
+    "title": "E-postdiagnostik",
+    "recipientEmail": "Mottagarens e-post",
+    "recipientPlaceholder": "test@example.com",
+    "subject": "Ämne",
+    "subjectPlaceholder": "Testmeddelandets ämne",
+    "message": "Meddelande",
+    "messagePlaceholder": "Skriv ditt testmeddelande här...",
+    "sendButton": "Skicka testmeddelande",
+    "sending": "Skickar...",
+    "noRecipient": "Ange en mottagares e-postadress",
+    "success": "Testmeddelande skickat!",
+    "error": "Kunde inte skicka testmeddelande"
   }
 }

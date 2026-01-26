@@ -41,5 +41,19 @@
   },
   "error": {
     "title": "Something went wrong"
+  },
+  "diagnostics": {
+    "title": "Email Diagnostics",
+    "recipientEmail": "Recipient Email",
+    "recipientPlaceholder": "test@example.com",
+    "subject": "Subject",
+    "subjectPlaceholder": "Test Email Subject",
+    "message": "Message",
+    "messagePlaceholder": "Enter your test message here...",
+    "sendButton": "Send Test Email",
+    "sending": "Sending...",
+    "noRecipient": "Please enter a recipient email",
+    "success": "Test email sent successfully!",
+    "error": "Failed to send test email"
   }
 }

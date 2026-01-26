@@ -10,7 +10,7 @@ import { circlesAdminApi } from '@/features/circles/circles-adminApi';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 
 // Hero image import
-import heroCircles from '@/assets/images/hero-circles.jpg';
+import heroAdmin from '@/assets/images/hero-admin.jpg';
 
 // SVG Icons
 const icons = {
@@ -56,6 +56,12 @@ const icons = {
       <line x1="12" x2="12.01" y1="16" y2="16"></line>
     </svg>
   ),
+  mail: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect width="20" height="16" x="2" y="4" rx="2"></rect>
+      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+    </svg>
+  ),
 };
 
 /**
@@ -99,6 +105,15 @@ export default function CirclesAdmin() {
   // Group state
   const [groups, setGroups] = useState([]);
   const [isAssigning, setIsAssigning] = useState(false);
+
+  // Email diagnostics state
+  const [diagnosticEmail, setDiagnosticEmail] = useState({
+    to: '',
+    subject: 'Eve Email Diagnostic Test',
+    message: 'This is a diagnostic test email from the Eve admin panel.',
+  });
+  const [isSendingDiagnostic, setIsSendingDiagnostic] = useState(false);
+  const [diagnosticResult, setDiagnosticResult] = useState(null);
 
   // Check admin status on mount
   useEffect(() => {
@@ -240,6 +255,43 @@ export default function CirclesAdmin() {
   }
 
   /**
+   * Send diagnostic email
+   */
+  async function handleSendDiagnosticEmail() {
+    if (!diagnosticEmail.to) {
+      alert(t('circlesAdmin:diagnostics.noRecipient', 'Please enter a recipient email'));
+      return;
+    }
+
+    setIsSendingDiagnostic(true);
+    setDiagnosticResult(null);
+
+    try {
+      const result = await circlesAdminApi.sendDiagnosticEmail(diagnosticEmail);
+
+      if (result.success) {
+        setDiagnosticResult({
+          success: true,
+          message: t('circlesAdmin:diagnostics.success', 'Test email sent successfully!'),
+        });
+      } else {
+        setDiagnosticResult({
+          success: false,
+          message: result.message || t('circlesAdmin:diagnostics.error', 'Failed to send test email'),
+        });
+      }
+    } catch (err) {
+      console.error('Error sending diagnostic email:', err);
+      setDiagnosticResult({
+        success: false,
+        message: err.message || t('circlesAdmin:diagnostics.error', 'Failed to send test email'),
+      });
+    } finally {
+      setIsSendingDiagnostic(false);
+    }
+  }
+
+  /**
    * Assign groups
    */
   async function handleAssignGroups() {
@@ -307,7 +359,7 @@ export default function CirclesAdmin() {
       <div className="hero-section">
         <div className="hero-image-container">
           <img
-            src={heroCircles}
+            src={heroAdmin}
             alt="Admin Panel"
             className="hero-image"
           />
@@ -481,6 +533,89 @@ export default function CirclesAdmin() {
                   </ul>
                 </div>
               ))
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* Email Diagnostics Section */}
+      {currentPool && (
+        <section className="section" id="admin-email-diagnostics-section">
+          <h2 className="section-title">
+            {icons.mail}
+            <span style={{ marginLeft: '8px' }}>
+              {t('circlesAdmin:diagnostics.title', 'Email Diagnostics')}
+            </span>
+          </h2>
+          <div className="admin-invite-form">
+            <div className="form-group">
+              <label className="form-label" htmlFor="diagnostic-email-to">
+                {t('circlesAdmin:diagnostics.recipientEmail', 'Recipient Email')}
+              </label>
+              <input
+                type="email"
+                id="diagnostic-email-to"
+                className="form-input"
+                placeholder={t('circlesAdmin:diagnostics.recipientPlaceholder', 'test@example.com')}
+                value={diagnosticEmail.to}
+                onChange={(e) => setDiagnosticEmail(prev => ({ ...prev, to: e.target.value }))}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label" htmlFor="diagnostic-email-subject">
+                {t('circlesAdmin:diagnostics.subject', 'Subject')}
+              </label>
+              <input
+                type="text"
+                id="diagnostic-email-subject"
+                className="form-input"
+                placeholder={t('circlesAdmin:diagnostics.subjectPlaceholder', 'Test Email Subject')}
+                value={diagnosticEmail.subject}
+                onChange={(e) => setDiagnosticEmail(prev => ({ ...prev, subject: e.target.value }))}
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label" htmlFor="diagnostic-email-message">
+                {t('circlesAdmin:diagnostics.message', 'Message')}
+              </label>
+              <textarea
+                id="diagnostic-email-message"
+                className="form-textarea"
+                rows="4"
+                placeholder={t('circlesAdmin:diagnostics.messagePlaceholder', 'Enter your test message here...')}
+                value={diagnosticEmail.message}
+                onChange={(e) => setDiagnosticEmail(prev => ({ ...prev, message: e.target.value }))}
+              />
+            </div>
+            <div className="admin-invite-actions">
+              <button
+                className="btn btn-primary"
+                onClick={handleSendDiagnosticEmail}
+                disabled={isSendingDiagnostic || !diagnosticEmail.to}
+              >
+                {icons.send}
+                <span style={{ marginLeft: '8px' }}>
+                  {isSendingDiagnostic
+                    ? t('circlesAdmin:diagnostics.sending', 'Sending...')
+                    : t('circlesAdmin:diagnostics.sendButton', 'Send Test Email')
+                  }
+                </span>
+              </button>
+            </div>
+            {diagnosticResult && (
+              <div
+                className={`admin-diagnostic-result ${diagnosticResult.success ? 'success' : 'error'}`}
+                style={{
+                  marginTop: '16px',
+                  padding: '12px 16px',
+                  borderRadius: '8px',
+                  backgroundColor: diagnosticResult.success ? 'rgba(90, 154, 130, 0.1)' : 'rgba(194, 112, 102, 0.1)',
+                  color: diagnosticResult.success ? 'var(--color-success)' : 'var(--color-alert)',
+                }}
+              >
+                {diagnosticResult.message}
+              </div>
             )}
           </div>
         </section>

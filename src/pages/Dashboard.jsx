@@ -342,7 +342,7 @@ export default function Dashboard() {
                   points={getTrendPoints(trends?.moodValues)}
                   fill="none"
                   stroke="var(--color-sage)"
-                  strokeWidth="2"
+                  strokeWidth="1.5"
                 />
               </svg>
             </div>
@@ -376,7 +376,7 @@ export default function Dashboard() {
                   points={getTrendPoints(trends?.energyValues)}
                   fill="none"
                   stroke="var(--color-sage)"
-                  strokeWidth="2"
+                  strokeWidth="1.5"
                 />
               </svg>
             </div>
@@ -410,7 +410,7 @@ export default function Dashboard() {
                   points={getTrendPoints(trends?.stressValues)}
                   fill="none"
                   stroke="var(--color-success)"
-                  strokeWidth="2"
+                  strokeWidth="1.5"
                 />
               </svg>
             </div>

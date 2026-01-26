@@ -60,6 +60,19 @@ const icons = {
       <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
     </svg>
   ),
+  playCircle: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"></circle>
+      <polygon points="10 8 16 12 10 16 10 8"></polygon>
+    </svg>
+  ),
+  externalLink: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+      <polyline points="15 3 21 3 21 9"></polyline>
+      <line x1="10" x2="21" y1="14" y2="3"></line>
+    </svg>
+  ),
 };
 
 export default function Profile() {
@@ -74,6 +87,12 @@ export default function Profile() {
   const [historyCleared, setHistoryCleared] = useState(false);
   const [isSendingReset, setIsSendingReset] = useState(false);
   const [resetSent, setResetSent] = useState(false);
+
+  // Coach voice preferences
+  const [selectedVoice, setSelectedVoice] = useState(() => {
+    return localStorage.getItem('coachVoice') || 'Alice';
+  });
+  const [isPreviewingVoice, setIsPreviewingVoice] = useState(false);
 
   // Form state
   const [firstName, setFirstName] = useState('');
@@ -100,8 +119,8 @@ export default function Profile() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 1024 * 1024) {
-      setError(t('profile:avatar.error.tooLarge', 'File too large. Max size is 1MB.'));
+    if (file.size > 5 * 1024 * 1024) {
+      setError(t('profile:avatar.error.tooLarge', 'File too large. Max size is 5MB.'));
       return;
     }
 
@@ -193,6 +212,28 @@ export default function Profile() {
       setError(err.message || t('profile:conversation.clearError', 'Failed to clear conversation history'));
     } finally {
       setIsClearingHistory(false);
+    }
+  }
+
+  function handleVoiceChange(voice) {
+    setSelectedVoice(voice);
+    localStorage.setItem('coachVoice', voice);
+  }
+
+  async function handlePreviewVoice() {
+    if (isPreviewingVoice) return;
+
+    setIsPreviewingVoice(true);
+    try {
+      // Use the Web Speech API for preview
+      const utterance = new SpeechSynthesisUtterance(
+        t('profile:coachPreferences.previewText', 'Hello, I am Eve, your leadership coach. How can I help you today?')
+      );
+      utterance.onend = () => setIsPreviewingVoice(false);
+      utterance.onerror = () => setIsPreviewingVoice(false);
+      speechSynthesis.speak(utterance);
+    } catch {
+      setIsPreviewingVoice(false);
     }
   }
 
@@ -400,6 +441,85 @@ export default function Profile() {
                 Svenska
               </button>
             </div>
+          </div>
+        </section>
+
+        {/* Coach Preferences */}
+        <section className="profile-section">
+          <h2 className="profile-section-title">
+            {t('profile:coachPreferences.title', 'Coach Preferences')}
+          </h2>
+          <div className="profile-account-card">
+            <div className="profile-account-item">
+              <div className="profile-account-info">
+                <h4>{t('profile:coachPreferences.voice', 'Voice')}</h4>
+                <p>{t('profile:coachPreferences.voiceDescription', 'Choose the voice Eve uses when reading messages aloud')}</p>
+              </div>
+              <select
+                className="form-select"
+                value={selectedVoice}
+                onChange={(e) => handleVoiceChange(e.target.value)}
+              >
+                <optgroup label={t('profile:coachPreferences.highPitch', 'High Pitch')}>
+                  <option value="Aria">High pitch A</option>
+                  <option value="Sarah">High pitch B</option>
+                  <option value="Laura">High pitch C</option>
+                  <option value="Alice">High pitch D (Default)</option>
+                  <option value="Matilda">High pitch E</option>
+                  <option value="Jessica">High pitch F</option>
+                  <option value="Lily">High pitch G</option>
+                </optgroup>
+                <optgroup label={t('profile:coachPreferences.lowPitch', 'Low Pitch')}>
+                  <option value="Roger">Low pitch A</option>
+                  <option value="Charlie">Low pitch B</option>
+                  <option value="George">Low pitch C</option>
+                  <option value="Callum">Low pitch D</option>
+                  <option value="Liam">Low pitch E</option>
+                  <option value="Daniel">Low pitch F</option>
+                </optgroup>
+              </select>
+            </div>
+            <div className="profile-account-item">
+              <div className="profile-account-info">
+                <h4>{t('profile:coachPreferences.previewVoice', 'Preview Voice')}</h4>
+                <p>{t('profile:coachPreferences.previewDescription', 'Listen to a sample of the selected voice')}</p>
+              </div>
+              <button
+                className="btn btn-secondary"
+                onClick={handlePreviewVoice}
+                disabled={isPreviewingVoice}
+              >
+                {icons.playCircle}
+                <span>{isPreviewingVoice ? t('common:playing', 'Playing...') : t('profile:coachPreferences.preview', 'Preview')}</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {/* Legal */}
+        <section className="profile-section">
+          <h2 className="profile-section-title">
+            {t('profile:legal.title', 'Legal')}
+          </h2>
+          <div className="profile-legal-links">
+            <a
+              href="/legal/privacy-policy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="profile-legal-link"
+            >
+              <span>{t('profile:legal.privacy', 'Privacy Policy')}</span>
+              {icons.externalLink}
+            </a>
+            <a
+              href="/legal/terms-of-service"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="profile-legal-link"
+            >
+              <span>{t('profile:legal.terms', 'Terms of Service')}</span>
+              {icons.externalLink}
+            </a>
           </div>
         </section>
 

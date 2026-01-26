@@ -3,7 +3,7 @@
   "picture": {
     "title": "Profilbild",
     "hint": "Ladda upp en profilbild för att personalisera ditt konto.",
-    "limits": "Max filstorlek: 1 MB. Format: JPG, PNG",
+    "limits": "Max filstorlek: 5 MB. Format: JPG, PNG",
     "upload": "Ladda upp foto",
     "remove": "Ta bort"
   },
@@ -26,6 +26,22 @@
   "language": {
     "label": "Språk",
     "helper": "Detta påverkar appens gränssnitt och Eves svar"
+  },
+  "coachPreferences": {
+    "title": "Coachinställningar",
+    "voice": "Röst",
+    "voiceDescription": "Välj vilken röst Eve använder när meddelanden läses upp",
+    "previewVoice": "Förhandsgranska röst",
+    "previewDescription": "Lyssna på ett exempel av den valda rösten",
+    "preview": "Förhandsgranska",
+    "previewText": "Hej, jag är Eve, din ledarskapscoach. Hur kan jag hjälpa dig idag?",
+    "highPitch": "Hög tonhöjd",
+    "lowPitch": "Låg tonhöjd"
+  },
+  "legal": {
+    "title": "Juridiskt",
+    "privacy": "Integritetspolicy",
+    "terms": "Användarvillkor"
   },
   "account": {
     "title": "Konto",
