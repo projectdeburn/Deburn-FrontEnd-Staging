@@ -37,7 +37,18 @@
     "assignButton": "Assign Groups ({{count}} accepted)",
     "confirmAssign": "Assign members to groups? This cannot be undone.",
     "assignSuccess": "Groups assigned successfully",
-    "memberCount": "{{count}} members"
+    "memberCount": "{{count}} members",
+    "moveTo": "Move to...",
+    "moveTitle": "Move Member",
+    "moveConfirm": "Move {{name}} from {{from}} to {{to}}?",
+    "moving": "Moving...",
+    "confirmMove": "Confirm Move",
+    "deleteGroup": "Delete Group",
+    "deleteTitle": "Delete Group",
+    "deleteConfirm": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone.",
+    "deleteWarning": "This group has {{count}} member(s) who will be removed from the group.",
+    "deleting": "Deleting...",
+    "confirmDelete": "Delete Group"
   },
   "error": {
     "title": "Something went wrong"

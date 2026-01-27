@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { circlesAdminApi } from '@/features/circles/circles-adminApi';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { Modal, ModalFooter } from '@/components/ui/Modal';
 
 // Hero image import
 import heroAdmin from '@/assets/images/hero-admin.jpg';
@@ -20,6 +21,12 @@ const icons = {
       <circle cx="9" cy="7" r="4"></circle>
       <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
       <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+    </svg>
+  ),
+  move: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="15 10 20 15 15 20"></polyline>
+      <path d="M4 4v7a4 4 0 0 0 4 4h12"></path>
     </svg>
   ),
   send: (
@@ -114,6 +121,22 @@ export default function CirclesAdmin() {
   });
   const [isSendingDiagnostic, setIsSendingDiagnostic] = useState(false);
   const [diagnosticResult, setDiagnosticResult] = useState(null);
+
+  // Move member state
+  const [moveModal, setMoveModal] = useState({
+    isOpen: false,
+    member: null,
+    fromGroup: null,
+    toGroupId: '',
+  });
+  const [isMoving, setIsMoving] = useState(false);
+
+  // Delete group state
+  const [deleteModal, setDeleteModal] = useState({
+    isOpen: false,
+    group: null,
+  });
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Check admin status on mount
   useEffect(() => {
@@ -288,6 +311,131 @@ export default function CirclesAdmin() {
       });
     } finally {
       setIsSendingDiagnostic(false);
+    }
+  }
+
+  /**
+   * Open move member modal
+   */
+  function handleOpenMoveModal(member, fromGroup, toGroupId) {
+    const targetGroup = groups.find(g => g.id === toGroupId);
+    if (targetGroup) {
+      setMoveModal({
+        isOpen: true,
+        member,
+        fromGroup,
+        toGroupId,
+      });
+    }
+  }
+
+  /**
+   * Close move member modal
+   */
+  function handleCloseMoveModal() {
+    setMoveModal({
+      isOpen: false,
+      member: null,
+      fromGroup: null,
+      toGroupId: '',
+    });
+  }
+
+  /**
+   * Execute move member
+   */
+  async function handleMoveMember() {
+    if (!currentPool || !moveModal.member || !moveModal.fromGroup || !moveModal.toGroupId) {
+      return;
+    }
+
+    setIsMoving(true);
+
+    try {
+      const result = await circlesAdminApi.moveMember(
+        currentPool.id,
+        moveModal.fromGroup.id,
+        moveModal.member.id,
+        moveModal.toGroupId
+      );
+
+      if (result.success) {
+        // Reload groups to reflect the change
+        await loadPoolData(currentPool.id);
+        handleCloseMoveModal();
+      }
+    } catch (err) {
+      console.error('Error moving member:', err);
+      alert(err.message || 'Failed to move member');
+    } finally {
+      setIsMoving(false);
+    }
+  }
+
+  /**
+   * Get available groups for moving (exclude current group, check capacity)
+   */
+  function getAvailableTargetGroups(currentGroupId) {
+    const maxSize = currentPool?.targetGroupSize || 6;
+    return groups.filter(g =>
+      g.id !== currentGroupId &&
+      (g.members?.length || 0) < maxSize
+    );
+  }
+
+  /**
+   * Check if source group can lose a member (must keep at least 3)
+   */
+  function canMoveFromGroup(group) {
+    return (group.members?.length || 0) > 3;
+  }
+
+  /**
+   * Open delete group modal
+   */
+  function handleOpenDeleteModal(group) {
+    setDeleteModal({
+      isOpen: true,
+      group,
+    });
+  }
+
+  /**
+   * Close delete group modal
+   */
+  function handleCloseDeleteModal() {
+    setDeleteModal({
+      isOpen: false,
+      group: null,
+    });
+  }
+
+  /**
+   * Execute delete group
+   */
+  async function handleDeleteGroup() {
+    if (!currentPool || !deleteModal.group) {
+      return;
+    }
+
+    setIsDeleting(true);
+
+    try {
+      const result = await circlesAdminApi.deleteGroup(
+        currentPool.id,
+        deleteModal.group.id
+      );
+
+      if (result.success) {
+        // Reload groups to reflect the change
+        await loadPoolData(currentPool.id);
+        handleCloseDeleteModal();
+      }
+    } catch (err) {
+      console.error('Error deleting group:', err);
+      alert(err.message || 'Failed to delete group');
+    } finally {
+      setIsDeleting(false);
     }
   }
 
@@ -510,29 +658,63 @@ export default function CirclesAdmin() {
                 <p>{t('circlesAdmin:groups.empty', 'No groups assigned yet')}</p>
               </div>
             ) : (
-              groups.map((group) => (
-                <div key={group.id} className="admin-group-card">
-                  <div className="admin-group-header">
-                    <h4>{group.name}</h4>
-                    <span className="admin-group-count">
-                      {t('circlesAdmin:groups.memberCount', '{{count}} members', { count: group.members?.length || 0 })}
-                    </span>
-                  </div>
-                  <ul className="admin-group-members">
-                    {(group.members || []).map((member, idx) => (
-                      <li key={member.id || idx}>
-                        {icons.user}
-                        <span style={{ marginLeft: '8px' }}>
-                          {member.firstName
-                            ? `${member.firstName} ${member.lastName || ''}`
-                            : member.email
-                          }
+              groups.map((group) => {
+                const availableTargets = getAvailableTargetGroups(group.id);
+                const canMove = canMoveFromGroup(group);
+
+                return (
+                  <div key={group.id} className="admin-group-card">
+                    <div className="admin-group-header">
+                      <div className="admin-group-title-row">
+                        <h4>{group.name}</h4>
+                        <span className="admin-group-count">
+                          {t('circlesAdmin:groups.memberCount', '{{count}} members', { count: group.members?.length || 0 })}
                         </span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))
+                      </div>
+                      <button
+                        className="btn btn-sm btn-danger"
+                        onClick={() => handleOpenDeleteModal(group)}
+                        title={t('circlesAdmin:groups.deleteGroup', 'Delete Group')}
+                      >
+                        {icons.trash}
+                      </button>
+                    </div>
+                    <ul className="admin-group-members">
+                      {(group.members || []).map((member, idx) => (
+                        <li key={member.id || idx} className="admin-group-member-row">
+                          <div className="admin-member-info">
+                            {icons.user}
+                            <span style={{ marginLeft: '8px' }}>
+                              {member.name || member.email || 'Member'}
+                            </span>
+                          </div>
+                          {canMove && availableTargets.length > 0 && (
+                            <div className="admin-move-select-wrapper">
+                              <select
+                                className="admin-move-select"
+                                value=""
+                                onChange={(e) => {
+                                  if (e.target.value) {
+                                    handleOpenMoveModal(member, group, e.target.value);
+                                  }
+                                }}
+                              >
+                                <option value="">{t('circlesAdmin:groups.moveTo', 'Move to...')}</option>
+                                {availableTargets.map(target => (
+                                  <option key={target.id} value={target.id}>
+                                    {target.name} ({target.members?.length || 0})
+                                  </option>
+                                ))}
+                              </select>
+                              <span className="admin-move-icon">{icons.move}</span>
+                            </div>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                );
+              })
             )}
           </div>
         </section>
@@ -620,6 +802,81 @@ export default function CirclesAdmin() {
           </div>
         </section>
       )}
+
+      {/* Move Member Confirmation Modal */}
+      <Modal
+        isOpen={moveModal.isOpen}
+        onClose={handleCloseMoveModal}
+        title={t('circlesAdmin:groups.moveTitle', 'Move Member')}
+        size="sm"
+      >
+        <p style={{ color: 'var(--neutral-600)', margin: 0 }}>
+          {t('circlesAdmin:groups.moveConfirm', 'Move {{name}} from {{from}} to {{to}}?', {
+            name: moveModal.member?.name || 'Member',
+            from: moveModal.fromGroup?.name || '',
+            to: groups.find(g => g.id === moveModal.toGroupId)?.name || '',
+          })}
+        </p>
+        <ModalFooter>
+          <button
+            className="btn btn-ghost"
+            onClick={handleCloseMoveModal}
+            disabled={isMoving}
+          >
+            {t('common:cancel', 'Cancel')}
+          </button>
+          <button
+            className="btn btn-primary"
+            onClick={handleMoveMember}
+            disabled={isMoving}
+          >
+            {isMoving
+              ? t('circlesAdmin:groups.moving', 'Moving...')
+              : t('circlesAdmin:groups.confirmMove', 'Confirm Move')
+            }
+          </button>
+        </ModalFooter>
+      </Modal>
+
+      {/* Delete Group Confirmation Modal */}
+      <Modal
+        isOpen={deleteModal.isOpen}
+        onClose={handleCloseDeleteModal}
+        title={t('circlesAdmin:groups.deleteTitle', 'Delete Group')}
+        size="sm"
+      >
+        <p style={{ color: 'var(--neutral-600)', margin: 0 }}>
+          {t('circlesAdmin:groups.deleteConfirm', 'Are you sure you want to delete "{{name}}"? This action cannot be undone.', {
+            name: deleteModal.group?.name || 'Group',
+          })}
+        </p>
+        {(deleteModal.group?.members?.length || 0) > 0 && (
+          <div className="modal-warning" style={{ marginTop: 'var(--space-3)' }}>
+            {t('circlesAdmin:groups.deleteWarning', 'This group has {{count}} member(s) who will be removed from the group.', {
+              count: deleteModal.group?.members?.length || 0,
+            })}
+          </div>
+        )}
+        <ModalFooter>
+          <button
+            className="btn btn-ghost"
+            onClick={handleCloseDeleteModal}
+            disabled={isDeleting}
+          >
+            {t('common:cancel', 'Cancel')}
+          </button>
+          <button
+            className="btn btn-danger"
+            onClick={handleDeleteGroup}
+            disabled={isDeleting}
+          >
+            {isDeleting
+              ? t('circlesAdmin:groups.deleting', 'Deleting...')
+              : t('circlesAdmin:groups.confirmDelete', 'Delete Group')
+            }
+          </button>
+        </ModalFooter>
+      </Modal>
     </>
   );
 }

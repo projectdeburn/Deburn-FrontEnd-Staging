@@ -7,6 +7,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/context/AuthContext';
+import { NotificationDropdown } from '@/components/notifications/NotificationDropdown';
 
 export function Header({ onMenuClick }) {
   const { t, i18n } = useTranslation();
@@ -55,12 +56,7 @@ export function Header({ onMenuClick }) {
       </div>
 
       <div className="header-right">
-        <button className="icon-btn">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-          </svg>
-        </button>
+        <NotificationDropdown />
 
         <div
           ref={menuRef}

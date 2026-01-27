@@ -37,7 +37,18 @@
     "assignButton": "Tilldela grupper ({{count}} accepterade)",
     "confirmAssign": "Tilldela medlemmar till grupper? Detta kan inte ångras.",
     "assignSuccess": "Grupper tilldelade framgångsrikt",
-    "memberCount": "{{count}} medlemmar"
+    "memberCount": "{{count}} medlemmar",
+    "moveTo": "Flytta till...",
+    "moveTitle": "Flytta medlem",
+    "moveConfirm": "Flytta {{name}} från {{from}} till {{to}}?",
+    "moving": "Flyttar...",
+    "confirmMove": "Bekräfta flytt",
+    "deleteGroup": "Ta bort grupp",
+    "deleteTitle": "Ta bort grupp",
+    "deleteConfirm": "Är du säker på att du vill ta bort \"{{name}}\"? Detta kan inte ångras.",
+    "deleteWarning": "Denna grupp har {{count}} medlem(mar) som kommer att tas bort från gruppen.",
+    "deleting": "Tar bort...",
+    "confirmDelete": "Ta bort grupp"
   },
   "error": {
     "title": "Något gick fel"

@@ -98,6 +98,31 @@ export const circlesAdminApi = {
     return get(`${CIRCLES_BASE}/pools/${poolId}/groups`);
   },
 
+  /**
+   * Move a member from one group to another
+   * @param {string} poolId - Pool ID
+   * @param {string} fromGroupId - Source group ID
+   * @param {string} memberId - User ID of member to move
+   * @param {string} toGroupId - Target group ID
+   * @returns {Promise<{success: boolean, data: {fromGroup, toGroup, movedMember}}>}
+   */
+  moveMember(poolId, fromGroupId, memberId, toGroupId) {
+    return post(`${CIRCLES_BASE}/pools/${poolId}/groups/${fromGroupId}/move-member`, {
+      memberId,
+      toGroupId,
+    });
+  },
+
+  /**
+   * Delete a circle group
+   * @param {string} poolId - Pool ID
+   * @param {string} groupId - Group ID to delete
+   * @returns {Promise<{success: boolean, data: {message: string, deletedGroup: Object}}>}
+   */
+  deleteGroup(poolId, groupId) {
+    return post(`${CIRCLES_BASE}/pools/${poolId}/groups/${groupId}/delete`, {});
+  },
+
   // ============================================================================
   // DIAGNOSTICS
   // ============================================================================

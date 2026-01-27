@@ -62,6 +62,12 @@
     "english": "English",
     "swedish": "Svenska"
   },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No notifications yet",
+    "markAllRead": "Mark all read",
+    "loadMore": "Load more"
+  },
   "loading": "Loading...",
   "saving": "Saving...",
   "adding": "Adding...",

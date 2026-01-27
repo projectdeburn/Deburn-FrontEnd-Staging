@@ -12,6 +12,9 @@
     "modalTitle": "Set Your Availability",
     "modalDescription": "Select the times you are typically available for circle meetings. Your availability helps find meeting times that work for everyone.",
     "slotsSelected": "{{count}} slots selected",
+    "selectDay": "Day:",
+    "daySlots": "{{count}} selected",
+    "clearDay": "Clear Day",
     "clearAll": "Clear All",
     "saveButton": "Save Availability",
     "days": {
@@ -21,7 +24,14 @@
       "thu": "Thu",
       "fri": "Fri",
       "sat": "Sat",
-      "sun": "Sun"
+      "sun": "Sun",
+      "sunday": "Sunday",
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday"
     }
   },
   "invitations": {

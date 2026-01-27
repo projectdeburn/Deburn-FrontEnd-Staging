@@ -295,6 +295,77 @@ Lists groups for a pool (admin only).
 
 ---
 
+## POST /api/circles/pools/:poolId/groups/:groupId/move-member
+
+Moves a member from one group to another (admin only).
+
+**Request Body:**
+```json
+{
+  "memberId": "user_123",
+  "toGroupId": "grp_456"
+}
+```
+
+**Frontend Usage:**
+```javascript
+// src/features/circles/circles-adminApi.js
+circlesAdminApi.moveMember(poolId, fromGroupId, memberId, toGroupId)
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "message": "Member moved successfully",
+    "fromGroup": {
+      "id": "grp_123",
+      "name": "Circle A",
+      "memberCount": 4
+    },
+    "toGroup": {
+      "id": "grp_456",
+      "name": "Circle B",
+      "memberCount": 5
+    },
+    "movedMember": {
+      "id": "user_123",
+      "name": "John Doe"
+    }
+  }
+}
+```
+
+---
+
+## POST /api/circles/pools/:poolId/groups/:groupId/delete
+
+Deletes a circle group (admin only).
+
+**Frontend Usage:**
+```javascript
+// src/features/circles/circles-adminApi.js
+circlesAdminApi.deleteGroup(poolId, groupId)
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "message": "Group deleted successfully",
+    "deletedGroup": {
+      "id": "grp_123",
+      "name": "Circle A",
+      "memberCount": 4
+    }
+  }
+}
+```
+
+---
+
 ## Error Responses
 
 ```json
@@ -324,17 +395,19 @@ Lists groups for a pool (admin only).
 
 All endpoints have been implemented and tested.
 
-| Endpoint | Status | File | Line |
-|----------|--------|------|------|
-| `GET /api/auth/admin-status` | ✅ Complete | `app_v2/routers/auth.py` | 283-330 |
-| `POST /api/circles/pools` | ✅ Complete | `app_v2/routers/circles.py` | 319-371 |
-| `GET /api/circles/pools` | ✅ Complete | `app_v2/routers/circles.py` | 374-397 |
-| `GET /api/circles/pools/:id` | ✅ Complete | `app_v2/routers/circles.py` | 400-427 |
-| `POST /api/circles/pools/:id/invitations` | ✅ Complete | `app_v2/routers/circles.py` | 430-457 |
-| `GET /api/circles/pools/:id/invitations` | ✅ Complete | `app_v2/routers/circles.py` | 460-495 |
-| `DELETE /api/circles/invitations/:id` | ✅ Complete | `app_v2/routers/circles.py` | 498-529 |
-| `POST /api/circles/pools/:id/assign` | ✅ Complete | `app_v2/routers/circles.py` | 532-582 |
-| `GET /api/circles/pools/:id/groups` | ✅ Complete | `app_v2/routers/circles.py` | 585-635 |
+| Endpoint | Status | Frontend File |
+|----------|--------|---------------|
+| `GET /api/auth/admin-status` | ✅ Complete | `src/features/circles/circles-adminApi.js` |
+| `POST /api/circles/pools` | ✅ Complete | `src/features/circles/circles-adminApi.js` |
+| `GET /api/circles/pools` | ✅ Complete | `src/features/circles/circles-adminApi.js` |
+| `GET /api/circles/pools/:id` | ✅ Complete | `src/features/circles/circles-adminApi.js` |
+| `POST /api/circles/pools/:id/invitations` | ✅ Complete | `src/features/circles/circles-adminApi.js` |
+| `GET /api/circles/pools/:id/invitations` | ✅ Complete | `src/features/circles/circles-adminApi.js` |
+| `DELETE /api/circles/invitations/:id` | ✅ Complete | `src/features/circles/circles-adminApi.js` |
+| `POST /api/circles/pools/:id/assign` | ✅ Complete | `src/features/circles/circles-adminApi.js` |
+| `GET /api/circles/pools/:id/groups` | ✅ Complete | `src/features/circles/circles-adminApi.js` |
+| `POST /api/circles/pools/:id/groups/:groupId/move-member` | ✅ Complete | `src/features/circles/circles-adminApi.js` |
+| `POST /api/circles/pools/:id/groups/:groupId/delete` | ✅ Complete | `src/features/circles/circles-adminApi.js` |
 
 ### Key Implementation Notes
 
@@ -346,32 +419,47 @@ All endpoints have been implemented and tested.
 
 4. **Admin Authorization**: Each endpoint verifies the user is an organization admin via the `organizationmembers` collection.
 
-### Services Used
+### Frontend Files
 
-| Service | File | Key Methods |
-|---------|------|-------------|
-| `PoolService` | `app_v2/services/circles/pool_service.py` | `create_pool()`, `get_pools_for_organization()`, `get_pool()` |
-| `InvitationService` | `app_v2/services/circles/invitation_service.py` | `send_invitations()`, `get_invitations_for_pool()`, `cancel_invitation()` |
-| `GroupService` | `app_v2/services/circles/group_service.py` | `assign_groups()`, `get_groups_for_pool()` |
+| File | Description |
+|------|-------------|
+| `src/features/circles/circles-adminApi.js` | API client for all admin endpoints |
+| `src/pages/CirclesAdmin.jsx` | Admin page component with pool, invitation, and group management |
+| `src/components/ui/Modal.jsx` | Reusable modal component used for move/delete confirmations |
 
-### Schemas
+### API Methods
 
-```python
-# app_v2/schemas/circles.py
+```javascript
+// src/features/circles/circles-adminApi.js
 
-class InviteeItem(BaseModel):
-    email: str
-    firstName: Optional[str] = None
-    lastName: Optional[str] = None
-
-class SendInvitationsRequest(BaseModel):
-    invitees: List[InviteeItem]
-
-class CreatePoolRequest(BaseModel):
-    name: str
-    organizationId: str
-    topic: Optional[str] = None
-    description: Optional[str] = None
-    targetGroupSize: int = Field(default=4, ge=3, le=6)
-    cadence: str = Field(default="biweekly", pattern="^(weekly|biweekly)$")
+circlesAdminApi.getAdminStatus()
+circlesAdminApi.getPools(status?)
+circlesAdminApi.getPool(poolId)
+circlesAdminApi.sendInvitations(poolId, invitees)
+circlesAdminApi.getPoolInvitations(poolId)
+circlesAdminApi.cancelInvitation(invitationId)
+circlesAdminApi.assignGroups(poolId)
+circlesAdminApi.getPoolGroups(poolId)
+circlesAdminApi.moveMember(poolId, fromGroupId, memberId, toGroupId)
+circlesAdminApi.deleteGroup(poolId, groupId)
 ```
+
+### Translations
+
+| Namespace | Key | Description |
+|-----------|-----|-------------|
+| `circlesAdmin` | `groups.moveTo` | "Move to..." dropdown label |
+| `circlesAdmin` | `groups.moveTitle` | Move member modal title |
+| `circlesAdmin` | `groups.moveConfirm` | Move confirmation message |
+| `circlesAdmin` | `groups.deleteGroup` | Delete button tooltip |
+| `circlesAdmin` | `groups.deleteTitle` | Delete modal title |
+| `circlesAdmin` | `groups.deleteConfirm` | Delete confirmation message |
+| `circlesAdmin` | `groups.deleteWarning` | Warning about members in group |
+
+---
+
+## Added: 2026-01-27
+
+- Added move member functionality with dropdown per member and confirmation modal
+- Added delete group functionality with trash icon and confirmation modal
+- Uses reusable `Modal` component from `@/components/ui/Modal`

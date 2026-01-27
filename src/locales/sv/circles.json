@@ -12,6 +12,9 @@
     "modalTitle": "Ange din tillgänglighet",
     "modalDescription": "Välj de tider du vanligtvis är tillgänglig för cirkelmöten. Din tillgänglighet hjälper till att hitta mötestider som fungerar för alla.",
     "slotsSelected": "{{count}} tider valda",
+    "selectDay": "Dag:",
+    "daySlots": "{{count}} valda",
+    "clearDay": "Rensa dag",
     "clearAll": "Rensa alla",
     "saveButton": "Spara tillgänglighet",
     "days": {
@@ -21,7 +24,14 @@
       "thu": "Tor",
       "fri": "Fre",
       "sat": "Lör",
-      "sun": "Sön"
+      "sun": "Sön",
+      "sunday": "Söndag",
+      "monday": "Måndag",
+      "tuesday": "Tisdag",
+      "wednesday": "Onsdag",
+      "thursday": "Torsdag",
+      "friday": "Fredag",
+      "saturday": "Lördag"
     }
   },
   "invitations": {
