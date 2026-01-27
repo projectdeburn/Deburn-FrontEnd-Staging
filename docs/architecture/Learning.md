@@ -1,5 +1,7 @@
 # Learning
 
+> **Rebranding Note (January 2026):** "Learnings" has been rebranded to **"Micro-Courses"** in the user-facing application. The codebase retains the original "learning" terminology for backward compatibility.
+
 ## Functions
 
 ### loadLearningContent

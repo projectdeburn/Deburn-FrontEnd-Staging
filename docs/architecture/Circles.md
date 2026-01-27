@@ -1,5 +1,7 @@
 # Circles
 
+> **Rebranding Note (January 2026):** "Circles" has been rebranded to **"Think Tanks"** in the user-facing application. The codebase retains the original "circles" terminology for backward compatibility.
+
 ## Functions
 
 ### loadCirclesData
