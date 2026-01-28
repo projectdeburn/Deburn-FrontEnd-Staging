@@ -6,9 +6,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import i18n from '@/utils/i18n';
 import { useAuth } from '@/context/AuthContext';
 import { get } from '@/utils/api';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+
+// Modal components for Today's Focus
+import ArticleModal from '@/components/learning/ArticleModal';
+import AudioModal from '@/components/learning/AudioModal';
 
 // Hero image import
 import heroImage from '@/assets/images/hero-nordic-calm.jpg';
@@ -70,6 +75,11 @@ const icons = {
       <line x1="5" y1="12" x2="19" y2="12"></line>
     </svg>
   ),
+  spinner: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="spinner-icon">
+      <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
+    </svg>
+  ),
 };
 
 export default function Dashboard() {
@@ -80,6 +90,12 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState(null);
   const [trends, setTrends] = useState(null);
+
+  // Modal state for Today's Focus
+  const [selectedModule, setSelectedModule] = useState(null);
+  const [showArticleModal, setShowArticleModal] = useState(false);
+  const [showAudioModal, setShowAudioModal] = useState(false);
+  const [isLoadingModule, setIsLoadingModule] = useState(false);
 
   useEffect(() => {
     loadDashboardData();
@@ -206,6 +222,66 @@ export default function Dashboard() {
   const streak = dashboardData?.streak || 0;
   const insightsCount = dashboardData?.insightsCount || 0;
 
+  // Get localized title for today's focus
+  function getTodaysFocusTitle() {
+    const focus = dashboardData?.todaysFocus;
+    if (!focus?.module) return null;
+
+    const lang = i18n.language === 'sv' ? 'Sv' : 'En';
+    return focus.module[`title${lang}`] || focus.module.titleEn;
+  }
+
+  // Open Today's Focus module
+  async function openTodaysFocus(e) {
+    e.stopPropagation();
+
+    const focus = dashboardData?.todaysFocus;
+    console.log('Today\'s Focus data:', focus);
+
+    if (!focus?.module?.id) {
+      console.log('No focus module, navigating to /learning');
+      navigate('/learning');
+      return;
+    }
+
+    setIsLoadingModule(true);
+    try {
+      const response = await get(`/api/learning/content/${focus.module.id}`);
+      if (response.success && response.data?.item) {
+        const module = response.data.item;
+        setSelectedModule(module);
+
+        // Open appropriate modal based on content type
+        if (module.contentType === 'text_article') {
+          setShowArticleModal(true);
+        } else if (module.contentType === 'audio_article' || module.contentType === 'audio_exercise') {
+          setShowAudioModal(true);
+        } else if (module.contentType === 'video_link' && module.videoUrl) {
+          window.open(module.videoUrl, '_blank');
+        } else {
+          navigate('/learning');
+        }
+      } else {
+        navigate('/learning');
+      }
+    } catch (error) {
+      console.error('Error loading module:', error);
+      navigate('/learning');
+    } finally {
+      setIsLoadingModule(false);
+    }
+  }
+
+  function closeArticleModal() {
+    setShowArticleModal(false);
+    setSelectedModule(null);
+  }
+
+  function closeAudioModal() {
+    setShowAudioModal(false);
+    setSelectedModule(null);
+  }
+
   return (
     <div className="dashboard-content">
       {/* Hero Section */}
@@ -279,31 +355,23 @@ export default function Dashboard() {
               {t('dashboard:focusCard.title', "Today's Focus")}
             </h3>
             <p className="card-description todays-focus-title">
-              {dashboardData?.todaysFocus?.title ||
+              {getTodaysFocusTitle() ||
                 t('dashboard:focusCard.noFocus', 'No focus set for today')}
             </p>
-            {dashboardData?.todaysFocus && (
-              <div className="progress-indicator">
-                <div className="progress-bar">
-                  <div
-                    className="progress-fill"
-                    style={{ width: `${dashboardData.todaysFocus.progress || 0}%` }}
-                  />
-                </div>
-                <span className="progress-text">
-                  {dashboardData.todaysFocus.progress || 0}%
-                </span>
-              </div>
-            )}
           </div>
           <button
-            className="btn btn-secondary"
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate('/learning');
-            }}
+            className={`btn btn-secondary ${isLoadingModule ? 'btn-loading' : ''}`}
+            onClick={openTodaysFocus}
+            disabled={isLoadingModule}
           >
-            {t('dashboard:focusCard.button', 'Continue')}
+            {isLoadingModule ? (
+              <>
+                {icons.spinner}
+                <span>{t('common:loading', 'Loading...')}</span>
+              </>
+            ) : (
+              t('dashboard:focusCard.button', 'Continue')
+            )}
           </button>
         </div>
       </div>
@@ -464,6 +532,22 @@ export default function Dashboard() {
           </div>
         </div>
       </section>
+
+      {/* Article Modal for Today's Focus */}
+      {showArticleModal && selectedModule && (
+        <ArticleModal
+          module={selectedModule}
+          onClose={closeArticleModal}
+        />
+      )}
+
+      {/* Audio Modal for Today's Focus */}
+      {showAudioModal && selectedModule && (
+        <AudioModal
+          module={selectedModule}
+          onClose={closeAudioModal}
+        />
+      )}
     </div>
   );
 }
