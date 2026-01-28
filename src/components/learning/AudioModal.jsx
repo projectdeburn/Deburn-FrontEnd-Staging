@@ -187,6 +187,15 @@ export default function AudioModal({ module, onClose }) {
     }
   }
 
+  function handleCanPlay() {
+    // Autoplay when audio is ready
+    if (audioRef.current && !isPlaying) {
+      audioRef.current.play().catch(() => {
+        // Autoplay blocked by browser, user will need to click play
+      });
+    }
+  }
+
   function handleEnded() {
     setIsPlaying(false);
     setCurrentTime(0);
@@ -265,6 +274,7 @@ export default function AudioModal({ module, onClose }) {
               src={audioSrc}
               onTimeUpdate={handleTimeUpdate}
               onLoadedMetadata={handleLoadedMetadata}
+              onCanPlay={handleCanPlay}
               onEnded={handleEnded}
               onPlay={() => setIsPlaying(true)}
               onPause={() => setIsPlaying(false)}

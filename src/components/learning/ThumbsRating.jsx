@@ -1,6 +1,7 @@
 /**
  * ThumbsRating Component
  * Simple thumbs up/down rating for learning content feedback
+ * Uses optimistic UI - shows thanks immediately, submits async
  */
 
 import { useState } from 'react';
@@ -25,12 +26,10 @@ const icons = {
 export default function ThumbsRating({ contentId, contentTitle }) {
   const { t } = useTranslation(['learning', 'common']);
 
-  const [selectedRating, setSelectedRating] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  async function handleRating(rating) {
-    if (isSubmitting || isSubmitted) return;
+  function handleRating(rating) {
+    if (isSubmitted) return;
 
     // Validate required props
     if (!contentId) {
@@ -38,24 +37,18 @@ export default function ThumbsRating({ contentId, contentTitle }) {
       return;
     }
 
-    setSelectedRating(rating);
-    setIsSubmitting(true);
+    // Optimistic UI - show thanks immediately
+    setIsSubmitted(true);
 
-    try {
-      await post('/api/feedback/learning', {
-        contentId,
-        contentTitle: contentTitle || 'Unknown',
-        rating,
-        isAnonymous: false,
-      });
-
-      setIsSubmitted(true);
-    } catch (error) {
+    // Submit async in background (fire and forget)
+    post('/api/feedback/learning', {
+      contentId,
+      contentTitle: contentTitle || 'Unknown',
+      rating,
+      isAnonymous: false,
+    }).catch((error) => {
       console.error('Failed to submit rating:', error);
-      setSelectedRating(null);
-    } finally {
-      setIsSubmitting(false);
-    }
+    });
   }
 
   if (isSubmitted) {
@@ -75,18 +68,16 @@ export default function ThumbsRating({ contentId, contentTitle }) {
   return (
     <div className="content-rating">
       <button
-        className={`rating-btn ${selectedRating === 1 ? 'active' : ''}`}
+        className="rating-btn"
         onClick={() => handleRating(1)}
-        disabled={isSubmitting}
         data-rating="1"
         aria-label={t('learning:rating.helpful', 'Helpful')}
       >
         {icons.thumbsUp}
       </button>
       <button
-        className={`rating-btn ${selectedRating === -1 ? 'active' : ''}`}
+        className="rating-btn"
         onClick={() => handleRating(-1)}
-        disabled={isSubmitting}
         data-rating="-1"
         aria-label={t('learning:rating.notHelpful', 'Not helpful')}
       >
