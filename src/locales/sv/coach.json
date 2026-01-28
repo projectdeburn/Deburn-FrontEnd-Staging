@@ -17,6 +17,8 @@
     "placeholder": "Skriv ett meddelande...",
     "hint": "Dina samtal är privata och konfidentiella"
   },
+  "clearHistory": "Rensa historik",
+  "clearHistoryConfirm": "Är du säker på att du vill rensa din samtalshistorik?",
   "quickReplies": {
     "tellMore": "Berätta mer om det",
     "whatSuggest": "Vad skulle du föreslå?",

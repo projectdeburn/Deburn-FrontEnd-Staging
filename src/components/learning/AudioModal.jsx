@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { getAuthToken } from '../../utils/api';
 import i18n from '@/utils/i18n';
-import SmileyRating from './SmileyRating';
+import ThumbsRating from './ThumbsRating';
 
 /**
  * Get localized field from module based on current language
@@ -271,7 +271,7 @@ export default function AudioModal({ module, onClose }) {
             />
           )}
 
-          <SmileyRating
+          <ThumbsRating
             contentId={module._id || module.id}
             contentTitle={title}
           />

@@ -6,7 +6,7 @@
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import i18n from '@/utils/i18n';
-import SmileyRating from './SmileyRating';
+import ThumbsRating from './ThumbsRating';
 
 /**
  * Get localized field from module based on current language
@@ -106,7 +106,7 @@ export default function ArticleModal({ module, onClose }) {
             dangerouslySetInnerHTML={{ __html: formatArticleContent(textContent) }}
           />
 
-          <SmileyRating
+          <ThumbsRating
             contentId={module._id || module.id}
             contentTitle={title}
           />

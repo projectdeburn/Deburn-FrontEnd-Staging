@@ -158,8 +158,10 @@
   },
   "rating": {
     "title": "Hur hjälpsamt var detta innehåll?",
+    "helpful": "Hjälpsamt",
+    "notHelpful": "Inte hjälpsamt",
     "anonymous": "Skicka anonymt",
-    "thanks": "Tack för din feedback!"
+    "thanks": "Tack!"
   },
   "minRead": "min läsning",
   "noModules": "Inga lärmoduler tillgängliga ännu."

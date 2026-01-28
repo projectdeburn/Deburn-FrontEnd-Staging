@@ -473,6 +473,23 @@ export default function Coach() {
     }
   }
 
+  async function handleClearHistory(e) {
+    e.preventDefault();
+    if (!window.confirm(t('coach:clearHistoryConfirm', 'Are you sure you want to clear your conversation history?'))) {
+      return;
+    }
+
+    try {
+      await del('/api/conversations');
+      localStorage.removeItem(CONVERSATION_STORAGE_KEY);
+      setMessages([]);
+      setConversationId(null);
+      setShowStarters(true);
+    } catch {
+      // Silent fail
+    }
+  }
+
   return (
     <div className="coach-content">
       {/* Hero Section */}
@@ -664,7 +681,15 @@ export default function Coach() {
             </button>
           </div>
           <p className="chat-hint">
-            {t('coach:input.hint', 'Your conversations are private and confidential')}
+            <a
+              href="#"
+              className="clear-history-link"
+              onClick={handleClearHistory}
+            >
+              {t('coach:clearHistory', 'Clear history')}
+            </a>
+            <span className="chat-hint-separator">•</span>
+            <span>{t('coach:input.hint', 'Your conversations are private and confidential')}</span>
           </p>
         </div>
       </div>

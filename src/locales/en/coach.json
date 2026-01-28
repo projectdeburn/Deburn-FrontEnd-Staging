@@ -17,6 +17,8 @@
     "placeholder": "Type a message...",
     "hint": "Your conversations are private and confidential"
   },
+  "clearHistory": "Clear history",
+  "clearHistoryConfirm": "Are you sure you want to clear your conversation history?",
   "quickReplies": {
     "tellMore": "Tell me more about that",
     "whatSuggest": "What would you suggest?",

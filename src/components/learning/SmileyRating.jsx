@@ -1,92 +1,83 @@
 /**
  * SmileyRating Component
- * 5-point smiley rating system for learning content feedback
+ * 1-5 smiley face rating for general feedback
  */
 
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { post } from '@/utils/api';
 
-// Mood face SVGs (matching Checkin)
-const moodFaces = {
-  1: (
-    <svg className="mood-face-icon" viewBox="0 0 48 48" fill="none">
-      <circle cx="24" cy="24" r="22" stroke="currentColor" strokeWidth="2"/>
-      <circle cx="16" cy="20" r="2" fill="currentColor"/>
-      <circle cx="32" cy="20" r="2" fill="currentColor"/>
-      <path d="M16 32 C18 28, 30 28, 32 32" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-      <path d="M14 14 L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-      <path d="M34 14 L30 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-    </svg>
-  ),
-  2: (
-    <svg className="mood-face-icon" viewBox="0 0 48 48" fill="none">
-      <circle cx="24" cy="24" r="22" stroke="currentColor" strokeWidth="2"/>
-      <circle cx="16" cy="20" r="2" fill="currentColor"/>
-      <circle cx="32" cy="20" r="2" fill="currentColor"/>
-      <path d="M16 32 C20 30, 28 30, 32 32" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-    </svg>
-  ),
-  3: (
-    <svg className="mood-face-icon" viewBox="0 0 48 48" fill="none">
-      <circle cx="24" cy="24" r="22" stroke="currentColor" strokeWidth="2"/>
-      <circle cx="16" cy="20" r="2" fill="currentColor"/>
-      <circle cx="32" cy="20" r="2" fill="currentColor"/>
-      <line x1="16" y1="32" x2="32" y2="32" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-    </svg>
-  ),
-  4: (
-    <svg className="mood-face-icon" viewBox="0 0 48 48" fill="none">
-      <circle cx="24" cy="24" r="22" stroke="currentColor" strokeWidth="2"/>
-      <circle cx="16" cy="20" r="2" fill="currentColor"/>
-      <circle cx="32" cy="20" r="2" fill="currentColor"/>
-      <path d="M16 30 C20 34, 28 34, 32 30" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-    </svg>
-  ),
-  5: (
-    <svg className="mood-face-icon" viewBox="0 0 48 48" fill="none">
-      <circle cx="24" cy="24" r="22" stroke="currentColor" strokeWidth="2"/>
-      <circle cx="16" cy="20" r="2" fill="currentColor"/>
-      <circle cx="32" cy="20" r="2" fill="currentColor"/>
-      <path d="M14 28 C18 36, 30 36, 34 28" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-    </svg>
-  ),
+// Mood face icons (1-5 scale)
+const MoodFace = ({ level }) => {
+  const faces = {
+    1: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mood-face-icon">
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="M16 16s-1.5-2-4-2-4 2-4 2"></path>
+        <line x1="9" y1="9" x2="9.01" y2="9"></line>
+        <line x1="15" y1="9" x2="15.01" y2="9"></line>
+      </svg>
+    ),
+    2: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mood-face-icon">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="8" y1="15" x2="16" y2="15"></line>
+        <line x1="9" y1="9" x2="9.01" y2="9"></line>
+        <line x1="15" y1="9" x2="15.01" y2="9"></line>
+      </svg>
+    ),
+    3: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mood-face-icon">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="8" y1="15" x2="16" y2="15"></line>
+        <line x1="9" y1="9" x2="9.01" y2="9"></line>
+        <line x1="15" y1="9" x2="15.01" y2="9"></line>
+      </svg>
+    ),
+    4: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mood-face-icon">
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+        <line x1="9" y1="9" x2="9.01" y2="9"></line>
+        <line x1="15" y1="9" x2="15.01" y2="9"></line>
+      </svg>
+    ),
+    5: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mood-face-icon">
+        <circle cx="12" cy="12" r="10"></circle>
+        <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+        <line x1="9" y1="9" x2="9.01" y2="9"></line>
+        <line x1="15" y1="9" x2="15.01" y2="9"></line>
+      </svg>
+    ),
+  };
+  return faces[level] || faces[3];
 };
 
-const ratingLabels = [
-  { rating: 1, label: 'Not helpful' },
-  { rating: 2, label: 'Slightly helpful' },
-  { rating: 3, label: 'Okay' },
-  { rating: 4, label: 'Helpful' },
-  { rating: 5, label: 'Very helpful' },
-];
-
-export default function SmileyRating({ contentId, contentTitle }) {
-  const { t } = useTranslation(['learning', 'common']);
+export default function SmileyRating({ onSubmit }) {
+  const { t } = useTranslation(['common']);
 
   const [selectedRating, setSelectedRating] = useState(null);
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  async function handleRating(rating) {
+  async function handleSubmit(rating) {
     if (isSubmitting || isSubmitted) return;
 
     setSelectedRating(rating);
     setIsSubmitting(true);
 
     try {
-      await post('/api/feedback/learning', {
-        contentId,
-        contentTitle,
+      await post('/api/feedback', {
         rating,
         isAnonymous,
       });
 
       setIsSubmitted(true);
+      if (onSubmit) onSubmit(rating);
     } catch (error) {
-      console.error('Failed to submit rating:', error);
-      // Reset on error so user can try again
+      console.error('Failed to submit feedback:', error);
       setSelectedRating(null);
     } finally {
       setIsSubmitting(false);
@@ -97,11 +88,11 @@ export default function SmileyRating({ contentId, contentTitle }) {
     return (
       <div className="smiley-rating">
         <div className="smiley-rating-success">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
             <polyline points="22 4 12 14.01 9 11.01"></polyline>
           </svg>
-          <span>{t('learning:rating.thanks', 'Thanks for your feedback!')}</span>
+          <span>{t('common:thanks', 'Thank you for your feedback!')}</span>
         </div>
       </div>
     );
@@ -110,32 +101,28 @@ export default function SmileyRating({ contentId, contentTitle }) {
   return (
     <div className="smiley-rating">
       <p className="smiley-rating-title">
-        {t('learning:rating.title', 'How helpful was this content?')}
+        {t('common:rateExperience', 'How would you rate your experience?')}
       </p>
-
       <div className="smiley-rating-buttons">
-        {ratingLabels.map((item) => (
+        {[1, 2, 3, 4, 5].map((level) => (
           <button
-            key={item.rating}
-            className={`smiley-btn ${selectedRating === item.rating ? 'selected' : ''}`}
-            onClick={() => handleRating(item.rating)}
+            key={level}
+            className={`smiley-btn ${selectedRating === level ? 'selected' : ''}`}
+            onClick={() => handleSubmit(level)}
             disabled={isSubmitting}
-            title={item.label}
-            aria-label={item.label}
+            aria-label={`Rate ${level} out of 5`}
           >
-            {moodFaces[item.rating]}
+            <MoodFace level={level} />
           </button>
         ))}
       </div>
-
       <label className="smiley-rating-anonymous">
         <input
           type="checkbox"
           checked={isAnonymous}
           onChange={(e) => setIsAnonymous(e.target.checked)}
-          disabled={isSubmitting}
         />
-        <span>{t('learning:rating.anonymous', 'Submit anonymously')}</span>
+        {t('common:submitAnonymously', 'Submit anonymously')}
       </label>
     </div>
   );
