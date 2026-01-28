@@ -25,7 +25,31 @@ const icons = {
       <line x1="12" x2="12.01" y1="16" y2="16"></line>
     </svg>
   ),
+  link: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+    </svg>
+  ),
 };
+
+function getUserTimezone() {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+  } catch {
+    return 'UTC';
+  }
+}
+
+function normalizeUrl(url) {
+  if (!url) return null;
+  const trimmed = url.trim();
+  if (!trimmed) return null;
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    return trimmed;
+  }
+  return `https://${trimmed}`;
+}
 
 function getNextDateForDayOfWeek(dayOfWeek, weeksAhead = 0) {
   const today = new Date();
@@ -95,12 +119,14 @@ export default function ScheduleMeetingModal({
   const [isScheduling, setIsScheduling] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [meetingTitle, setMeetingTitle] = useState('');
+  const [meetingLink, setMeetingLink] = useState('');
 
   useEffect(() => {
     if (isOpen && group?.id) {
       loadCommonAvailability();
       setMeetingTitle(t('circles:schedule.defaultTitle', 'Circle Discussion'));
       setSelectedSlot(null);
+      setMeetingLink('');
     }
   }, [isOpen, group?.id]);
 
@@ -125,10 +151,14 @@ export default function ScheduleMeetingModal({
 
     setIsScheduling(true);
     try {
+      const timezone = getUserTimezone();
       await onSchedule?.({
         groupId: group.id,
         title: meetingTitle.trim(),
         scheduledAt: `${selectedSlot.date}T${String(selectedSlot.hour).padStart(2, '0')}:00:00`,
+        duration: 60,
+        meetingLink: normalizeUrl(meetingLink),
+        timezone,
       });
       onClose();
     } finally {
@@ -179,6 +209,26 @@ export default function ScheduleMeetingModal({
                 onChange={(e) => setMeetingTitle(e.target.value)}
                 placeholder={t('circles:schedule.defaultTitle', 'Circle Discussion')}
               />
+            </div>
+
+            <div className="schedule-meeting-field">
+              <label htmlFor="meeting-link">
+                {t('circles:schedule.meetingLink', 'Meeting Link')}
+                <span className="schedule-meeting-optional">
+                  {t('common:optional', '(optional)')}
+                </span>
+              </label>
+              <div className="schedule-meeting-input-wrapper">
+                <span className="schedule-meeting-input-icon">{icons.link}</span>
+                <input
+                  type="url"
+                  id="meeting-link"
+                  className="schedule-meeting-input schedule-meeting-input--with-icon"
+                  value={meetingLink}
+                  onChange={(e) => setMeetingLink(e.target.value)}
+                  placeholder={t('circles:schedule.meetingLinkPlaceholder', 'https://zoom.us/j/... or https://meet.google.com/...')}
+                />
+              </div>
             </div>
 
             <div className="schedule-meeting-field">

@@ -150,6 +150,9 @@ export default function Circles() {
       const result = await circlesApi.scheduleMeeting(meetingData.groupId, {
         title: meetingData.title,
         scheduledAt: meetingData.scheduledAt,
+        duration: meetingData.duration || 60,
+        meetingLink: meetingData.meetingLink,
+        timezone: meetingData.timezone,
       });
       if (result.success) {
         await loadCirclesData();

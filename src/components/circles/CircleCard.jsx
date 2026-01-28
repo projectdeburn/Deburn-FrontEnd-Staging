@@ -62,6 +62,14 @@ function formatMeetingDate(dateString) {
   });
 }
 
+function ensureProtocol(url) {
+  if (!url) return '';
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+  return `https://${url}`;
+}
+
 export default function CircleCard({
   group,
   onScheduleMeeting,
@@ -135,12 +143,22 @@ export default function CircleCard({
       {/* Actions - always at bottom */}
       <div className="circle-card-actions">
         {nextMeeting?.meetingLink ? (
-          <button
+          <a
+            href={ensureProtocol(nextMeeting.meetingLink)}
+            target="_blank"
+            rel="noopener noreferrer"
             className="btn btn-primary"
-            onClick={() => onJoinCall?.(group, nextMeeting)}
           >
             {icons.video}
             <span>{t('circles:groups.joinCall', 'Join Video Call')}</span>
+          </a>
+        ) : nextMeeting ? (
+          <button
+            className="btn btn-primary"
+            onClick={() => onViewDetails?.(group)}
+          >
+            {icons.calendar}
+            <span>{t('circles:groups.viewMeeting', 'View Meeting')}</span>
           </button>
         ) : (
           <button

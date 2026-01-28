@@ -69,6 +69,14 @@ function formatMeetingDate(dateString) {
   });
 }
 
+function ensureProtocol(url) {
+  if (!url) return '';
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+  return `https://${url}`;
+}
+
 export default function GroupDetailsModal({
   isOpen,
   onClose,
@@ -92,8 +100,8 @@ export default function GroupDetailsModal({
       if (result.success) {
         setMeetings(result.data.meetings || []);
       }
-    } catch (error) {
-      console.error('Error loading meetings:', error);
+    } catch {
+      setMeetings([]);
     } finally {
       setIsLoadingMeetings(false);
     }
@@ -177,7 +185,7 @@ export default function GroupDetailsModal({
                   </div>
                   {meeting.meetingLink && (
                     <a
-                      href={meeting.meetingLink}
+                      href={ensureProtocol(meeting.meetingLink)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="btn btn-primary btn-small"
