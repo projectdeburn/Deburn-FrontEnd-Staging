@@ -1,12 +1,6 @@
-/**
- * AvailabilityBanner Component
- * Inline availability picker with day boxes and 24-hour toggle chips
- */
-
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
-// SVG Icons
 const icons = {
   calendar: (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -34,10 +28,29 @@ const icons = {
   ),
 };
 
-// Day order starting from Monday
 const DAYS_ORDER = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
-const HOURS = Array.from({ length: 24 }, (_, i) => i); // 0-23
+const DAY_TO_NUMBER = {
+  sunday: 0,
+  monday: 1,
+  tuesday: 2,
+  wednesday: 3,
+  thursday: 4,
+  friday: 5,
+  saturday: 6,
+};
+
+const NUMBER_TO_DAY = {
+  0: 'sunday',
+  1: 'monday',
+  2: 'tuesday',
+  3: 'wednesday',
+  4: 'thursday',
+  5: 'friday',
+  6: 'saturday',
+};
+
+const HOURS = Array.from({ length: 24 }, (_, i) => i);
 
 function formatHour(hour) {
   if (hour === 0) return '12am';
@@ -60,10 +73,12 @@ export default function AvailabilityBanner({
   const hasAvailability = availability && availability.length > 0;
   const slotCount = availability.length;
 
-  // Initialize selected slots from availability prop
   useEffect(() => {
     if (availability.length > 0) {
-      const slotKeys = availability.map(slot => `${slot.day}-${slot.hour}`);
+      const slotKeys = availability.map(slot => {
+        const dayName = NUMBER_TO_DAY[slot.day] || 'monday';
+        return `${dayName}-${slot.hour}`;
+      });
       setSelectedSlots(new Set(slotKeys));
     }
   }, [availability]);
@@ -88,15 +103,14 @@ export default function AvailabilityBanner({
 
   function handleSave() {
     const slots = Array.from(selectedSlots).map(key => {
-      const [day, hour] = key.split('-');
-      return { day, hour: parseInt(hour, 10) };
+      const [dayName, hour] = key.split('-');
+      return { day: DAY_TO_NUMBER[dayName], hour: parseInt(hour, 10) };
     });
     onSaveAvailability?.(slots);
     setHasChanges(false);
   }
 
   function handleClearAll() {
-    // Clear all slots for the current day
     setSelectedSlots(prev => {
       const newSet = new Set(prev);
       HOURS.forEach(hour => {
@@ -113,24 +127,23 @@ export default function AvailabilityBanner({
   }
 
   function handleCancel() {
-    // Reset to original
-    const slotKeys = availability.map(slot => `${slot.day}-${slot.hour}`);
+    const slotKeys = availability.map(slot => {
+      const dayName = NUMBER_TO_DAY[slot.day] || 'monday';
+      return `${dayName}-${slot.hour}`;
+    });
     setSelectedSlots(new Set(slotKeys));
     setHasChanges(false);
     setIsExpanded(false);
   }
 
-  // Count slots for current day
   const currentDaySlotCount = HOURS.filter(hour =>
     selectedSlots.has(`${selectedDay}-${hour}`)
   ).length;
 
-  // Count slots for any day
   function getDaySlotCount(day) {
     return HOURS.filter(hour => selectedSlots.has(`${day}-${hour}`)).length;
   }
 
-  // Short day names for boxes
   const shortDayNames = {
     monday: t('circles:availability.days.mon', 'Mon'),
     tuesday: t('circles:availability.days.tue', 'Tue'),
@@ -141,7 +154,6 @@ export default function AvailabilityBanner({
     sunday: t('circles:availability.days.sun', 'Sun'),
   };
 
-  // Full day names for accessibility
   const dayNames = {
     sunday: t('circles:availability.days.sunday', 'Sunday'),
     monday: t('circles:availability.days.monday', 'Monday'),
@@ -154,7 +166,6 @@ export default function AvailabilityBanner({
 
   return (
     <div className={`availability-banner ${hasAvailability ? 'availability-banner--set' : ''} ${isExpanded ? 'availability-banner--expanded' : ''}`}>
-      {/* Banner Header */}
       <div className="availability-banner-header" onClick={() => setIsExpanded(!isExpanded)}>
         <div className={`availability-banner-icon ${hasAvailability ? 'availability-banner-icon--success' : ''}`}>
           {hasAvailability ? icons.checkCircle : icons.calendar}
@@ -177,10 +188,8 @@ export default function AvailabilityBanner({
         </button>
       </div>
 
-      {/* Expandable Content */}
       {isExpanded && (
         <div className="availability-banner-body">
-          {/* Day Selector - Horizontal Boxes */}
           <div className="availability-day-boxes">
             {DAYS_ORDER.map(day => {
               const dayHasSlots = getDaySlotCount(day) > 0;
@@ -200,7 +209,6 @@ export default function AvailabilityBanner({
             })}
           </div>
 
-          {/* Selected day info */}
           <div className="availability-day-info">
             <span className="availability-day-name">{dayNames[selectedDay]}</span>
             <span className="availability-day-count">
@@ -208,7 +216,6 @@ export default function AvailabilityBanner({
             </span>
           </div>
 
-          {/* Hour Chips Grid (6 columns x 4 rows = 24 hours) */}
           <div className="availability-chips">
             {HOURS.map(hour => (
               <button
@@ -224,7 +231,6 @@ export default function AvailabilityBanner({
             ))}
           </div>
 
-          {/* Footer */}
           <div className="availability-banner-footer">
             <span className="availability-slot-count">
               {t('circles:availability.slotsSelected', '{{count}} slots selected', { count: selectedSlots.size })}

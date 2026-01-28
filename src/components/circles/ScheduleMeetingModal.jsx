@@ -1,14 +1,8 @@
-/**
- * ScheduleMeetingModal Component
- * For scheduling a new circle meeting based on common availability
- */
-
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal, ModalFooter } from '@/components/ui/Modal';
 import { circlesApi } from '@/features/circles/circlesApi';
 
-// SVG Icons
 const icons = {
   calendar: (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -33,6 +27,46 @@ const icons = {
   ),
 };
 
+function getNextDateForDayOfWeek(dayOfWeek, weeksAhead = 0) {
+  const today = new Date();
+  const currentDay = today.getDay();
+  let daysUntil = dayOfWeek - currentDay;
+
+  if (daysUntil < 0 || (daysUntil === 0 && weeksAhead === 0)) {
+    daysUntil += 7;
+  }
+
+  daysUntil += weeksAhead * 7;
+
+  const targetDate = new Date(today);
+  targetDate.setDate(today.getDate() + daysUntil);
+  return targetDate;
+}
+
+function convertSlotsToUpcomingDates(slots, weeksToShow = 2) {
+  const upcomingSlots = [];
+
+  for (let week = 0; week < weeksToShow; week++) {
+    for (const slot of slots) {
+      const date = getNextDateForDayOfWeek(slot.day, week);
+      const dateStr = date.toISOString().split('T')[0];
+      upcomingSlots.push({
+        date: dateStr,
+        day: slot.day,
+        hour: slot.hour,
+        dateObj: date,
+      });
+    }
+  }
+
+  upcomingSlots.sort((a, b) => {
+    if (a.date !== b.date) return a.date.localeCompare(b.date);
+    return a.hour - b.hour;
+  });
+
+  return upcomingSlots;
+}
+
 function formatSlotDate(slot) {
   const date = new Date(slot.date);
   return date.toLocaleDateString('en-US', {
@@ -43,6 +77,7 @@ function formatSlotDate(slot) {
 }
 
 function formatHour(hour) {
+  if (hour === 0) return '12:00 AM';
   if (hour === 12) return '12:00 PM';
   if (hour > 12) return `${hour - 12}:00 PM`;
   return `${hour}:00 AM`;
@@ -74,10 +109,12 @@ export default function ScheduleMeetingModal({
     try {
       const result = await circlesApi.getGroupAvailability(group.id);
       if (result.success) {
-        setCommonAvailability(result.data.slots || []);
+        const weeklySlots = result.data.slots || [];
+        const upcomingSlots = convertSlotsToUpcomingDates(weeklySlots, 2);
+        setCommonAvailability(upcomingSlots);
       }
     } catch (error) {
-      console.error('Error loading availability:', error);
+      setCommonAvailability([]);
     } finally {
       setIsLoading(false);
     }
@@ -130,7 +167,6 @@ export default function ScheduleMeetingModal({
           </div>
         ) : (
           <>
-            {/* Meeting Title */}
             <div className="schedule-meeting-field">
               <label htmlFor="meeting-title">
                 {t('circles:schedule.meetingTitle', 'Meeting Title')}
@@ -145,13 +181,12 @@ export default function ScheduleMeetingModal({
               />
             </div>
 
-            {/* Available Slots */}
             <div className="schedule-meeting-field">
               <label>
                 {t('circles:schedule.selectTime', 'Select a Time')}
               </label>
               <div className="schedule-meeting-slots">
-                {commonAvailability.map((slot, index) => {
+                {commonAvailability.map((slot) => {
                   const slotKey = `${slot.date}-${slot.hour}`;
                   const isSelected = selectedSlot &&
                     selectedSlot.date === slot.date &&
@@ -172,11 +207,6 @@ export default function ScheduleMeetingModal({
                         {icons.clock}
                         {formatHour(slot.hour)}
                       </span>
-                      {slot.availableCount && (
-                        <span className="schedule-meeting-slot-count">
-                          {t('circles:schedule.available', '{{count}} available', { count: slot.availableCount })}
-                        </span>
-                      )}
                     </button>
                   );
                 })}

@@ -1,13 +1,7 @@
-/**
- * Circles Page
- * Leadership Circles - peer support groups and scheduled meetings
- */
-
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { circlesApi } from '@/features/circles/circlesApi';
 
-// Components
 import CircleCard from '@/components/circles/CircleCard';
 import AvailabilityBanner from '@/components/circles/AvailabilityBanner';
 import InvitationCard from '@/components/circles/InvitationCard';
@@ -15,10 +9,8 @@ import GroupDetailsModal from '@/components/circles/GroupDetailsModal';
 import ScheduleMeetingModal from '@/components/circles/ScheduleMeetingModal';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 
-// Hero image import
 import heroCircles from '@/assets/images/hero-circles.jpg';
 
-// SVG Icons
 const icons = {
   users: (
     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -46,7 +38,6 @@ const icons = {
 export default function Circles() {
   const { t } = useTranslation(['circles', 'common']);
 
-  // Data state
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [groups, setGroups] = useState([]);
@@ -54,7 +45,6 @@ export default function Circles() {
   const [acceptedInvitations, setAcceptedInvitations] = useState([]);
   const [availability, setAvailability] = useState([]);
 
-  // Modal state
   const [showGroupDetailsModal, setShowGroupDetailsModal] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState(null);
@@ -68,14 +58,15 @@ export default function Circles() {
     setIsLoading(true);
     setError(null);
     try {
-      const [groupsRes, invitesRes, availRes] = await Promise.all([
+      const [groupsRes, invitesRes] = await Promise.all([
         circlesApi.getMyGroups().catch(() => ({ success: false })),
         circlesApi.getMyInvitations().catch(() => ({ success: false })),
-        circlesApi.getAvailability().catch(() => ({ success: false })),
       ]);
 
+      let loadedGroups = [];
       if (groupsRes.success) {
-        setGroups(groupsRes.data.groups || []);
+        loadedGroups = groupsRes.data.groups || [];
+        setGroups(loadedGroups);
       }
 
       if (invitesRes.success) {
@@ -83,27 +74,28 @@ export default function Circles() {
         setAcceptedInvitations(invitesRes.data.accepted || []);
       }
 
-      if (availRes.success) {
-        setAvailability(availRes.data.slots || []);
+      if (loadedGroups.length > 0) {
+        const firstGroupId = loadedGroups[0].id;
+        const availRes = await circlesApi.getAvailability(firstGroupId).catch(() => ({ success: false }));
+        if (availRes.success) {
+          setAvailability(availRes.data.slots || []);
+        }
       }
     } catch (err) {
-      console.error('Error loading circles:', err);
       setError(err.message || t('circles:error.load', 'Failed to load circles'));
     } finally {
       setIsLoading(false);
     }
   }
 
-  // Invitation handlers
   async function handleAcceptInvitation(token) {
     try {
       const result = await circlesApi.acceptInvitation(token);
       if (result.success) {
-        // Refresh data
         await loadCirclesData();
       }
     } catch (err) {
-      console.error('Error accepting invitation:', err);
+      setError(err.message);
     }
   }
 
@@ -111,30 +103,32 @@ export default function Circles() {
     try {
       const result = await circlesApi.declineInvitation(token);
       if (result.success) {
-        // Remove from pending
         setPendingInvitations(prev => prev.filter(inv => inv.token !== token));
       }
     } catch (err) {
-      console.error('Error declining invitation:', err);
+      setError(err.message);
     }
   }
 
-  // Availability handlers
   async function handleSaveAvailability(slots) {
+    if (groups.length === 0) {
+      return;
+    }
+
+    const groupId = groups[0].id;
     setIsSavingAvailability(true);
     try {
-      const result = await circlesApi.updateAvailability(slots);
+      const result = await circlesApi.updateAvailability(groupId, slots);
       if (result.success) {
         setAvailability(slots);
       }
     } catch (err) {
-      console.error('Error saving availability:', err);
+      setError(err.message);
     } finally {
       setIsSavingAvailability(false);
     }
   }
 
-  // Meeting handlers
   function handleViewDetails(group) {
     setSelectedGroup(group);
     setShowGroupDetailsModal(true);
@@ -158,20 +152,17 @@ export default function Circles() {
         scheduledAt: meetingData.scheduledAt,
       });
       if (result.success) {
-        // Refresh to get updated meeting data
         await loadCirclesData();
       }
     } catch (err) {
-      console.error('Error scheduling meeting:', err);
+      setError(err.message);
     }
   }
 
-  // Loading state
   if (isLoading) {
     return <LoadingSpinner text={t('common:loading', 'Loading...')} />;
   }
 
-  // Error state
   if (error) {
     return (
       <div className="circles-error-state">
@@ -191,7 +182,6 @@ export default function Circles() {
 
   return (
     <>
-      {/* Hero Section */}
       <div className="hero-section">
         <div className="hero-image-container">
           <img
@@ -209,7 +199,6 @@ export default function Circles() {
         </div>
       </div>
 
-      {/* Availability Banner - only show if user has groups */}
       {hasGroups && (
         <AvailabilityBanner
           availability={availability}
@@ -218,7 +207,6 @@ export default function Circles() {
         />
       )}
 
-      {/* Pending Invitations */}
       {hasPendingInvitations && (
         <section className="section">
           <h2 className="section-title">
@@ -237,7 +225,6 @@ export default function Circles() {
         </section>
       )}
 
-      {/* Your Circles */}
       <section className="section">
         <h2 className="section-title">
           {t('circles:groups.title', 'Your Circles')}
@@ -256,7 +243,6 @@ export default function Circles() {
             ))}
           </div>
         ) : hasAcceptedInvitations ? (
-          // Accepted invitation, waiting for group formation
           <div className="circles-waiting-state">
             <div className="circles-waiting-icon">{icons.check}</div>
             <h3>{t('circles:empty.acceptedTitle', 'Invitation Accepted')}</h3>
@@ -270,7 +256,6 @@ export default function Circles() {
             </p>
           </div>
         ) : (
-          // No circles at all
           <div className="circles-empty-state">
             <div className="circles-empty-icon">{icons.users}</div>
             <h2>{t('circles:empty.title', 'No circles yet')}</h2>
@@ -281,7 +266,6 @@ export default function Circles() {
         )}
       </section>
 
-      {/* Modals */}
       <GroupDetailsModal
         isOpen={showGroupDetailsModal}
         onClose={() => {
