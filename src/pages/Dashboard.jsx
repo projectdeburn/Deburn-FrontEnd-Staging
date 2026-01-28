@@ -236,10 +236,7 @@ export default function Dashboard() {
     e.stopPropagation();
 
     const focus = dashboardData?.todaysFocus;
-    console.log('Today\'s Focus data:', focus);
-
     if (!focus?.module?.id) {
-      console.log('No focus module, navigating to /learning');
       navigate('/learning');
       return;
     }
