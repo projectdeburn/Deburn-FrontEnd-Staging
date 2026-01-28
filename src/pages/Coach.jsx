@@ -108,6 +108,10 @@ export default function Coach() {
   const [showArticleModal, setShowArticleModal] = useState(false);
   const [showAudioModal, setShowAudioModal] = useState(false);
 
+  // Translation state
+  const [isTranslating, setIsTranslating] = useState(false);
+  const prevLanguageRef = useRef(i18n.language);
+
   // Voice state
   const [isRecording, setIsRecording] = useState(false);
   const [isVoiceInput, setIsVoiceInput] = useState(false);
@@ -299,6 +303,59 @@ export default function Coach() {
     }
   }, [messages, conversationId]);
 
+  // Translate conversation when language changes
+  useEffect(() => {
+    const prevLanguage = prevLanguageRef.current;
+    const currentLanguage = i18n.language;
+
+    // Update ref for next comparison
+    prevLanguageRef.current = currentLanguage;
+
+    // Skip if no language change or no conversation
+    if (prevLanguage === currentLanguage || !conversationId || messages.length === 0) {
+      return;
+    }
+
+    async function translateMessages() {
+      setIsTranslating(true);
+      // Clear quick replies since they're language-specific
+      setQuickReplies([]);
+
+      try {
+        const response = await coachApi.translateConversation(
+          conversationId,
+          currentLanguage,
+          { count: 50 }
+        );
+
+        if (response.translatedMessages?.length > 0) {
+          // Create a map of index to translated content
+          const translationMap = new Map();
+          response.translatedMessages.forEach((tm) => {
+            translationMap.set(tm.index, tm.content);
+          });
+
+          // Update messages with translated content
+          setMessages((prev) =>
+            prev.map((msg, idx) => {
+              const translated = translationMap.get(idx);
+              if (translated) {
+                return { ...msg, content: translated };
+              }
+              return msg;
+            })
+          );
+        }
+      } catch (error) {
+        console.error('Translation error:', error);
+      } finally {
+        setIsTranslating(false);
+      }
+    }
+
+    translateMessages();
+  }, [i18n.language, conversationId, messages.length]);
+
   // Conversation starters
   const starters = [
     {
@@ -433,6 +490,30 @@ export default function Coach() {
     return icons.bookOpen;
   }
 
+  // Get localized title for action card
+  function getActionTitle(action) {
+    const category = action.metadata?.category;
+    const contentType = action.metadata?.contentType;
+
+    // Try to find matching content for localized title
+    let module = null;
+    if (category && contentType) {
+      module = learningContent.find(
+        (item) => item.category === category && item.contentType === contentType
+      );
+    }
+    if (!module && contentType) {
+      module = learningContent.find((item) => item.contentType === contentType);
+    }
+
+    if (module) {
+      return i18n.language === 'sv' ? (module.titleSv || module.titleEn) : module.titleEn;
+    }
+
+    // Fall back to action label
+    return action.label;
+  }
+
   // Handle action card click - find module from pre-loaded content and open modal
   function handleActionClick(action) {
     // Find matching content from pre-loaded learning content
@@ -530,6 +611,13 @@ export default function Coach() {
 
       {/* Chat Interface */}
       <div className="chat-container">
+        {/* Translation Indicator */}
+        {isTranslating && (
+          <div className="translation-indicator">
+            <span className="translation-spinner"></span>
+            <span>{t('coach:translating', 'Translating conversation...')}</span>
+          </div>
+        )}
         <div className="chat-messages" id="chat-messages">
           {/* Welcome Message */}
           <div className="message message-coach" id="welcome-message">
@@ -589,7 +677,7 @@ export default function Coach() {
                           {getActionIcon(action)}
                         </div>
                         <div className="coach-content-card-title">
-                          {action.label}
+                          {getActionTitle(action)}
                         </div>
                       </button>
                     ))}

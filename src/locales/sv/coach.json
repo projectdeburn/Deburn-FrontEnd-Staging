@@ -19,6 +19,9 @@
   },
   "clearHistory": "Rensa historik",
   "clearHistoryConfirm": "Är du säker på att du vill rensa din samtalshistorik?",
+  "translating": "Översätter konversation...",
+  "listen": "Lyssna",
+  "stop": "Stoppa",
   "quickReplies": {
     "tellMore": "Berätta mer om det",
     "whatSuggest": "Vad skulle du föreslå?",

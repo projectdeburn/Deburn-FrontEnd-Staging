@@ -208,4 +208,22 @@ export const coachApi = {
 
     return response.blob();
   },
+
+  /**
+   * Translate conversation messages to target language
+   * @param {string} conversationId - Conversation ID
+   * @param {string} targetLanguage - Target language code ('en' or 'sv')
+   * @param {object} options - Options including startIndex, count
+   * @returns {Promise<object>} Translated messages and metadata
+   */
+  translateConversation(conversationId, targetLanguage, options = {}) {
+    const { startIndex = null, count = 20 } = options;
+
+    return post(`${BASE}/conversations/translate`, {
+      conversationId,
+      targetLanguage,
+      startIndex,
+      count,
+    });
+  },
 };

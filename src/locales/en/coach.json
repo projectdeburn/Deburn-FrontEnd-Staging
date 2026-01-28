@@ -19,6 +19,9 @@
   },
   "clearHistory": "Clear history",
   "clearHistoryConfirm": "Are you sure you want to clear your conversation history?",
+  "translating": "Translating conversation...",
+  "listen": "Listen",
+  "stop": "Stop",
   "quickReplies": {
     "tellMore": "Tell me more about that",
     "whatSuggest": "What would you suggest?",
