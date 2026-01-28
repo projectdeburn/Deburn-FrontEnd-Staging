@@ -47,7 +47,7 @@ const ForwardIcon = () => (
   </svg>
 );
 
-export default function AudioModal({ module, onClose }) {
+export default function AudioModal({ module, onClose, preloadedAudioUrl }) {
   const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -56,14 +56,23 @@ export default function AudioModal({ module, onClose }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Track if we created the blob URL (need to revoke on unmount)
+  const createdBlobUrl = useRef(null);
+
   // Get current language for audio
   const audioLang = i18n.language === 'sv' ? 'sv' : 'en';
   const title = getLocalizedField(module, 'title');
 
   useEffect(() => {
+    // If preloaded audio is available, use it immediately
+    if (preloadedAudioUrl) {
+      setAudioSrc(preloadedAudioUrl);
+      setLoading(false);
+      return;
+    }
+
     if (!module.id) return;
 
-    let blobUrl = null;
     let cancelled = false;
 
     const fetchAudio = async () => {
@@ -90,7 +99,8 @@ export default function AudioModal({ module, onClose }) {
 
         if (cancelled) return;
 
-        blobUrl = URL.createObjectURL(blob);
+        const blobUrl = URL.createObjectURL(blob);
+        createdBlobUrl.current = blobUrl;
         setAudioSrc(blobUrl);
       } catch (err) {
         if (!cancelled) {
@@ -107,11 +117,12 @@ export default function AudioModal({ module, onClose }) {
 
     return () => {
       cancelled = true;
-      if (blobUrl) {
-        URL.revokeObjectURL(blobUrl);
+      // Only revoke if we created the blob URL (not preloaded)
+      if (createdBlobUrl.current) {
+        URL.revokeObjectURL(createdBlobUrl.current);
       }
     };
-  }, [module.id, audioLang]);
+  }, [module.id, audioLang, preloadedAudioUrl]);
 
   useEffect(() => {
     function handleEscape(e) {

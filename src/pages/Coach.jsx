@@ -332,6 +332,16 @@ export default function Coach() {
     streamingContentRef.current = '';
     actionsRef.current = [];
 
+    // Batched update timer for smoother rendering
+    let updateTimer = null;
+    const flushUpdate = () => {
+      if (updateTimer) {
+        clearTimeout(updateTimer);
+        updateTimer = null;
+      }
+      setStreamingContent(streamingContentRef.current);
+    };
+
     try {
       const assistantId = Date.now() + 1;
 
@@ -344,7 +354,10 @@ export default function Coach() {
         {
           onText: (content) => {
             streamingContentRef.current += content;
-            setStreamingContent(streamingContentRef.current);
+            // Batch updates every 30ms for smoother rendering
+            if (!updateTimer) {
+              updateTimer = setTimeout(flushUpdate, 30);
+            }
           },
           onActions: (actionList) => {
             if (actionList && actionList.length > 0) {
@@ -361,6 +374,11 @@ export default function Coach() {
             }
           },
           onDone: () => {
+            // Clear any pending update timer and flush final content
+            if (updateTimer) {
+              clearTimeout(updateTimer);
+              updateTimer = null;
+            }
             // Capture the final content and actions from refs before clearing
             const finalContent = streamingContentRef.current;
             const finalActions = actionsRef.current;

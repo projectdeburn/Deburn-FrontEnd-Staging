@@ -3,10 +3,10 @@
  * Micro-lessons and learning modules for leadership development
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import i18n from '@/utils/i18n';
-import { get } from '@/utils/api';
+import { get, getAuthToken } from '@/utils/api';
 
 // Modal components
 import ArticleModal from '@/components/learning/ArticleModal';
@@ -80,8 +80,19 @@ export default function Learning() {
   const [showArticleModal, setShowArticleModal] = useState(false);
   const [showAudioModal, setShowAudioModal] = useState(false);
 
+  // Audio preload cache and controllers
+  const audioCache = useRef(new Map()); // moduleId -> blob URL
+  const preloadTimers = useRef(new Map()); // moduleId -> timer
+  const abortControllers = useRef(new Map()); // moduleId -> AbortController
+
   useEffect(() => {
     loadLearningContent();
+
+    // Cleanup preloaded audio on unmount
+    return () => {
+      audioCache.current.forEach((url) => URL.revokeObjectURL(url));
+      abortControllers.current.forEach((controller) => controller.abort());
+    };
   }, []);
 
   async function loadLearningContent() {
@@ -124,6 +135,72 @@ export default function Learning() {
     setShowAudioModal(false);
     setSelectedModule(null);
   }
+
+  // Preload audio on hover (debounced)
+  const handleAudioHover = useCallback((module) => {
+    const moduleId = module.id;
+    const isAudio = module.contentType === 'audio_article' || module.contentType === 'audio_exercise';
+
+    if (!isAudio || !module.hasContent || audioCache.current.has(moduleId)) return;
+
+    // Debounce: wait 250ms before starting fetch
+    const timer = setTimeout(async () => {
+      // Double-check cache (might have been preloaded already)
+      if (audioCache.current.has(moduleId)) return;
+
+      const controller = new AbortController();
+      abortControllers.current.set(moduleId, controller);
+
+      try {
+        const audioLang = i18n.language === 'sv' ? 'sv' : 'en';
+        const response = await fetch(
+          `${import.meta.env.VITE_ENDPOINT || ''}/api/learning/content/${moduleId}/audio/${audioLang}`,
+          {
+            headers: { 'Authorization': `Bearer ${getAuthToken()}` },
+            signal: controller.signal,
+          }
+        );
+
+        if (response.ok) {
+          const blob = await response.blob();
+          const blobUrl = URL.createObjectURL(blob);
+          audioCache.current.set(moduleId, blobUrl);
+        }
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.error('Preload failed:', err);
+        }
+      } finally {
+        abortControllers.current.delete(moduleId);
+      }
+    }, 250);
+
+    preloadTimers.current.set(moduleId, timer);
+  }, []);
+
+  // Cancel preload on hover leave
+  const handleAudioLeave = useCallback((module) => {
+    const moduleId = module.id;
+
+    // Clear debounce timer
+    const timer = preloadTimers.current.get(moduleId);
+    if (timer) {
+      clearTimeout(timer);
+      preloadTimers.current.delete(moduleId);
+    }
+
+    // Abort in-flight request
+    const controller = abortControllers.current.get(moduleId);
+    if (controller) {
+      controller.abort();
+      abortControllers.current.delete(moduleId);
+    }
+  }, []);
+
+  // Get preloaded audio URL if available
+  const getPreloadedAudio = useCallback((moduleId) => {
+    return audioCache.current.get(moduleId) || null;
+  }, []);
 
   if (isLoading) {
     return <LoadingSpinner text={t('common:loading', 'Loading...')} />;
@@ -201,6 +278,8 @@ export default function Learning() {
                     key={module.id}
                     module={module}
                     onClick={() => handleCardClick(module)}
+                    onMouseEnter={() => handleAudioHover(module)}
+                    onMouseLeave={() => handleAudioLeave(module)}
                   />
                 ))}
               </div>
@@ -229,6 +308,7 @@ export default function Learning() {
         <AudioModal
           module={selectedModule}
           onClose={closeAudioModal}
+          preloadedAudioUrl={getPreloadedAudio(selectedModule.id)}
         />
       )}
     </div>
@@ -247,7 +327,7 @@ function getDisplayType(contentType) {
 }
 
 // Learning Card Component
-function LearningCard({ module, onClick }) {
+function LearningCard({ module, onClick, onMouseEnter, onMouseLeave }) {
   const { t } = useTranslation(['learning', 'common']);
   const displayType = getDisplayType(module.contentType);
   const contentIcon = contentIcons[displayType] || icons.fileText;
@@ -268,6 +348,8 @@ function LearningCard({ module, onClick }) {
     <div
       className={cardClasses}
       onClick={isDisabled ? undefined : onClick}
+      onMouseEnter={isDisabled ? undefined : onMouseEnter}
+      onMouseLeave={isDisabled ? undefined : onMouseLeave}
       style={{ cursor: isDisabled ? 'not-allowed' : 'pointer' }}
     >
       <div className="learning-card-icon">
