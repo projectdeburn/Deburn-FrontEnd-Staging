@@ -49,7 +49,7 @@
     "biWeekly": "Varannan vecka",
     "monthly": "Varje månad",
     "discussionTopic": "Diskussionsämne",
-    "joinCall": "Gå med i videosamtal",
+    "joinCall": "Gå med i samtal",
     "scheduleMeeting": "Boka möte",
     "viewDetails": "Visa detaljer",
     "membersTitle": "Medlemmar",
@@ -90,7 +90,7 @@
   },
   "meeting": {
     "nextMeeting": "Nästa möte",
-    "joinVideoCall": "Gå med i videosamtal",
+    "joinVideoCall": "Gå med i samtal",
     "viewDiscussion": "Visa diskussion"
   },
   "topic": {

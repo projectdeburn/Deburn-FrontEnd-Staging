@@ -49,7 +49,7 @@
     "biWeekly": "Bi-weekly",
     "monthly": "Monthly",
     "discussionTopic": "Discussion topic",
-    "joinCall": "Join Video Call",
+    "joinCall": "Join Call",
     "scheduleMeeting": "Schedule Meeting",
     "viewDetails": "View Details",
     "membersTitle": "Members",
@@ -89,8 +89,8 @@
     "members": "{{count}} members"
   },
   "meeting": {
-    "nextMeeting": "Next meeting",
-    "joinVideoCall": "Join Video Call",
+    "nextMeeting": "Next Meeting",
+    "joinVideoCall": "Join Call",
     "viewDiscussion": "View Discussion"
   },
   "topic": {
