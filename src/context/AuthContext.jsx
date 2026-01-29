@@ -20,43 +20,50 @@ function clearStoredAuth() {
 }
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // Initialize state synchronously from localStorage (before first render)
+  const [user, setUser] = useState(() => {
+    const cached = localStorage.getItem(USER_KEY);
+    if (cached) {
+      try {
+        return JSON.parse(cached);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  });
+  const [isLoading, setIsLoading] = useState(() => {
+    // Only show loading if we have a token but need to validate
+    // If no token, show login immediately (no loading)
+    const hasToken = !!localStorage.getItem(TOKEN_KEY);
+    const hasCachedUser = !!localStorage.getItem(USER_KEY);
+    return hasToken && !hasCachedUser;
+  });
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    const hasToken = !!localStorage.getItem(TOKEN_KEY);
+    const hasCachedUser = !!localStorage.getItem(USER_KEY);
+    return hasToken && hasCachedUser;
+  });
   const initializedRef = useRef(false);
 
-  // Load from localStorage on mount - instant restore, background validation
+  // Setup auth token and run background validation on mount
   useEffect(() => {
     if (initializedRef.current) return;
     initializedRef.current = true;
 
     const storedToken = localStorage.getItem(TOKEN_KEY);
-    const cachedUser = localStorage.getItem(USER_KEY);
+    const hasCachedUser = !!localStorage.getItem(USER_KEY);
 
-    if (storedToken && cachedUser) {
-      // Restore immediately from cache
-      try {
-        const userData = JSON.parse(cachedUser);
-        setAuthToken(storedToken);
-        setUser(userData);
-        setIsAuthenticated(true);
-        setIsLoading(false);
-
-        // Validate session in background (don't block rendering)
-        validateSessionInBackground();
-      } catch {
-        // Invalid cached data - clear and show login
-        clearStoredAuth();
-        setIsLoading(false);
-      }
+    if (storedToken && hasCachedUser) {
+      // Token already set in state, just set the API header and validate
+      setAuthToken(storedToken);
+      validateSessionInBackground();
     } else if (storedToken) {
-      // Token but no cached user - need to fetch (blocks until complete)
+      // Token but no cached user - need to fetch
       setAuthToken(storedToken);
       fetchSession();
-    } else {
-      // No token - show login immediately
-      setIsLoading(false);
     }
+    // No token case: isLoading already false, isAuthenticated already false
 
     // Background validation - silently logout if invalid
     async function validateSessionInBackground() {
