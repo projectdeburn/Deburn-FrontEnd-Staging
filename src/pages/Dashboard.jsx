@@ -125,7 +125,7 @@ export default function Dashboard() {
 
   function getGreeting() {
     const hour = new Date().getHours();
-    const name = user?.name?.split(' ')[0] || t('common:user', 'there');
+    const name = user?.firstName || user?.name?.split(' ')[0] || t('common:user', 'there');
 
     if (hour < 12) {
       return t('dashboard:hero.greeting.morning', { name, defaultValue: `Good morning, ${name}` });

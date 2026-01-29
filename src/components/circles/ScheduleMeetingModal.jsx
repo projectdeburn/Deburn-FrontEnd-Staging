@@ -31,6 +31,25 @@ const icons = {
       <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
     </svg>
   ),
+  users: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+      <circle cx="9" cy="7" r="4"></circle>
+      <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+      <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+    </svg>
+  ),
+  check: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="20 6 9 17 4 12"></polyline>
+    </svg>
+  ),
+  x: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+  ),
 };
 
 function getUserTimezone() {
@@ -78,6 +97,8 @@ function convertSlotsToUpcomingDates(slots, weeksToShow = 2) {
         date: dateStr,
         day: slot.day,
         hour: slot.hour,
+        availableCount: slot.availableCount,
+        availableMembers: slot.availableMembers || [],
         dateObj: date,
       });
     }
@@ -114,33 +135,43 @@ export default function ScheduleMeetingModal({
   onSchedule,
 }) {
   const { t } = useTranslation(['circles', 'common']);
-  const [commonAvailability, setCommonAvailability] = useState([]);
+  const [allSlots, setAllSlots] = useState([]);
+  const [allMembers, setAllMembers] = useState([]);
+  const [totalMembers, setTotalMembers] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [isScheduling, setIsScheduling] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [meetingTitle, setMeetingTitle] = useState('');
   const [meetingLink, setMeetingLink] = useState('');
+  const [membersModalSlot, setMembersModalSlot] = useState(null);
 
   useEffect(() => {
     if (isOpen && group?.id) {
-      loadCommonAvailability();
+      loadAvailability();
       setMeetingTitle(t('circles:schedule.defaultTitle', 'Circle Discussion'));
       setSelectedSlot(null);
       setMeetingLink('');
+      setMembersModalSlot(null);
     }
   }, [isOpen, group?.id]);
 
-  async function loadCommonAvailability() {
+  async function loadAvailability() {
     setIsLoading(true);
     try {
       const result = await circlesApi.getGroupAvailability(group.id);
       if (result.success) {
         const weeklySlots = result.data.slots || [];
+        const members = result.data.totalMembers || group?.members?.length || 5;
+        const memberNames = result.data.members || [];
         const upcomingSlots = convertSlotsToUpcomingDates(weeklySlots, 2);
-        setCommonAvailability(upcomingSlots);
+        setAllSlots(upcomingSlots);
+        setAllMembers(memberNames);
+        setTotalMembers(members);
       }
     } catch (error) {
-      setCommonAvailability([]);
+      setAllSlots([]);
+      setAllMembers([]);
+      setTotalMembers(0);
     } finally {
       setIsLoading(false);
     }
@@ -166,124 +197,187 @@ export default function ScheduleMeetingModal({
     }
   }
 
+  function showMembersModal(e, slot) {
+    e.stopPropagation();
+    setMembersModalSlot(slot);
+  }
+
   if (!group) return null;
 
-  const hasAvailability = commonAvailability.length > 0;
+  const hasSlots = allSlots.length > 0;
+
+  // Get unavailable members for the members modal
+  const availableSet = membersModalSlot ? new Set(membersModalSlot.availableMembers) : new Set();
+  const unavailableMembers = membersModalSlot ? allMembers.filter(m => !availableSet.has(m)) : [];
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title={t('circles:schedule.title', 'Schedule Meeting')}
-      size="md"
-    >
-      <div className="schedule-meeting-content">
-        <p className="schedule-meeting-subtitle">
-          {t('circles:schedule.for', 'For: {{groupName}}', { groupName: group.name })}
-        </p>
+    <>
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        title={t('circles:schedule.title', 'Schedule Meeting')}
+        size="md"
+      >
+        <div className="schedule-meeting-content">
+          <p className="schedule-meeting-subtitle">
+            {t('circles:schedule.for', 'For: {{groupName}}', { groupName: group.name })}
+          </p>
 
-        {isLoading ? (
-          <div className="schedule-meeting-loading">
-            <div className="loading-spinner"></div>
-            <p>{t('common:loading', 'Loading...')}</p>
-          </div>
-        ) : !hasAvailability ? (
-          <div className="schedule-meeting-no-availability">
-            {icons.alertCircle}
-            <h4>{t('circles:schedule.noAvailability', 'No Common Availability')}</h4>
-            <p>
-              {t('circles:schedule.noAvailabilityDesc', 'There are no time slots where all members are available. Ask members to update their availability.')}
-            </p>
-          </div>
-        ) : (
-          <>
-            <div className="schedule-meeting-field">
-              <label htmlFor="meeting-title">
-                {t('circles:schedule.meetingTitle', 'Meeting Title')}
-              </label>
-              <input
-                type="text"
-                id="meeting-title"
-                className="schedule-meeting-input"
-                value={meetingTitle}
-                onChange={(e) => setMeetingTitle(e.target.value)}
-                placeholder={t('circles:schedule.defaultTitle', 'Circle Discussion')}
-              />
+          {isLoading ? (
+            <div className="schedule-meeting-loading">
+              <div className="loading-spinner"></div>
+              <p>{t('common:loading', 'Loading...')}</p>
             </div>
-
-            <div className="schedule-meeting-field">
-              <label htmlFor="meeting-link">
-                {t('circles:schedule.meetingLink', 'Meeting Link')}
-                <span className="schedule-meeting-optional">
-                  {t('common:optional', '(optional)')}
-                </span>
-              </label>
-              <div className="schedule-meeting-input-wrapper">
-                <span className="schedule-meeting-input-icon">{icons.link}</span>
+          ) : !hasSlots ? (
+            <div className="schedule-meeting-no-availability">
+              {icons.alertCircle}
+              <h4>{t('circles:schedule.noAvailability', 'No Common Availability')}</h4>
+              <p>
+                {t('circles:schedule.noAvailabilityDesc', 'There are no time slots where members are available. Ask members to update their availability.')}
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className="schedule-meeting-field">
+                <label htmlFor="meeting-title">
+                  {t('circles:schedule.meetingTitle', 'Meeting Title')}
+                </label>
                 <input
-                  type="url"
-                  id="meeting-link"
-                  className="schedule-meeting-input schedule-meeting-input--with-icon"
-                  value={meetingLink}
-                  onChange={(e) => setMeetingLink(e.target.value)}
-                  placeholder={t('circles:schedule.meetingLinkPlaceholder', 'https://zoom.us/j/... or https://meet.google.com/...')}
+                  type="text"
+                  id="meeting-title"
+                  className="schedule-meeting-input"
+                  value={meetingTitle}
+                  onChange={(e) => setMeetingTitle(e.target.value)}
+                  placeholder={t('circles:schedule.defaultTitle', 'Circle Discussion')}
                 />
               </div>
-            </div>
 
-            <div className="schedule-meeting-field">
-              <label>
-                {t('circles:schedule.selectTime', 'Select a Time')}
-              </label>
-              <div className="schedule-meeting-slots">
-                {commonAvailability.map((slot) => {
-                  const slotKey = `${slot.date}-${slot.hour}`;
-                  const isSelected = selectedSlot &&
-                    selectedSlot.date === slot.date &&
-                    selectedSlot.hour === slot.hour;
-
-                  return (
-                    <button
-                      key={slotKey}
-                      type="button"
-                      className={`schedule-meeting-slot ${isSelected ? 'schedule-meeting-slot--selected' : ''}`}
-                      onClick={() => setSelectedSlot(slot)}
-                    >
-                      <span className="schedule-meeting-slot-date">
-                        {icons.calendar}
-                        {formatSlotDate(slot)}
-                      </span>
-                      <span className="schedule-meeting-slot-time">
-                        {icons.clock}
-                        {formatHour(slot.hour)}
-                      </span>
-                    </button>
-                  );
-                })}
+              <div className="schedule-meeting-field">
+                <label htmlFor="meeting-link">
+                  {t('circles:schedule.meetingLink', 'Meeting Link')}
+                  <span className="schedule-meeting-optional">
+                    {t('common:optional', '(optional)')}
+                  </span>
+                </label>
+                <div className="schedule-meeting-input-wrapper">
+                  <span className="schedule-meeting-input-icon">{icons.link}</span>
+                  <input
+                    type="url"
+                    id="meeting-link"
+                    className="schedule-meeting-input schedule-meeting-input--with-icon"
+                    value={meetingLink}
+                    onChange={(e) => setMeetingLink(e.target.value)}
+                    placeholder={t('circles:schedule.meetingLinkPlaceholder', 'https://zoom.us/j/... or https://meet.google.com/...')}
+                  />
+                </div>
               </div>
-            </div>
-          </>
-        )}
-      </div>
 
-      <ModalFooter>
-        <button
-          type="button"
-          className="btn btn-ghost"
-          onClick={onClose}
-          disabled={isScheduling}
-        >
-          {t('common:cancel', 'Cancel')}
-        </button>
-        <button
-          type="button"
-          className="btn btn-primary"
-          onClick={handleSchedule}
-          disabled={!hasAvailability || !selectedSlot || !meetingTitle.trim() || isScheduling}
-        >
-          {isScheduling ? t('common:creating', 'Creating...') : t('circles:schedule.scheduleButton', 'Schedule')}
-        </button>
-      </ModalFooter>
-    </Modal>
+              <div className="schedule-meeting-field">
+                <label>
+                  {t('circles:schedule.selectTime', 'Select a Time')}
+                </label>
+
+                <div className="schedule-meeting-slots">
+                  {allSlots.map((slot) => {
+                    const slotKey = `${slot.date}-${slot.hour}`;
+                    const isSelected = selectedSlot &&
+                      selectedSlot.date === slot.date &&
+                      selectedSlot.hour === slot.hour;
+
+                    return (
+                      <button
+                        key={slotKey}
+                        type="button"
+                        className={`schedule-meeting-slot ${isSelected ? 'schedule-meeting-slot--selected' : ''}`}
+                        onClick={() => setSelectedSlot(slot)}
+                      >
+                        <span className="schedule-meeting-slot-date">
+                          {icons.calendar}
+                          {formatSlotDate(slot)}
+                        </span>
+                        <span className="schedule-meeting-slot-time">
+                          {icons.clock}
+                          {formatHour(slot.hour)}
+                        </span>
+                        <span
+                          className="schedule-meeting-slot-availability"
+                          onClick={(e) => showMembersModal(e, slot)}
+                          role="button"
+                          tabIndex={0}
+                          title={t('circles:schedule.clickToSeeMembers', 'Click to see members')}
+                        >
+                          {icons.users}
+                          {slot.availableCount}/{totalMembers}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+
+        <ModalFooter>
+          <button
+            type="button"
+            className="btn btn-ghost"
+            onClick={onClose}
+            disabled={isScheduling}
+          >
+            {t('common:cancel', 'Cancel')}
+          </button>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={handleSchedule}
+            disabled={!hasSlots || !selectedSlot || !meetingTitle.trim() || isScheduling}
+          >
+            {isScheduling ? t('common:creating', 'Creating...') : t('circles:schedule.scheduleButton', 'Schedule')}
+          </button>
+        </ModalFooter>
+      </Modal>
+
+      {/* Members availability modal */}
+      <Modal
+        isOpen={!!membersModalSlot}
+        onClose={() => setMembersModalSlot(null)}
+        title={t('circles:schedule.memberAvailability', 'Member Availability')}
+        size="sm"
+      >
+        {membersModalSlot && (
+          <div className="members-availability-content">
+            <p className="members-availability-time">
+              {icons.calendar} {formatSlotDate(membersModalSlot)} &nbsp;
+              {icons.clock} {formatHour(membersModalSlot.hour)}
+            </p>
+
+            <div className="members-availability-list">
+              {membersModalSlot.availableMembers.map((name) => (
+                <div key={name} className="members-availability-item members-availability-item--available">
+                  {icons.check}
+                  <span>{name}</span>
+                </div>
+              ))}
+              {unavailableMembers.map((name) => (
+                <div key={name} className="members-availability-item members-availability-item--unavailable">
+                  {icons.x}
+                  <span>{name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        <ModalFooter>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => setMembersModalSlot(null)}
+          >
+            {t('common:close', 'Close')}
+          </button>
+        </ModalFooter>
+      </Modal>
+    </>
   );
 }
