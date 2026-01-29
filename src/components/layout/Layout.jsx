@@ -6,7 +6,6 @@
 import { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '@/context/AuthContext';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 
@@ -45,16 +44,6 @@ const mobileNavIcons = {
       <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
     </svg>
   ),
-  feedback: (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-    </svg>
-  ),
-  admin: (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-    </svg>
-  ),
 };
 
 const mobileNavItems = [
@@ -63,16 +52,11 @@ const mobileNavItems = [
   { key: 'coach', path: '/coach', labelKey: 'common:nav.coach', label: 'Eve' },
   { key: 'learning', path: '/learning', labelKey: 'common:nav.learning', label: 'Learn' },
   { key: 'circles', path: '/circles', labelKey: 'common:nav.circles', label: 'Circles', end: true },
-  { key: 'feedback', path: '/feedback', labelKey: 'common:nav.feedback', label: 'Feedback' },
 ];
 
 export function Layout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { t } = useTranslation();
-  const { user } = useAuth();
-
-  // Check if user is admin
-  const isAdmin = user?.role === 'admin' || user?.isHubAdmin || user?.isOrgAdmin;
 
   return (
     <div className="screen active">
@@ -106,15 +90,6 @@ export function Layout() {
             <span>{t(item.labelKey, item.label)}</span>
           </NavLink>
         ))}
-        {isAdmin && (
-          <NavLink
-            to="/circles/admin"
-            className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}
-          >
-            {mobileNavIcons.admin}
-            <span>{t('common:nav.admin', 'Admin')}</span>
-          </NavLink>
-        )}
       </nav>
 
       {/* Mobile overlay */}
