@@ -1,10 +1,10 @@
 {
   "nav": {
-    "dashboard": "Instrumentpanel",
+    "dashboard": "Dashboard",
     "checkin": "Incheckning",
     "coach": "Fråga Eve",
     "learning": "Mikrokurser",
-    "circles": "Tankesmedjor",
+    "circles": "Think Tanks",
     "progress": "Framsteg",
     "settings": "Inställningar",
     "feedback": "Återkoppling",

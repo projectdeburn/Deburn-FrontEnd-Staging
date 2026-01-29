@@ -80,7 +80,7 @@ export function Sidebar({ isOpen, onClose }) {
             <circle cx="16" cy="16" r="6" fill="none" stroke="#C4956A" strokeWidth="1.5"/>
             <circle cx="15.5" cy="16" r="3" fill="none" stroke="#D4A9A0" strokeWidth="1.5"/>
           </svg>
-          <span className="logo-text">Eve</span>
+          <span className="logo-text">Human First AI</span>
         </div>
       </div>
 
