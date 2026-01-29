@@ -17,6 +17,7 @@ export function Header({ onMenuClick }) {
   const menuRef = useRef(null);
 
   const currentLang = i18n.language || 'en';
+  const isAdmin = user?.role === 'admin' || user?.isHubAdmin || user?.isOrgAdmin;
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -98,6 +99,34 @@ export function Header({ onMenuClick }) {
                 </svg>
                 <span>{t('common:nav.progress', 'Progress')}</span>
               </button>
+
+              <button
+                className="user-menu-dropdown-item"
+                onClick={() => {
+                  navigate('/feedback');
+                  setIsMenuOpen(false);
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <span>{t('common:nav.feedback', 'Feedback')}</span>
+              </button>
+
+              {isAdmin && (
+                <button
+                  className="user-menu-dropdown-item"
+                  onClick={() => {
+                    navigate('/circles/admin');
+                    setIsMenuOpen(false);
+                  }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                  </svg>
+                  <span>{t('common:nav.admin', 'Admin')}</span>
+                </button>
+              )}
 
               <div className="user-menu-dropdown-item language-switcher">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

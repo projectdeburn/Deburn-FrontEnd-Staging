@@ -5,7 +5,6 @@
 
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '@/context/AuthContext';
 
 const navItems = [
   { key: 'dashboard', path: '/dashboard', icon: 'layout-dashboard', labelKey: 'common:nav.dashboard', label: 'Dashboard' },
@@ -13,7 +12,6 @@ const navItems = [
   { key: 'coach', path: '/coach', icon: 'message-circle', labelKey: 'common:nav.coach', label: 'Ask Eve' },
   { key: 'learning', path: '/learning', icon: 'book-open', labelKey: 'common:nav.learning', label: 'Micro-Courses' },
   { key: 'circles', path: '/circles', icon: 'users', labelKey: 'common:nav.circles', label: 'Think Tanks', end: true },
-  { key: 'feedback', path: '/feedback', icon: 'message-square', labelKey: 'common:nav.feedback', label: 'Feedback' },
 ];
 
 // SVG icons matching Lucide icons used in original
@@ -51,24 +49,10 @@ const icons = {
       <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
     </svg>
   ),
-  'message-square': (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-    </svg>
-  ),
-  'shield': (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-    </svg>
-  ),
 };
 
 export function Sidebar({ isOpen, onClose }) {
   const { t } = useTranslation();
-  const { user } = useAuth();
-
-  // Check if user is admin
-  const isAdmin = user?.role === 'admin' || user?.isHubAdmin || user?.isOrgAdmin;
 
   return (
     <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
@@ -97,18 +81,6 @@ export function Sidebar({ isOpen, onClose }) {
             <span>{t(item.labelKey, item.label)}</span>
           </NavLink>
         ))}
-
-        {/* Circles Admin link - only show if org admin */}
-        {isAdmin && (
-          <NavLink
-            to="/circles/admin"
-            onClick={onClose}
-            className={({ isActive }) => `nav-item admin-only ${isActive ? 'active' : ''}`}
-          >
-            {icons['shield']}
-            <span>{t('common:nav.admin', 'Admin')}</span>
-          </NavLink>
-        )}
       </nav>
     </aside>
   );
