@@ -99,6 +99,16 @@ export const circlesAdminApi = {
   },
 
   /**
+   * Create a new empty group in a pool
+   * @param {string} poolId - Pool ID
+   * @param {string} name - Group name
+   * @returns {Promise<{success: boolean, data: {id: string, name: string, memberCount: number}}>}
+   */
+  createGroup(poolId, name) {
+    return post(`${CIRCLES_BASE}/pools/${poolId}/groups`, { name });
+  },
+
+  /**
    * Move a member from one group to another
    * @param {string} poolId - Pool ID
    * @param {string} fromGroupId - Source group ID

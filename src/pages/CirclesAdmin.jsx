@@ -138,6 +138,13 @@ export default function CirclesAdmin() {
   });
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // Create group state
+  const [createGroupModal, setCreateGroupModal] = useState({
+    isOpen: false,
+    name: '',
+  });
+  const [isCreatingGroup, setIsCreatingGroup] = useState(false);
+
   // Check admin status on mount
   useEffect(() => {
     checkAdminAndLoad();
@@ -376,7 +383,8 @@ export default function CirclesAdmin() {
    * Get available groups for moving (exclude current group, check capacity)
    */
   function getAvailableTargetGroups(currentGroupId) {
-    const maxSize = currentPool?.targetGroupSize || 6;
+    // Use maxGroupSize from pool, default to 6
+    const maxSize = currentPool?.maxGroupSize || 6;
     return groups.filter(g =>
       g.id !== currentGroupId &&
       (g.members?.length || 0) < maxSize
@@ -387,7 +395,8 @@ export default function CirclesAdmin() {
    * Check if source group can lose a member (must keep at least 3)
    */
   function canMoveFromGroup(group) {
-    return (group.members?.length || 0) > 3;
+    // Allow moving from any group that has members
+    return (group.members?.length || 0) > 0;
   }
 
   /**
@@ -436,6 +445,55 @@ export default function CirclesAdmin() {
       alert(err.message || 'Failed to delete group');
     } finally {
       setIsDeleting(false);
+    }
+  }
+
+  /**
+   * Open create group modal
+   */
+  function handleOpenCreateGroupModal() {
+    setCreateGroupModal({
+      isOpen: true,
+      name: '',
+    });
+  }
+
+  /**
+   * Close create group modal
+   */
+  function handleCloseCreateGroupModal() {
+    setCreateGroupModal({
+      isOpen: false,
+      name: '',
+    });
+  }
+
+  /**
+   * Execute create group
+   */
+  async function handleCreateGroup() {
+    if (!currentPool || !createGroupModal.name.trim()) {
+      return;
+    }
+
+    setIsCreatingGroup(true);
+
+    try {
+      const result = await circlesAdminApi.createGroup(
+        currentPool.id,
+        createGroupModal.name.trim()
+      );
+
+      if (result.success) {
+        // Reload groups to reflect the change
+        await loadPoolData(currentPool.id);
+        handleCloseCreateGroupModal();
+      }
+    } catch (err) {
+      console.error('Error creating group:', err);
+      alert(err.message || 'Failed to create group');
+    } finally {
+      setIsCreatingGroup(false);
     }
   }
 
@@ -635,21 +693,35 @@ export default function CirclesAdmin() {
               {t('circlesAdmin:groups.title', 'Groups')}{' '}
               <span className="admin-count-badge">{groups.length}</span>
             </h2>
-            {canAssign && (
+            <div className="admin-groups-actions">
+              {canAssign && (
+                <button
+                  className="btn btn-secondary"
+                  onClick={handleAssignGroups}
+                  disabled={isAssigning}
+                >
+                  {icons.shuffle}
+                  <span style={{ marginLeft: '8px' }}>
+                    {isAssigning
+                      ? t('circlesAdmin:groups.assigning', 'Assigning...')
+                      : t('circlesAdmin:groups.assignButton', 'Assign Groups ({{count}} accepted)', { count: acceptedCount })
+                    }
+                  </span>
+                </button>
+              )}
               <button
-                className="btn btn-secondary"
-                onClick={handleAssignGroups}
-                disabled={isAssigning}
+                className="btn btn-primary"
+                onClick={handleOpenCreateGroupModal}
               >
-                {icons.shuffle}
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
                 <span style={{ marginLeft: '8px' }}>
-                  {isAssigning
-                    ? t('circlesAdmin:groups.assigning', 'Assigning...')
-                    : t('circlesAdmin:groups.assignButton', 'Assign Groups ({{count}} accepted)', { count: acceptedCount })
-                  }
+                  {t('circlesAdmin:groups.createButton', 'Create Group')}
                 </span>
               </button>
-            )}
+            </div>
           </div>
           <div className="admin-groups-list" id="admin-groups-list">
             {groups.length === 0 ? (
@@ -873,6 +945,48 @@ export default function CirclesAdmin() {
             {isDeleting
               ? t('circlesAdmin:groups.deleting', 'Deleting...')
               : t('circlesAdmin:groups.confirmDelete', 'Delete Group')
+            }
+          </button>
+        </ModalFooter>
+      </Modal>
+
+      {/* Create Group Modal */}
+      <Modal
+        isOpen={createGroupModal.isOpen}
+        onClose={handleCloseCreateGroupModal}
+        title={t('circlesAdmin:groups.createTitle', 'Create New Group')}
+        size="sm"
+      >
+        <div className="form-group">
+          <label className="form-label" htmlFor="create-group-name">
+            {t('circlesAdmin:groups.groupName', 'Group Name')}
+          </label>
+          <input
+            type="text"
+            id="create-group-name"
+            className="form-input"
+            placeholder={t('circlesAdmin:groups.groupNamePlaceholder', 'e.g., Circle D')}
+            value={createGroupModal.name}
+            onChange={(e) => setCreateGroupModal(prev => ({ ...prev, name: e.target.value }))}
+            autoFocus
+          />
+        </div>
+        <ModalFooter>
+          <button
+            className="btn btn-ghost"
+            onClick={handleCloseCreateGroupModal}
+            disabled={isCreatingGroup}
+          >
+            {t('common:cancel', 'Cancel')}
+          </button>
+          <button
+            className="btn btn-primary"
+            onClick={handleCreateGroup}
+            disabled={isCreatingGroup || !createGroupModal.name.trim()}
+          >
+            {isCreatingGroup
+              ? t('circlesAdmin:groups.creating', 'Creating...')
+              : t('circlesAdmin:groups.confirmCreate', 'Create Group')
             }
           </button>
         </ModalFooter>

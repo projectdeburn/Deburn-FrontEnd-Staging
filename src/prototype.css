@@ -6064,6 +6064,12 @@ body > .toast-notification.fade-out {
     margin-bottom: 0;
 }
 
+.admin-groups-actions {
+    display: flex;
+    gap: var(--space-3);
+    align-items: center;
+}
+
 .admin-groups-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
