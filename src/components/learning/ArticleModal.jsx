@@ -3,9 +3,10 @@
  * Displays text article content in a modal overlay
  */
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import i18n from '@/utils/i18n';
+import { getAuthToken } from '@/utils/api';
 import ThumbsRating from './ThumbsRating';
 
 /**
@@ -39,6 +40,10 @@ const CloseIcon = () => (
 
 export default function ArticleModal({ module, onClose }) {
   const { t } = useTranslation(['learning', 'common']);
+  const [articleImageUrl, setArticleImageUrl] = useState(null);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageFetchComplete, setImageFetchComplete] = useState(false);
+  const [contentLoaded, setContentLoaded] = useState(false);
 
   // Close on escape key
   useEffect(() => {
@@ -59,6 +64,69 @@ export default function ArticleModal({ module, onClose }) {
     };
   }, []);
 
+  // Content is loaded when image fetch is complete AND image is loaded (if applicable)
+  useEffect(() => {
+    if (!imageFetchComplete) return;
+
+    // If there's an image URL, wait for the image to load
+    if (articleImageUrl) {
+      if (imageLoaded) {
+        // Small delay for smooth transition
+        const timer = setTimeout(() => setContentLoaded(true), 100);
+        return () => clearTimeout(timer);
+      }
+    } else {
+      // No image, just show content after brief delay
+      const timer = setTimeout(() => setContentLoaded(true), 100);
+      return () => clearTimeout(timer);
+    }
+  }, [imageFetchComplete, articleImageUrl, imageLoaded]);
+
+  // Fetch article image if available
+  useEffect(() => {
+    async function fetchArticleImage() {
+      const lang = i18n.language === 'sv' ? 'sv' : 'en';
+      const hasImage = lang === 'sv' ? module.hasImageSv : module.hasImageEn;
+
+      // Also check generic hasImage flag
+      if (!hasImage && !module.hasImage) {
+        // No image to fetch, mark as complete
+        setImageFetchComplete(true);
+        return;
+      }
+
+      try {
+        const moduleId = module._id || module.id;
+        const response = await fetch(
+          `${import.meta.env.VITE_ENDPOINT || ''}/api/article-image/${moduleId}/${lang}`,
+          {
+            headers: { 'Authorization': `Bearer ${getAuthToken()}` },
+          }
+        );
+
+        if (response.ok) {
+          const blob = await response.blob();
+          const url = URL.createObjectURL(blob);
+          setArticleImageUrl(url);
+        }
+      } catch (error) {
+        console.error('Error fetching article image:', error);
+      } finally {
+        // Mark fetch as complete regardless of success/failure
+        setImageFetchComplete(true);
+      }
+    }
+
+    fetchArticleImage();
+
+    // Cleanup blob URL on unmount
+    return () => {
+      if (articleImageUrl) {
+        URL.revokeObjectURL(articleImageUrl);
+      }
+    };
+  }, [module]);
+
   // Get localized content
   const title = getLocalizedField(module, 'title');
   const textContent = getLocalizedField(module, 'textContent');
@@ -76,12 +144,18 @@ export default function ArticleModal({ module, onClose }) {
 
   return (
     <div className="modal-overlay active" onClick={handleBackdropClick}>
-      <div className="modal-content text-content-modal">
+      <div className="modal-content text-content-modal" style={{ position: 'relative' }}>
+        {/* Loading overlay */}
+        <div className={`article-loading-overlay ${contentLoaded ? 'hidden' : ''}`}>
+          <div className="article-loading-spinner"></div>
+          <p className="article-loading-text">{t('common:loading', 'Loading...')}</p>
+        </div>
+
         <button className="modal-close-btn" onClick={onClose}>
           <CloseIcon />
         </button>
 
-        <div className="text-content-body">
+        <div className={`text-content-body ${contentLoaded ? 'visible' : ''}`}>
           <div className="text-content-header">
             <div className="text-content-title-row">
               <FileTextIcon />
@@ -101,6 +175,18 @@ export default function ArticleModal({ module, onClose }) {
             </div>
           </div>
 
+          {/* Article Image */}
+          {articleImageUrl && (
+            <figure className={`article-image ${imageLoaded ? 'loaded' : ''}`}>
+              <img
+                src={articleImageUrl}
+                alt={title}
+                onLoad={() => setImageLoaded(true)}
+                onError={() => setImageLoaded(true)}
+              />
+            </figure>
+          )}
+
           <div
             className="text-content-article"
             dangerouslySetInnerHTML={{ __html: formatArticleContent(textContent) }}
@@ -112,7 +198,7 @@ export default function ArticleModal({ module, onClose }) {
           />
         </div>
 
-        <div className="text-content-footer">
+        <div className={`text-content-footer ${contentLoaded ? 'visible' : ''}`}>
           <button className="btn btn-secondary" onClick={onClose}>
             {t('common:close', 'Close')}
           </button>
@@ -124,17 +210,49 @@ export default function ArticleModal({ module, onClose }) {
 
 /**
  * Format article content with proper HTML structure
- * Handles markdown-style headers and paragraphs
+ * Handles markdown-style headers, paragraphs, and images
+ *
+ * Note: [IMAGE:caption] syntax is removed because the article image
+ * is displayed at the top of the article via the hasImage mechanism.
  */
 function formatArticleContent(content) {
   if (!content) return '';
 
+  // Check if content is already HTML (starts with < and contains tags)
+  const isHtml = content.trim().startsWith('<') && /<[a-z][\s\S]*>/i.test(content);
+
+  if (isHtml) {
+    // Content is already HTML - remove image placeholders and return
+    let html = content;
+
+    // Remove [IMAGE:caption] placeholders - the image is shown at the top via hasImage
+    html = html.replace(/\[IMAGE:[^\]]*\]/g, '');
+
+    // Convert markdown images ![alt](url) to img tags (for any actual URLs in content)
+    html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g,
+      '<figure class="article-image inline-image"><img src="$2" alt="$1"><figcaption>$1</figcaption></figure>');
+
+    return html;
+  }
+
+  // Content is markdown-style - parse it
   // Split into paragraphs
   const paragraphs = content.split(/\n\n+/);
 
   return paragraphs.map(para => {
-    const trimmed = para.trim();
+    let trimmed = para.trim();
     if (!trimmed) return '';
+
+    // Skip [IMAGE:caption] lines - the image is shown at the top via hasImage
+    if (trimmed.match(/^\[IMAGE:[^\]]*\]$/)) {
+      return '';
+    }
+
+    // Handle markdown images ![alt](url) with actual URLs
+    if (trimmed.match(/^!\[([^\]]*)\]\(([^)]+)\)$/)) {
+      const match = trimmed.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
+      return `<figure class="article-image inline-image"><img src="${match[2]}" alt="${match[1]}"><figcaption>${match[1]}</figcaption></figure>`;
+    }
 
     // Check for markdown-style headers
     if (trimmed.startsWith('### ')) {
@@ -145,6 +263,11 @@ function formatArticleContent(content) {
     }
     if (trimmed.startsWith('# ')) {
       return `<h2>${trimmed.slice(2)}</h2>`;
+    }
+
+    // Check for horizontal rule
+    if (trimmed === '---') {
+      return '<hr>';
     }
 
     // Check for bold section headers (e.g., "**Header:**")
@@ -158,7 +281,9 @@ function formatArticleContent(content) {
     // Regular paragraph - handle inline formatting
     let formatted = trimmed
       .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')  // Bold
-      .replace(/\*([^*]+)\*/g, '<em>$1</em>')              // Italic
+      .replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, '<em>$1</em>') // Italic (not bold)
+      .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="inline-article-image">') // Inline images with URLs
+      .replace(/\[IMAGE:[^\]]*\]/g, '')                    // Remove image placeholders
       .replace(/\n/g, '<br/>');                            // Line breaks
 
     return `<p>${formatted}</p>`;
