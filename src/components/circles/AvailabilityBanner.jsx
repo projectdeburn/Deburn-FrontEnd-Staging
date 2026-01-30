@@ -63,9 +63,15 @@ export default function AvailabilityBanner({
   availability = [],
   onSaveAvailability,
   isSaving = false,
+  isExpanded = false,
+  onToggleExpanded,
 }) {
   const { t } = useTranslation(['circles', 'common']);
-  const [isExpanded, setIsExpanded] = useState(false);
+
+  // Use internal state if no external control provided
+  const [internalExpanded, setInternalExpanded] = useState(false);
+  const expanded = onToggleExpanded ? isExpanded : internalExpanded;
+  const setExpanded = onToggleExpanded || setInternalExpanded;
   const [selectedDay, setSelectedDay] = useState('monday');
   const [selectedSlots, setSelectedSlots] = useState(new Set());
   const [hasChanges, setHasChanges] = useState(false);
@@ -133,7 +139,7 @@ export default function AvailabilityBanner({
     });
     setSelectedSlots(new Set(slotKeys));
     setHasChanges(false);
-    setIsExpanded(false);
+    setExpanded(false);
   }
 
   const currentDaySlotCount = HOURS.filter(hour =>
@@ -165,8 +171,8 @@ export default function AvailabilityBanner({
   };
 
   return (
-    <div className={`availability-banner ${hasAvailability ? 'availability-banner--set' : ''} ${isExpanded ? 'availability-banner--expanded' : ''}`}>
-      <div className="availability-banner-header" onClick={() => setIsExpanded(!isExpanded)}>
+    <div className={`availability-banner ${hasAvailability ? 'availability-banner--set' : ''} ${expanded ? 'availability-banner--expanded' : ''}`}>
+      <div className="availability-banner-header" onClick={() => setExpanded(!expanded)}>
         <div className={`availability-banner-icon ${hasAvailability ? 'availability-banner-icon--success' : ''}`}>
           {hasAvailability ? icons.checkCircle : icons.calendar}
         </div>
@@ -183,12 +189,12 @@ export default function AvailabilityBanner({
           </p>
         </div>
         <button className="availability-banner-toggle" type="button">
-          {isExpanded ? icons.chevronUp : icons.chevronDown}
-          <span>{isExpanded ? t('common:buttons.close', 'Close') : t('common:edit', 'Edit')}</span>
+          {expanded ? icons.chevronUp : icons.chevronDown}
+          <span>{expanded ? t('common:buttons.close', 'Close') : t('common:edit', 'Edit')}</span>
         </button>
       </div>
 
-      {isExpanded && (
+      {expanded && (
         <div className="availability-banner-body">
           <div className="availability-day-boxes">
             {DAYS_ORDER.map(day => {

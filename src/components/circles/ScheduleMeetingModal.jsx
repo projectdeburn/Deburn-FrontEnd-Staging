@@ -75,10 +75,12 @@ function getNextDateForDayOfWeek(dayOfWeek, weeksAhead = 0) {
   const currentDay = today.getDay();
   let daysUntil = dayOfWeek - currentDay;
 
-  if (daysUntil < 0 || (daysUntil === 0 && weeksAhead === 0)) {
+  // If the day is today or already passed this week, go to next week's occurrence
+  if (daysUntil <= 0) {
     daysUntil += 7;
   }
 
+  // Add additional weeks
   daysUntil += weeksAhead * 7;
 
   const targetDate = new Date(today);
@@ -91,6 +93,9 @@ function convertSlotsToUpcomingDates(slots, weeksToShow = 2) {
 
   for (let week = 0; week < weeksToShow; week++) {
     for (const slot of slots) {
+      // Skip slots where only 1 person is available (just the user)
+      if (slot.availableCount <= 1) continue;
+
       const date = getNextDateForDayOfWeek(slot.day, week);
       const dateStr = date.toISOString().split('T')[0];
       upcomingSlots.push({
@@ -104,7 +109,9 @@ function convertSlotsToUpcomingDates(slots, weeksToShow = 2) {
     }
   }
 
+  // Sort by availability (most available first), then by date, then by hour
   upcomingSlots.sort((a, b) => {
+    if (b.availableCount !== a.availableCount) return b.availableCount - a.availableCount;
     if (a.date !== b.date) return a.date.localeCompare(b.date);
     return a.hour - b.hour;
   });
@@ -138,6 +145,7 @@ export default function ScheduleMeetingModal({
   const [allSlots, setAllSlots] = useState([]);
   const [allMembers, setAllMembers] = useState([]);
   const [totalMembers, setTotalMembers] = useState(0);
+  const [existingMeetings, setExistingMeetings] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isScheduling, setIsScheduling] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState(null);
@@ -158,23 +166,44 @@ export default function ScheduleMeetingModal({
   async function loadAvailability() {
     setIsLoading(true);
     try {
-      const result = await circlesApi.getGroupAvailability(group.id);
-      if (result.success) {
-        const weeklySlots = result.data.slots || [];
-        const members = result.data.totalMembers || group?.members?.length || 5;
-        const memberNames = result.data.members || [];
+      // Fetch availability and existing meetings in parallel
+      const [availResult, meetingsResult] = await Promise.all([
+        circlesApi.getGroupAvailability(group.id),
+        circlesApi.getGroupMeetings(group.id),
+      ]);
+
+      if (availResult.success) {
+        const weeklySlots = availResult.data.slots || [];
+        const members = availResult.data.totalMembers || group?.members?.length || 5;
+        const memberNames = availResult.data.members || [];
         const upcomingSlots = convertSlotsToUpcomingDates(weeklySlots, 2);
         setAllSlots(upcomingSlots);
         setAllMembers(memberNames);
         setTotalMembers(members);
       }
+
+      if (meetingsResult.success) {
+        setExistingMeetings(meetingsResult.data.meetings || []);
+      }
     } catch (error) {
       setAllSlots([]);
       setAllMembers([]);
       setTotalMembers(0);
+      setExistingMeetings([]);
     } finally {
       setIsLoading(false);
     }
+  }
+
+  // Check if a slot clashes with an existing meeting, returns the meeting if found
+  function getBookedMeeting(slot) {
+    return existingMeetings.find(meeting => {
+      if (!meeting.scheduledAt) return false;
+      const meetingDate = new Date(meeting.scheduledAt);
+      const meetingDateStr = meetingDate.toISOString().split('T')[0];
+      const meetingHour = meetingDate.getHours();
+      return meetingDateStr === slot.date && meetingHour === slot.hour;
+    });
   }
 
   async function handleSchedule() {
@@ -223,6 +252,15 @@ export default function ScheduleMeetingModal({
             {t('circles:schedule.for', 'For: {{groupName}}', { groupName: group.name })}
           </p>
 
+          {group.nextMeeting?.title && (
+            <div className="schedule-meeting-topic">
+              <span className="schedule-meeting-topic-label">
+                {t('circles:schedule.discussionTopic', 'Discussion Topic:')}
+              </span>
+              <p className="schedule-meeting-topic-text">{group.nextMeeting.title}</p>
+            </div>
+          )}
+
           {isLoading ? (
             <div className="schedule-meeting-loading">
               <div className="loading-spinner"></div>
@@ -255,9 +293,7 @@ export default function ScheduleMeetingModal({
               <div className="schedule-meeting-field">
                 <label htmlFor="meeting-link">
                   {t('circles:schedule.meetingLink', 'Meeting Link')}
-                  <span className="schedule-meeting-optional">
-                    {t('common:optional', '(optional)')}
-                  </span>
+                  <span className="schedule-meeting-required">*</span>
                 </label>
                 <div className="schedule-meeting-input-wrapper">
                   <span className="schedule-meeting-input-icon">{icons.link}</span>
@@ -268,8 +304,12 @@ export default function ScheduleMeetingModal({
                     value={meetingLink}
                     onChange={(e) => setMeetingLink(e.target.value)}
                     placeholder={t('circles:schedule.meetingLinkPlaceholder', 'https://zoom.us/j/... or https://meet.google.com/...')}
+                    required
                   />
                 </div>
+                <p className="schedule-meeting-hint">
+                  {t('circles:schedule.meetingLinkHint', 'Add a Zoom, Google Meet, or Teams link for your circle to join')}
+                </p>
               </div>
 
               <div className="schedule-meeting-field">
@@ -283,13 +323,16 @@ export default function ScheduleMeetingModal({
                     const isSelected = selectedSlot &&
                       selectedSlot.date === slot.date &&
                       selectedSlot.hour === slot.hour;
+                    const bookedMeeting = getBookedMeeting(slot);
+                    const isBooked = !!bookedMeeting;
 
                     return (
                       <button
                         key={slotKey}
                         type="button"
-                        className={`schedule-meeting-slot ${isSelected ? 'schedule-meeting-slot--selected' : ''}`}
-                        onClick={() => setSelectedSlot(slot)}
+                        className={`schedule-meeting-slot ${isSelected ? 'schedule-meeting-slot--selected' : ''} ${isBooked ? 'schedule-meeting-slot--booked' : ''}`}
+                        onClick={() => !isBooked && setSelectedSlot(slot)}
+                        disabled={isBooked}
                       >
                         <span className="schedule-meeting-slot-date">
                           {icons.calendar}
@@ -299,16 +342,25 @@ export default function ScheduleMeetingModal({
                           {icons.clock}
                           {formatHour(slot.hour)}
                         </span>
-                        <span
-                          className="schedule-meeting-slot-availability"
-                          onClick={(e) => showMembersModal(e, slot)}
-                          role="button"
-                          tabIndex={0}
-                          title={t('circles:schedule.clickToSeeMembers', 'Click to see members')}
-                        >
-                          {icons.users}
-                          {slot.availableCount}/{totalMembers}
-                        </span>
+                        {isBooked ? (
+                          <span
+                            className="schedule-meeting-slot-availability schedule-meeting-slot-availability--booked"
+                            title={bookedMeeting.title || t('circles:schedule.alreadyBooked', 'Already booked')}
+                          >
+                            {t('circles:schedule.booked', 'Booked')}
+                          </span>
+                        ) : (
+                          <span
+                            className="schedule-meeting-slot-availability"
+                            onClick={(e) => showMembersModal(e, slot)}
+                            role="button"
+                            tabIndex={0}
+                            title={t('circles:schedule.clickToSeeMembers', 'Click to see members')}
+                          >
+                            {icons.users}
+                            {slot.availableCount}/{totalMembers}
+                          </span>
+                        )}
                       </button>
                     );
                   })}
@@ -331,7 +383,7 @@ export default function ScheduleMeetingModal({
             type="button"
             className="btn btn-primary"
             onClick={handleSchedule}
-            disabled={!hasSlots || !selectedSlot || !meetingTitle.trim() || isScheduling}
+            disabled={!hasSlots || !selectedSlot || !meetingTitle.trim() || !meetingLink.trim() || isScheduling}
           >
             {isScheduling ? t('common:creating', 'Creating...') : t('circles:schedule.scheduleButton', 'Schedule')}
           </button>

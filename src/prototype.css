@@ -6887,17 +6887,38 @@ body > .toast-notification.fade-out {
 /* Circle Card Actions - always at bottom */
 .circle-card-actions {
     display: flex;
-    gap: var(--space-3);
+    flex-direction: column;
+    gap: var(--space-2);
     margin-top: auto;
     padding-top: var(--space-3);
 }
 
-.circle-card-actions .btn {
+.circle-card-actions > .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+}
+
+.circle-card-actions-row {
+    display: flex;
+    gap: var(--space-2);
+    width: 100%;
+}
+
+.circle-card-actions-row .btn {
     flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: var(--space-2);
+    font-size: var(--text-body-sm);
+}
+
+.btn.btn-disabled,
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 /* Invitation Card - In-page Version */
@@ -7188,6 +7209,25 @@ body > .toast-notification.fade-out {
     color: var(--neutral-500);
 }
 
+.group-details-meeting--booked {
+    border-left-color: var(--color-error, #dc2626);
+}
+
+.group-details-meeting-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.group-details-meeting-badge {
+    font-size: var(--text-caption);
+    font-weight: 600;
+    color: var(--color-error, #dc2626);
+    background: rgba(220, 38, 38, 0.1);
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-full);
+}
+
 .group-details-loading,
 .group-details-empty {
     font-size: var(--text-body-sm);
@@ -7206,9 +7246,34 @@ body > .toast-notification.fade-out {
 }
 
 .schedule-meeting-subtitle {
-    margin: 0 0 var(--space-5) 0;
+    margin: 0 0 var(--space-3) 0;
     font-size: var(--text-body-sm);
     color: var(--neutral-500);
+}
+
+.schedule-meeting-topic {
+    margin: 0 0 var(--space-5) 0;
+    padding: var(--space-3);
+    background: var(--neutral-50);
+    border-radius: var(--radius-md);
+    border-left: 3px solid var(--color-deep-forest);
+}
+
+.schedule-meeting-topic-label {
+    display: block;
+    font-size: var(--text-caption);
+    font-weight: 600;
+    color: var(--neutral-500);
+    margin-bottom: var(--space-1);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.schedule-meeting-topic-text {
+    margin: 0;
+    font-size: var(--text-body-sm);
+    color: var(--color-ink);
+    font-weight: 500;
 }
 
 .schedule-meeting-loading {
@@ -7293,6 +7358,17 @@ body > .toast-notification.fade-out {
     font-size: var(--text-body-sm);
 }
 
+.schedule-meeting-required {
+    color: var(--color-error, #dc2626);
+    margin-left: var(--space-1);
+}
+
+.schedule-meeting-hint {
+    margin: var(--space-2) 0 0 0;
+    font-size: var(--text-caption);
+    color: var(--neutral-500);
+}
+
 .schedule-meeting-slots {
     display: flex;
     flex-direction: column;
@@ -7322,6 +7398,22 @@ body > .toast-notification.fade-out {
 .schedule-meeting-slot--selected {
     border-color: var(--color-deep-forest);
     background: rgba(45, 74, 71, 0.05);
+}
+
+.schedule-meeting-slot--booked {
+    border-color: var(--color-error, #dc2626);
+    background: rgba(220, 38, 38, 0.05);
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.schedule-meeting-slot--booked:hover {
+    background: rgba(220, 38, 38, 0.05);
+}
+
+.schedule-meeting-slot--booked .schedule-meeting-slot-date,
+.schedule-meeting-slot--booked .schedule-meeting-slot-time {
+    color: var(--neutral-400);
 }
 
 .schedule-meeting-slot-date,
@@ -7373,6 +7465,16 @@ body > .toast-notification.fade-out {
 .schedule-meeting-slot-availability svg {
     width: 12px;
     height: 12px;
+}
+
+.schedule-meeting-slot-availability--booked {
+    color: var(--color-error, #dc2626);
+    background: rgba(220, 38, 38, 0.1);
+    cursor: not-allowed;
+}
+
+.schedule-meeting-slot-availability--booked:hover {
+    background: rgba(220, 38, 38, 0.1);
 }
 
 /* Members availability modal */
@@ -7531,7 +7633,7 @@ body > .toast-notification.fade-out {
         flex-direction: column;
     }
 
-    .circle-card-actions {
+    .circle-card-actions-row {
         flex-direction: column;
     }
 

@@ -74,21 +74,15 @@ export default function CircleCard({
   group,
   onScheduleMeeting,
   onViewDetails,
-  onJoinCall,
+  onEditAvailability,
 }) {
   const { t } = useTranslation(['circles', 'common']);
 
-  const { name, members = [], pool, nextMeeting } = group;
+  const { name, members = [], nextMeeting } = group;
   const memberCount = members.length;
-  const cadence = pool?.cadence || 'bi-weekly';
-  const topic = pool?.topic || null;
+  const topic = nextMeeting?.title || null;
 
-  // Format cadence for display
-  const cadenceText = {
-    weekly: t('circles:groups.weekly', 'Weekly'),
-    'bi-weekly': t('circles:groups.biWeekly', 'Bi-weekly'),
-    monthly: t('circles:groups.monthly', 'Monthly'),
-  }[cadence] || cadence;
+  const hasMeetingLink = nextMeeting?.meetingLink;
 
   return (
     <div className="circle-card">
@@ -96,7 +90,7 @@ export default function CircleCard({
       <div className="circle-card-header">
         <h3 className="circle-card-name">{name}</h3>
         <p className="circle-card-meta">
-          {memberCount} {t('circles:groups.members', 'members')} · {cadenceText}
+          {memberCount} {t('circles:groups.members', 'members')}
         </p>
       </div>
 
@@ -142,40 +136,72 @@ export default function CircleCard({
 
       {/* Actions - always at bottom */}
       <div className="circle-card-actions">
-        {nextMeeting?.meetingLink ? (
-          <a
-            href={ensureProtocol(nextMeeting.meetingLink)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn btn-primary"
-          >
-            {icons.video}
-            <span>{t('circles:groups.joinCall', 'Join Video Call')}</span>
-          </a>
-        ) : nextMeeting ? (
-          <button
-            className="btn btn-primary"
-            onClick={() => onViewDetails?.(group)}
-          >
-            {icons.calendar}
-            <span>{t('circles:groups.viewMeeting', 'View Meeting')}</span>
-          </button>
+        {nextMeeting ? (
+          <>
+            {/* Primary actions row */}
+            <div className="circle-card-actions-row">
+              {hasMeetingLink ? (
+                <a
+                  href={ensureProtocol(nextMeeting.meetingLink)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-primary"
+                >
+                  {icons.video}
+                  <span>{t('circles:groups.joinCall', 'Join Call')}</span>
+                </a>
+              ) : (
+                <button
+                  className="btn btn-primary btn-disabled"
+                  disabled
+                  title={t('circles:groups.noLinkYet', 'No meeting link added yet')}
+                >
+                  {icons.video}
+                  <span>{t('circles:groups.joinCall', 'Join Call')}</span>
+                </button>
+              )}
+              <button
+                className="btn btn-primary"
+                onClick={() => onScheduleMeeting?.(group)}
+              >
+                {icons.clock}
+                <span>{t('circles:groups.scheduleAnother', 'Schedule Meeting')}</span>
+              </button>
+            </div>
+            {/* Secondary actions row */}
+            <div className="circle-card-actions-row">
+              <button
+                className="btn btn-ghost"
+                onClick={() => onViewDetails?.(group)}
+              >
+                {t('circles:groups.viewUpcomingMeetings', 'View Upcoming Meetings')}
+              </button>
+              <button
+                className="btn btn-ghost"
+                onClick={() => onEditAvailability?.(group)}
+              >
+                {t('circles:groups.editAvailability', 'Edit Availability')}
+              </button>
+            </div>
+          </>
         ) : (
-          <button
-            className="btn btn-primary"
-            onClick={() => onScheduleMeeting?.(group)}
-          >
-            {icons.clock}
-            <span>{t('circles:groups.scheduleMeeting', 'Schedule Meeting')}</span>
-          </button>
+          <>
+            {/* No meeting yet - simpler layout */}
+            <button
+              className="btn btn-primary"
+              onClick={() => onScheduleMeeting?.(group)}
+            >
+              {icons.clock}
+              <span>{t('circles:groups.scheduleMeeting', 'Schedule Meeting')}</span>
+            </button>
+            <button
+              className="btn btn-ghost"
+              onClick={() => onEditAvailability?.(group)}
+            >
+              {t('circles:groups.editAvailability', 'Edit Availability')}
+            </button>
+          </>
         )}
-
-        <button
-          className="btn btn-ghost"
-          onClick={() => onViewDetails?.(group)}
-        >
-          {t('circles:groups.viewDetails', 'View Details')}
-        </button>
       </div>
     </div>
   );

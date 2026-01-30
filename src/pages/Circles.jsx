@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { circlesApi } from '@/features/circles/circlesApi';
 
@@ -49,6 +49,9 @@ export default function Circles() {
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [isSavingAvailability, setIsSavingAvailability] = useState(false);
+  const [availabilityExpanded, setAvailabilityExpanded] = useState(false);
+
+  const availabilityBannerRef = useRef(null);
 
   useEffect(() => {
     loadCirclesData();
@@ -139,6 +142,12 @@ export default function Circles() {
     setShowScheduleModal(true);
   }
 
+  function handleEditAvailability() {
+    // Expand the banner and scroll to it
+    setAvailabilityExpanded(true);
+    availabilityBannerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
   function handleJoinCall(group, meeting) {
     if (meeting?.meetingLink) {
       window.open(meeting.meetingLink, '_blank', 'noopener,noreferrer');
@@ -203,11 +212,15 @@ export default function Circles() {
       </div>
 
       {hasGroups && (
-        <AvailabilityBanner
-          availability={availability}
-          onSaveAvailability={handleSaveAvailability}
-          isSaving={isSavingAvailability}
-        />
+        <div ref={availabilityBannerRef}>
+          <AvailabilityBanner
+            availability={availability}
+            onSaveAvailability={handleSaveAvailability}
+            isSaving={isSavingAvailability}
+            isExpanded={availabilityExpanded}
+            onToggleExpanded={setAvailabilityExpanded}
+          />
+        </div>
       )}
 
       {hasPendingInvitations && (
@@ -241,7 +254,7 @@ export default function Circles() {
                 group={group}
                 onScheduleMeeting={handleScheduleMeeting}
                 onViewDetails={handleViewDetails}
-                onJoinCall={handleJoinCall}
+                onEditAvailability={handleEditAvailability}
               />
             ))}
           </div>
