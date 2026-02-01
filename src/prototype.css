@@ -6363,6 +6363,17 @@ body > .toast-notification.fade-out {
     color: var(--neutral-400);
 }
 
+.admin-member-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-shrink: 0;
+}
+
+.admin-member-actions .admin-move-select {
+    min-width: 110px;
+}
+
 /* Modal (Small) */
 .modal-sm {
     max-width: 400px;

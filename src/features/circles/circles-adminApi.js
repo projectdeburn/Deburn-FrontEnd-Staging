@@ -146,6 +146,19 @@ export const circlesAdminApi = {
     });
   },
 
+  /**
+   * Remove a member from a group and the pool entirely
+   * @param {string} poolId - Pool ID
+   * @param {string} groupId - Group ID
+   * @param {string} userId - User ID to remove
+   * @returns {Promise<{success: boolean, data: {group: Object, removedMember: Object}}>}
+   */
+  removeMemberFromGroup(poolId, groupId, userId) {
+    return post(`${CIRCLES_BASE}/pools/${poolId}/groups/${groupId}/remove-member`, {
+      userId,
+    });
+  },
+
   // ============================================================================
   // DIAGNOSTICS
   // ============================================================================

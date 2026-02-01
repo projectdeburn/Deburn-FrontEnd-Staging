@@ -54,7 +54,14 @@
     "groupName": "Group Name",
     "groupNamePlaceholder": "e.g., Circle D",
     "creating": "Creating...",
-    "confirmCreate": "Create Group"
+    "confirmCreate": "Create Group",
+    "actions": "Actions...",
+    "removeMember": "Remove Member",
+    "removeTitle": "Remove Member",
+    "removeConfirm": "Remove {{name}} from {{group}}?",
+    "removeWarning": "This will also remove their invitation. They will need to be re-invited to join again.",
+    "removing": "Removing...",
+    "confirmRemove": "Remove Member"
   },
   "unassigned": {
     "title": "Unassigned Members",

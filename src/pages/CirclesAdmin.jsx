@@ -153,6 +153,14 @@ export default function CirclesAdmin() {
   });
   const [isAddingMember, setIsAddingMember] = useState(false);
 
+  // Remove member state
+  const [removeModal, setRemoveModal] = useState({
+    isOpen: false,
+    member: null,
+    fromGroup: null,
+  });
+  const [isRemoving, setIsRemoving] = useState(false);
+
   // Check admin status on mount
   useEffect(() => {
     checkAdminAndLoad();
@@ -561,6 +569,58 @@ export default function CirclesAdmin() {
   }
 
   /**
+   * Open remove member modal
+   */
+  function handleOpenRemoveModal(member, fromGroup) {
+    setRemoveModal({
+      isOpen: true,
+      member,
+      fromGroup,
+    });
+  }
+
+  /**
+   * Close remove member modal
+   */
+  function handleCloseRemoveModal() {
+    setRemoveModal({
+      isOpen: false,
+      member: null,
+      fromGroup: null,
+    });
+  }
+
+  /**
+   * Execute remove member
+   */
+  async function handleRemoveMember() {
+    if (!currentPool || !removeModal.member || !removeModal.fromGroup) {
+      return;
+    }
+
+    setIsRemoving(true);
+
+    try {
+      const result = await circlesAdminApi.removeMemberFromGroup(
+        currentPool.id,
+        removeModal.fromGroup.id,
+        removeModal.member.id
+      );
+
+      if (result.success) {
+        // Reload data to reflect the change
+        await loadPoolData(currentPool.id);
+        handleCloseRemoveModal();
+      }
+    } catch (err) {
+      console.error('Error removing member:', err);
+      alert(err.message || 'Failed to remove member');
+    } finally {
+      setIsRemoving(false);
+    }
+  }
+
+  /**
    * Get groups that have capacity for new members
    */
   function getGroupsWithCapacity() {
@@ -913,8 +973,8 @@ export default function CirclesAdmin() {
                               {member.name || member.email || 'Member'}
                             </span>
                           </div>
-                          {canMove && availableTargets.length > 0 && (
-                            <div className="admin-move-select-wrapper">
+                          <div className="admin-member-actions">
+                            {availableTargets.length > 0 && (
                               <select
                                 className="admin-move-select"
                                 value=""
@@ -931,9 +991,15 @@ export default function CirclesAdmin() {
                                   </option>
                                 ))}
                               </select>
-                              <span className="admin-move-icon">{icons.move}</span>
-                            </div>
-                          )}
+                            )}
+                            <button
+                              className="btn btn-sm btn-danger"
+                              onClick={() => handleOpenRemoveModal(member, group)}
+                              title={t('circlesAdmin:groups.removeMember', 'Remove Member')}
+                            >
+                              {icons.trash}
+                            </button>
+                          </div>
                         </li>
                       ))}
                     </ul>
@@ -1174,6 +1240,43 @@ export default function CirclesAdmin() {
             {isAddingMember
               ? t('circlesAdmin:unassigned.adding', 'Adding...')
               : t('circlesAdmin:unassigned.confirmAdd', 'Add to Group')
+            }
+          </button>
+        </ModalFooter>
+      </Modal>
+
+      {/* Remove Member Confirmation Modal */}
+      <Modal
+        isOpen={removeModal.isOpen}
+        onClose={handleCloseRemoveModal}
+        title={t('circlesAdmin:groups.removeTitle', 'Remove Member')}
+        size="sm"
+      >
+        <p style={{ color: 'var(--neutral-600)', margin: 0 }}>
+          {t('circlesAdmin:groups.removeConfirm', 'Remove {{name}} from {{group}}?', {
+            name: removeModal.member?.name || 'Member',
+            group: removeModal.fromGroup?.name || '',
+          })}
+        </p>
+        <div className="modal-warning" style={{ marginTop: 'var(--space-3)' }}>
+          {t('circlesAdmin:groups.removeWarning', 'This will also remove their invitation. They will need to be re-invited to join again.')}
+        </div>
+        <ModalFooter>
+          <button
+            className="btn btn-ghost"
+            onClick={handleCloseRemoveModal}
+            disabled={isRemoving}
+          >
+            {t('common:cancel', 'Cancel')}
+          </button>
+          <button
+            className="btn btn-danger"
+            onClick={handleRemoveMember}
+            disabled={isRemoving}
+          >
+            {isRemoving
+              ? t('circlesAdmin:groups.removing', 'Removing...')
+              : t('circlesAdmin:groups.confirmRemove', 'Remove Member')
             }
           </button>
         </ModalFooter>

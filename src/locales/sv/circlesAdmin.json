@@ -54,7 +54,14 @@
     "groupName": "Gruppnamn",
     "groupNamePlaceholder": "t.ex. Cirkel D",
     "creating": "Skapar...",
-    "confirmCreate": "Skapa grupp"
+    "confirmCreate": "Skapa grupp",
+    "actions": "Åtgärder...",
+    "removeMember": "Ta bort medlem",
+    "removeTitle": "Ta bort medlem",
+    "removeConfirm": "Ta bort {{name}} från {{group}}?",
+    "removeWarning": "Detta tar även bort deras inbjudan. De måste bjudas in igen för att gå med.",
+    "removing": "Tar bort...",
+    "confirmRemove": "Ta bort medlem"
   },
   "unassigned": {
     "title": "Ej tilldelade medlemmar",
