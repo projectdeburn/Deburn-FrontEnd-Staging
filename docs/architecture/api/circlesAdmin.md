@@ -366,6 +366,125 @@ circlesAdminApi.deleteGroup(poolId, groupId)
 
 ---
 
+## POST /api/circles/pools/:poolId/groups/:groupId/add-member
+
+Adds a latecomer to an existing group (admin only). Used for users who accepted an invitation after groups were already assigned.
+
+**Request Body:**
+```json
+{
+  "userId": "user_123"
+}
+```
+
+**Frontend Usage:**
+```javascript
+// src/features/circles/circles-adminApi.js
+circlesAdminApi.addMemberToGroup(poolId, groupId, userId)
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "message": "Member added successfully",
+    "group": {
+      "id": "grp_123",
+      "name": "Circle A",
+      "memberCount": 5
+    },
+    "addedMember": {
+      "id": "user_123",
+      "name": "John Doe"
+    }
+  }
+}
+```
+
+**Errors:**
+- `GROUP_FULL` (400): Group already has 6 members
+- `ALREADY_MEMBER` (400): User is already in this group
+- `USER_NOT_FOUND` (404): User does not exist
+
+---
+
+## POST /api/circles/pools/:poolId/groups/:groupId/remove-member
+
+Removes a member from a group AND deletes their invitation (admin only). Effectively makes it as if they were never invited.
+
+**Request Body:**
+```json
+{
+  "userId": "user_123"
+}
+```
+
+**Frontend Usage:**
+```javascript
+// src/features/circles/circles-adminApi.js
+circlesAdminApi.removeMemberFromGroup(poolId, groupId, userId)
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "message": "Member removed successfully",
+    "group": {
+      "id": "grp_123",
+      "name": "Circle A",
+      "memberCount": 4
+    },
+    "removedMember": {
+      "id": "user_123",
+      "name": "John Doe"
+    }
+  }
+}
+```
+
+**Side Effects:**
+- Member is removed from the group's `members` array in `circlegroups` collection
+- Member's invitation is deleted from `circleinvitations` collection
+
+**Errors:**
+- `NOT_GROUP_MEMBER` (400): User is not a member of this group
+
+---
+
+## POST /api/circles/pools/:poolId/groups
+
+Creates a new empty group in a pool (admin only).
+
+**Request Body:**
+```json
+{
+  "name": "Circle D"
+}
+```
+
+**Frontend Usage:**
+```javascript
+// src/features/circles/circles-adminApi.js
+circlesAdminApi.createGroup(poolId, name)
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "grp_456",
+    "name": "Circle D",
+    "memberCount": 0
+  }
+}
+```
+
+---
+
 ## Error Responses
 
 ```json
@@ -408,6 +527,9 @@ All endpoints have been implemented and tested.
 | `GET /api/circles/pools/:id/groups` | ✅ Complete | `src/features/circles/circles-adminApi.js` |
 | `POST /api/circles/pools/:id/groups/:groupId/move-member` | ✅ Complete | `src/features/circles/circles-adminApi.js` |
 | `POST /api/circles/pools/:id/groups/:groupId/delete` | ✅ Complete | `src/features/circles/circles-adminApi.js` |
+| `POST /api/circles/pools/:id/groups` | ✅ Complete | `src/features/circles/circles-adminApi.js` |
+| `POST /api/circles/pools/:id/groups/:groupId/add-member` | ✅ Complete | `src/features/circles/circles-adminApi.js` |
+| `POST /api/circles/pools/:id/groups/:groupId/remove-member` | ✅ Complete | `src/features/circles/circles-adminApi.js` |
 
 ### Key Implementation Notes
 
@@ -440,8 +562,11 @@ circlesAdminApi.getPoolInvitations(poolId)
 circlesAdminApi.cancelInvitation(invitationId)
 circlesAdminApi.assignGroups(poolId)
 circlesAdminApi.getPoolGroups(poolId)
+circlesAdminApi.createGroup(poolId, name)
 circlesAdminApi.moveMember(poolId, fromGroupId, memberId, toGroupId)
 circlesAdminApi.deleteGroup(poolId, groupId)
+circlesAdminApi.addMemberToGroup(poolId, groupId, userId)
+circlesAdminApi.removeMemberFromGroup(poolId, groupId, userId)
 ```
 
 ### Translations
