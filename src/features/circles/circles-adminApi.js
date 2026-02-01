@@ -133,6 +133,19 @@ export const circlesAdminApi = {
     return post(`${CIRCLES_BASE}/pools/${poolId}/groups/${groupId}/delete`, {});
   },
 
+  /**
+   * Add a latecomer to an existing group
+   * @param {string} poolId - Pool ID
+   * @param {string} groupId - Target group ID
+   * @param {string} userId - User ID to add
+   * @returns {Promise<{success: boolean, data: {group: Object}}>}
+   */
+  addMemberToGroup(poolId, groupId, userId) {
+    return post(`${CIRCLES_BASE}/pools/${poolId}/groups/${groupId}/add-member`, {
+      userId,
+    });
+  },
+
   // ============================================================================
   // DIAGNOSTICS
   // ============================================================================

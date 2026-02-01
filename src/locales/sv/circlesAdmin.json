@@ -48,7 +48,22 @@
     "deleteConfirm": "Är du säker på att du vill ta bort \"{{name}}\"? Detta kan inte ångras.",
     "deleteWarning": "Denna grupp har {{count}} medlem(mar) som kommer att tas bort från gruppen.",
     "deleting": "Tar bort...",
-    "confirmDelete": "Ta bort grupp"
+    "confirmDelete": "Ta bort grupp",
+    "createButton": "Skapa grupp",
+    "createTitle": "Skapa ny grupp",
+    "groupName": "Gruppnamn",
+    "groupNamePlaceholder": "t.ex. Cirkel D",
+    "creating": "Skapar...",
+    "confirmCreate": "Skapa grupp"
+  },
+  "unassigned": {
+    "title": "Ej tilldelade medlemmar",
+    "addTo": "Lägg till i...",
+    "allGroupsFull": "Alla grupper är fulla",
+    "addTitle": "Lägg till medlem i grupp",
+    "addConfirm": "Lägg till {{name}} i {{group}}?",
+    "adding": "Lägger till...",
+    "confirmAdd": "Lägg till i grupp"
   },
   "error": {
     "title": "Något gick fel"

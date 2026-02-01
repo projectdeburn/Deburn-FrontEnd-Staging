@@ -145,6 +145,14 @@ export default function CirclesAdmin() {
   });
   const [isCreatingGroup, setIsCreatingGroup] = useState(false);
 
+  // Add member state
+  const [addMemberModal, setAddMemberModal] = useState({
+    isOpen: false,
+    member: null,
+    toGroupId: '',
+  });
+  const [isAddingMember, setIsAddingMember] = useState(false);
+
   // Check admin status on mount
   useEffect(() => {
     checkAdminAndLoad();
@@ -498,6 +506,99 @@ export default function CirclesAdmin() {
   }
 
   /**
+   * Open add member modal
+   */
+  function handleOpenAddMemberModal(member, toGroupId) {
+    const targetGroup = groups.find(g => g.id === toGroupId);
+    if (targetGroup) {
+      setAddMemberModal({
+        isOpen: true,
+        member,
+        toGroupId,
+      });
+    }
+  }
+
+  /**
+   * Close add member modal
+   */
+  function handleCloseAddMemberModal() {
+    setAddMemberModal({
+      isOpen: false,
+      member: null,
+      toGroupId: '',
+    });
+  }
+
+  /**
+   * Execute add member to group
+   */
+  async function handleAddMember() {
+    if (!currentPool || !addMemberModal.member || !addMemberModal.toGroupId) {
+      return;
+    }
+
+    setIsAddingMember(true);
+
+    try {
+      const result = await circlesAdminApi.addMemberToGroup(
+        currentPool.id,
+        addMemberModal.toGroupId,
+        addMemberModal.member.userId
+      );
+
+      if (result.success) {
+        // Reload groups to reflect the change
+        await loadPoolData(currentPool.id);
+        handleCloseAddMemberModal();
+      }
+    } catch (err) {
+      console.error('Error adding member:', err);
+      alert(err.message || 'Failed to add member');
+    } finally {
+      setIsAddingMember(false);
+    }
+  }
+
+  /**
+   * Get groups that have capacity for new members
+   */
+  function getGroupsWithCapacity() {
+    const maxSize = currentPool?.maxGroupSize || 6;
+    return groups.filter(g => (g.members?.length || 0) < maxSize);
+  }
+
+  /**
+   * Get unassigned accepted members (accepted invitations not in any group)
+   */
+  function getUnassignedMembers() {
+    // Get all member ids currently in groups
+    const assignedUserIds = new Set();
+    for (const group of groups) {
+      for (const member of (group.members || [])) {
+        // Backend returns member.id (string), not member.userId
+        if (member.id) {
+          assignedUserIds.add(member.id);
+        }
+      }
+    }
+
+    // Filter accepted invitations to find unassigned ones
+    return invitations
+      .filter(inv => inv.status === 'accepted' && inv.userId && !assignedUserIds.has(inv.userId))
+      .map(inv => {
+        const firstName = inv.firstName || '';
+        const lastName = inv.lastName || '';
+        const fullName = `${firstName} ${lastName}`.trim();
+        return {
+          email: inv.email,
+          name: fullName || inv.email,
+          userId: inv.userId,
+        };
+      });
+  }
+
+  /**
    * Assign groups
    */
   async function handleAssignGroups() {
@@ -684,6 +785,58 @@ export default function CirclesAdmin() {
           </div>
         </section>
       )}
+
+      {/* Unassigned Members Section */}
+      {currentPool && groups.length > 0 && (() => {
+        const unassignedMembers = getUnassignedMembers();
+        const groupsWithCapacity = getGroupsWithCapacity();
+
+        if (unassignedMembers.length === 0) return null;
+
+        return (
+          <section className="section" id="admin-unassigned-section">
+            <h2 className="section-title">
+              {t('circlesAdmin:unassigned.title', 'Unassigned Members')}{' '}
+              <span className="admin-count-badge">{unassignedMembers.length}</span>
+            </h2>
+            <div className="admin-unassigned-list">
+              {unassignedMembers.map((member) => (
+                <div key={member.userId} className="admin-table-row">
+                  <div className="admin-member-info">
+                    {icons.user}
+                    <span style={{ marginLeft: '8px' }}>{member.name}</span>
+                  </div>
+                  {groupsWithCapacity.length > 0 ? (
+                    <div className="admin-move-select-wrapper">
+                      <select
+                        className="admin-move-select"
+                        value=""
+                        onChange={(e) => {
+                          if (e.target.value) {
+                            handleOpenAddMemberModal(member, e.target.value);
+                          }
+                        }}
+                      >
+                        <option value="">{t('circlesAdmin:unassigned.addTo', 'Add to...')}</option>
+                        {groupsWithCapacity.map(group => (
+                          <option key={group.id} value={group.id}>
+                            {group.name} ({group.members?.length || 0})
+                          </option>
+                        ))}
+                      </select>
+                      <span className="admin-move-icon">{icons.move}</span>
+                    </div>
+                  ) : (
+                    <span className="admin-status-info">
+                      {t('circlesAdmin:unassigned.allGroupsFull', 'All groups full')}
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+        );
+      })()}
 
       {/* Groups Section */}
       {currentPool && (
@@ -987,6 +1140,40 @@ export default function CirclesAdmin() {
             {isCreatingGroup
               ? t('circlesAdmin:groups.creating', 'Creating...')
               : t('circlesAdmin:groups.confirmCreate', 'Create Group')
+            }
+          </button>
+        </ModalFooter>
+      </Modal>
+
+      {/* Add Member Confirmation Modal */}
+      <Modal
+        isOpen={addMemberModal.isOpen}
+        onClose={handleCloseAddMemberModal}
+        title={t('circlesAdmin:unassigned.addTitle', 'Add Member to Group')}
+        size="sm"
+      >
+        <p style={{ color: 'var(--neutral-600)', margin: 0 }}>
+          {t('circlesAdmin:unassigned.addConfirm', 'Add {{name}} to {{group}}?', {
+            name: addMemberModal.member?.name || 'Member',
+            group: groups.find(g => g.id === addMemberModal.toGroupId)?.name || '',
+          })}
+        </p>
+        <ModalFooter>
+          <button
+            className="btn btn-ghost"
+            onClick={handleCloseAddMemberModal}
+            disabled={isAddingMember}
+          >
+            {t('common:cancel', 'Cancel')}
+          </button>
+          <button
+            className="btn btn-primary"
+            onClick={handleAddMember}
+            disabled={isAddingMember}
+          >
+            {isAddingMember
+              ? t('circlesAdmin:unassigned.adding', 'Adding...')
+              : t('circlesAdmin:unassigned.confirmAdd', 'Add to Group')
             }
           </button>
         </ModalFooter>

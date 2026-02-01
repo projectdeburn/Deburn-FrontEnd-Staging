@@ -48,7 +48,22 @@
     "deleteConfirm": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone.",
     "deleteWarning": "This group has {{count}} member(s) who will be removed from the group.",
     "deleting": "Deleting...",
-    "confirmDelete": "Delete Group"
+    "confirmDelete": "Delete Group",
+    "createButton": "Create Group",
+    "createTitle": "Create New Group",
+    "groupName": "Group Name",
+    "groupNamePlaceholder": "e.g., Circle D",
+    "creating": "Creating...",
+    "confirmCreate": "Create Group"
+  },
+  "unassigned": {
+    "title": "Unassigned Members",
+    "addTo": "Add to...",
+    "allGroupsFull": "All groups full",
+    "addTitle": "Add Member to Group",
+    "addConfirm": "Add {{name}} to {{group}}?",
+    "adding": "Adding...",
+    "confirmAdd": "Add to Group"
   },
   "error": {
     "title": "Something went wrong"
