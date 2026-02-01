@@ -62,7 +62,7 @@ export default function ResetPassword() {
         }
       }
     } catch (err) {
-      setError('Network error. Please try again.');
+      setError(t('errors.network', 'Network error. Please try again.'));
     } finally {
       setIsLoading(false);
     }
@@ -157,7 +157,7 @@ export default function ResetPassword() {
                   id="reset-password"
                   name="password"
                   className="form-input"
-                  placeholder="Enter new password"
+                  placeholder={t('resetPassword.passwordPlaceholder', 'Enter new password')}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -192,7 +192,7 @@ export default function ResetPassword() {
                   id="reset-password-confirm"
                   name="passwordConfirm"
                   className="form-input"
-                  placeholder="Confirm new password"
+                  placeholder={t('resetPassword.confirmPasswordPlaceholder', 'Confirm new password')}
                   value={passwordConfirm}
                   onChange={(e) => setPasswordConfirm(e.target.value)}
                   required

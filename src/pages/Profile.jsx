@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/context/AuthContext';
-import { put, post, uploadFile, del } from '@/utils/api';
+import { put, patch, post, uploadFile, del } from '@/utils/api';
 
 // LocalStorage key for conversation history (must match Coach.jsx)
 const CONVERSATION_STORAGE_KEY = 'hfai_coach_conversation';
@@ -169,9 +169,17 @@ export default function Profile() {
     }
   }
 
-  function changeLanguage(lang) {
+  async function changeLanguage(lang) {
     i18n.changeLanguage(lang);
     localStorage.setItem('language', lang);
+
+    // Sync to backend for email preferences
+    try {
+      await patch('/api/user/profile', { preferredLanguage: lang });
+    } catch (err) {
+      // Non-blocking - language still works locally even if sync fails
+      console.warn('Failed to sync language preference:', err);
+    }
   }
 
   async function handleLogout() {

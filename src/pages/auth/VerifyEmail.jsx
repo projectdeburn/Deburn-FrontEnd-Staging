@@ -6,9 +6,10 @@ import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { getApiBaseUrl } from '@/utils/api';
+import { authApi } from '@/features/auth/authApi';
 
 export default function VerifyEmail() {
-  const { t } = useTranslation('auth');
+  const { t, i18n } = useTranslation('auth');
   const [searchParams] = useSearchParams();
 
   const [status, setStatus] = useState('verifying'); // verifying, success, error, resent
@@ -52,19 +53,14 @@ export default function VerifyEmail() {
 
     setIsResending(true);
     try {
-      const response = await fetch(`${getApiBaseUrl()}/api/auth/resend-verification`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-      const data = await response.json();
-      if (response.ok && data.success) {
+      const result = await authApi.resendVerification(email, i18n.language);
+      if (result.success) {
         setStatus('resent');
       } else {
-        setError(data.error || t('verifyEmail.resendFailed', 'Failed to resend verification email'));
+        setError(result.error || t('verifyEmail.resendFailed', 'Failed to resend verification email'));
       }
     } catch (err) {
-      setError('Network error. Please try again.');
+      setError(t('errors.network', 'Network error. Please try again.'));
     } finally {
       setIsResending(false);
     }

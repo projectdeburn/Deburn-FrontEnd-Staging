@@ -4,6 +4,8 @@
  */
 
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '@/context/AuthContext';
+import { patch } from '@/utils/api';
 
 const LANGUAGES = [
   { code: 'en', label: 'EN' },
@@ -12,11 +14,22 @@ const LANGUAGES = [
 
 export default function LanguageSwitcher({ className = '' }) {
   const { i18n } = useTranslation();
+  const { isAuthenticated } = useAuth();
   const currentLang = i18n.language || 'en';
 
-  const handleLanguageChange = (langCode) => {
+  const handleLanguageChange = async (langCode) => {
     i18n.changeLanguage(langCode);
     localStorage.setItem('language', langCode);
+
+    // Sync to backend if user is logged in (for email preferences)
+    if (isAuthenticated) {
+      try {
+        await patch('/api/user/profile', { preferredLanguage: langCode });
+      } catch (err) {
+        // Non-blocking - language still works locally
+        console.warn('Failed to sync language preference:', err);
+      }
+    }
   };
 
   return (

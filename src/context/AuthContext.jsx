@@ -6,6 +6,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { authApi } from '@/features/auth/authApi';
 import { setAuthToken, clearAuthToken } from '@/utils/api';
+import i18n from '@/utils/i18n';
 
 const AuthContext = createContext(null);
 
@@ -17,6 +18,15 @@ function clearStoredAuth() {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
   clearAuthToken();
+}
+
+// Helper to sync language from user profile
+function syncLanguageFromUser(userData) {
+  const preferredLanguage = userData?.preferredLanguage;
+  if (preferredLanguage && ['en', 'sv'].includes(preferredLanguage)) {
+    i18n.changeLanguage(preferredLanguage);
+    localStorage.setItem('language', preferredLanguage);
+  }
 }
 
 export function AuthProvider({ children }) {
@@ -82,6 +92,9 @@ export function AuthProvider({ children }) {
             userData = { ...userData, isOrgAdmin: false };
           }
 
+          // Sync language from user profile
+          syncLanguageFromUser(userData);
+
           // Update user data and cache
           setUser(userData);
           localStorage.setItem(USER_KEY, JSON.stringify(userData));
@@ -115,6 +128,9 @@ export function AuthProvider({ children }) {
             userData = { ...userData, isOrgAdmin: false };
           }
 
+          // Sync language from user profile
+          syncLanguageFromUser(userData);
+
           setUser(userData);
           setIsAuthenticated(true);
           localStorage.setItem(USER_KEY, JSON.stringify(userData));
@@ -147,6 +163,9 @@ export function AuthProvider({ children }) {
         } catch {
           userData = { ...userData, isOrgAdmin: false };
         }
+
+        // Sync language from user profile
+        syncLanguageFromUser(userData);
 
         setUser(userData);
         setIsAuthenticated(true);
@@ -187,6 +206,9 @@ export function AuthProvider({ children }) {
         userData = { ...userData, isOrgAdmin: false };
       }
 
+      // Sync language from user profile
+      syncLanguageFromUser(userData);
+
       // Cache user data for instant restore on next visit
       localStorage.setItem(USER_KEY, JSON.stringify(userData));
 
@@ -208,8 +230,8 @@ export function AuthProvider({ children }) {
     setIsAuthenticated(false);
   }, []);
 
-  const register = useCallback(async (userData) => {
-    return authApi.register(userData);
+  const register = useCallback(async (userData, language = 'en') => {
+    return authApi.register(userData, language);
   }, []);
 
   const value = {

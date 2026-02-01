@@ -91,7 +91,7 @@ export default function Login() {
                 id="login-email"
                 name="email"
                 className="form-input"
-                placeholder="you@company.com"
+                placeholder={t('login.emailPlaceholder', 'you@company.com')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -109,7 +109,7 @@ export default function Login() {
                   id="login-password"
                   name="password"
                   className="form-input"
-                  placeholder="Enter your password"
+                  placeholder={t('login.passwordPlaceholder', 'Enter your password')}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -166,7 +166,7 @@ export default function Login() {
           <div className="form-footer">
             {t('login.noAccount', "Don't have an account?")}{' '}
             <Link to="/register" className="form-link">
-              {t('login.signUp', 'Create account')}
+              {t('login.createAccount', 'Create account')}
             </Link>
           </div>
         </div>
