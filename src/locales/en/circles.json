@@ -51,7 +51,11 @@
     "discussionTopic": "Discussion topic",
     "joinCall": "Join Call",
     "scheduleMeeting": "Schedule Meeting",
+    "scheduleAnother": "Schedule Meeting",
     "viewDetails": "View Details",
+    "viewUpcomingMeetings": "View Upcoming Meetings",
+    "editAvailability": "Edit Availability",
+    "noLinkYet": "No meeting link added yet",
     "membersTitle": "Members",
     "currentTopic": "Current Discussion Topic",
     "upcomingMeetings": "Upcoming Meetings",
@@ -59,7 +63,9 @@
     "noUpcoming": "No upcoming meetings scheduled.",
     "join": "Join",
     "completed": "Completed",
-    "cancelled": "Cancelled"
+    "cancelled": "Cancelled",
+    "cancelForEveryone": "Cancel for Everyone",
+    "cancel": "Cancel"
   },
   "schedule": {
     "title": "Schedule Meeting",

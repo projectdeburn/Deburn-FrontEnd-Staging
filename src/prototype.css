@@ -1022,6 +1022,26 @@ p {
     color: var(--color-ink);
 }
 
+.btn-link-underline {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: var(--text-sm);
+    color: var(--neutral-500);
+    text-decoration: underline;
+    cursor: pointer;
+    transition: color 0.15s ease;
+}
+
+.btn-link-underline:hover {
+    color: var(--color-deep-forest);
+}
+
+.btn-link-underline:disabled {
+    color: var(--neutral-400);
+    cursor: not-allowed;
+}
+
 /* ==========================================================================
    Sections
    ========================================================================== */
@@ -7054,6 +7074,11 @@ body > .toast-notification.fade-out {
     font-size: var(--text-body-sm);
 }
 
+.circle-card-actions-row--cancel {
+    justify-content: center;
+    padding-top: var(--space-1);
+}
+
 .btn.btn-disabled,
 .btn:disabled {
     opacity: 0.5;
@@ -7614,6 +7639,17 @@ body > .toast-notification.fade-out {
 
 .schedule-meeting-slot-availability--booked:hover {
     background: rgba(220, 38, 38, 0.1);
+}
+
+.schedule-meeting-slot-booked-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-left: auto;
+}
+
+.schedule-meeting-slot-booked-actions .btn-link-underline {
+    font-size: var(--text-caption);
 }
 
 /* Members availability modal */

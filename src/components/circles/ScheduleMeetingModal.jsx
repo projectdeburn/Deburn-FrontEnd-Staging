@@ -88,7 +88,7 @@ function getNextDateForDayOfWeek(dayOfWeek, weeksAhead = 0) {
   return targetDate;
 }
 
-function convertSlotsToUpcomingDates(slots, weeksToShow = 2) {
+function convertSlotsToUpcomingDates(slots, weeksToShow = 4) {
   const upcomingSlots = [];
 
   for (let week = 0; week < weeksToShow; week++) {
@@ -140,6 +140,7 @@ export default function ScheduleMeetingModal({
   onClose,
   group,
   onSchedule,
+  onMeetingCancelled,
 }) {
   const { t } = useTranslation(['circles', 'common']);
   const [allSlots, setAllSlots] = useState([]);
@@ -148,6 +149,7 @@ export default function ScheduleMeetingModal({
   const [existingMeetings, setExistingMeetings] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isScheduling, setIsScheduling] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(null);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [meetingTitle, setMeetingTitle] = useState('');
   const [meetingLink, setMeetingLink] = useState('');
@@ -176,7 +178,7 @@ export default function ScheduleMeetingModal({
         const weeklySlots = availResult.data.slots || [];
         const members = availResult.data.totalMembers || group?.members?.length || 5;
         const memberNames = availResult.data.members || [];
-        const upcomingSlots = convertSlotsToUpcomingDates(weeklySlots, 2);
+        const upcomingSlots = convertSlotsToUpcomingDates(weeklySlots, 4);
         setAllSlots(upcomingSlots);
         setAllMembers(memberNames);
         setTotalMembers(members);
@@ -196,14 +198,31 @@ export default function ScheduleMeetingModal({
   }
 
   // Check if a slot clashes with an existing meeting, returns the meeting if found
+  // Excludes cancelled meetings so slot returns to unbooked state
   function getBookedMeeting(slot) {
     return existingMeetings.find(meeting => {
       if (!meeting.scheduledAt) return false;
+      if (meeting.status === 'cancelled') return false;
       const meetingDate = new Date(meeting.scheduledAt);
       const meetingDateStr = meetingDate.toISOString().split('T')[0];
       const meetingHour = meetingDate.getHours();
       return meetingDateStr === slot.date && meetingHour === slot.hour;
     });
+  }
+
+  async function handleCancelMeeting(e, meetingId) {
+    e.stopPropagation();
+    setIsCancelling(meetingId);
+    try {
+      await circlesApi.cancelMeeting(meetingId);
+      // Reload availability to refresh the booked slots
+      await loadAvailability();
+      onMeetingCancelled?.();
+    } catch (err) {
+      console.error('Failed to cancel meeting:', err);
+    } finally {
+      setIsCancelling(null);
+    }
   }
 
   async function handleSchedule() {
@@ -251,15 +270,6 @@ export default function ScheduleMeetingModal({
           <p className="schedule-meeting-subtitle">
             {t('circles:schedule.for', 'For: {{groupName}}', { groupName: group.name })}
           </p>
-
-          {group.nextMeeting?.title && (
-            <div className="schedule-meeting-topic">
-              <span className="schedule-meeting-topic-label">
-                {t('circles:schedule.discussionTopic', 'Discussion Topic:')}
-              </span>
-              <p className="schedule-meeting-topic-text">{group.nextMeeting.title}</p>
-            </div>
-          )}
 
           {isLoading ? (
             <div className="schedule-meeting-loading">
@@ -326,13 +336,49 @@ export default function ScheduleMeetingModal({
                     const bookedMeeting = getBookedMeeting(slot);
                     const isBooked = !!bookedMeeting;
 
+                    // Use div for booked slots (contains cancel button), button for available slots
+                    if (isBooked) {
+                      return (
+                        <div
+                          key={slotKey}
+                          className="schedule-meeting-slot schedule-meeting-slot--booked"
+                        >
+                          <span className="schedule-meeting-slot-date">
+                            {icons.calendar}
+                            {formatSlotDate(slot)}
+                          </span>
+                          <span className="schedule-meeting-slot-time">
+                            {icons.clock}
+                            {formatHour(slot.hour)}
+                          </span>
+                          <div className="schedule-meeting-slot-booked-actions">
+                            <span
+                              className="schedule-meeting-slot-availability schedule-meeting-slot-availability--booked"
+                              title={bookedMeeting.title || t('circles:schedule.alreadyBooked', 'Already booked')}
+                            >
+                              {t('circles:schedule.booked', 'Booked')}
+                            </span>
+                            <button
+                              type="button"
+                              className="btn-link-underline"
+                              onClick={(e) => handleCancelMeeting(e, bookedMeeting.id)}
+                              disabled={isCancelling === bookedMeeting.id}
+                            >
+                              {isCancelling === bookedMeeting.id
+                                ? '...'
+                                : t('circles:groups.cancel', 'Cancel')}
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    }
+
                     return (
                       <button
                         key={slotKey}
                         type="button"
-                        className={`schedule-meeting-slot ${isSelected ? 'schedule-meeting-slot--selected' : ''} ${isBooked ? 'schedule-meeting-slot--booked' : ''}`}
-                        onClick={() => !isBooked && setSelectedSlot(slot)}
-                        disabled={isBooked}
+                        className={`schedule-meeting-slot ${isSelected ? 'schedule-meeting-slot--selected' : ''}`}
+                        onClick={() => setSelectedSlot(slot)}
                       >
                         <span className="schedule-meeting-slot-date">
                           {icons.calendar}
@@ -342,25 +388,16 @@ export default function ScheduleMeetingModal({
                           {icons.clock}
                           {formatHour(slot.hour)}
                         </span>
-                        {isBooked ? (
-                          <span
-                            className="schedule-meeting-slot-availability schedule-meeting-slot-availability--booked"
-                            title={bookedMeeting.title || t('circles:schedule.alreadyBooked', 'Already booked')}
-                          >
-                            {t('circles:schedule.booked', 'Booked')}
-                          </span>
-                        ) : (
-                          <span
-                            className="schedule-meeting-slot-availability"
-                            onClick={(e) => showMembersModal(e, slot)}
-                            role="button"
-                            tabIndex={0}
-                            title={t('circles:schedule.clickToSeeMembers', 'Click to see members')}
-                          >
-                            {icons.users}
-                            {slot.availableCount}/{totalMembers}
-                          </span>
-                        )}
+                        <span
+                          className="schedule-meeting-slot-availability"
+                          onClick={(e) => showMembersModal(e, slot)}
+                          role="button"
+                          tabIndex={0}
+                          title={t('circles:schedule.clickToSeeMembers', 'Click to see members')}
+                        >
+                          {icons.users}
+                          {slot.availableCount}/{totalMembers}
+                        </span>
                       </button>
                     );
                   })}

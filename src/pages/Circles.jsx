@@ -300,6 +300,7 @@ export default function Circles() {
         }}
         group={selectedGroup}
         onSchedule={handleScheduleSubmit}
+        onMeetingCancelled={loadCirclesData}
       />
     </>
   );

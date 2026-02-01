@@ -86,6 +86,7 @@ export default function GroupDetailsModal({
   const { t } = useTranslation(['circles', 'common']);
   const [meetings, setMeetings] = useState([]);
   const [isLoadingMeetings, setIsLoadingMeetings] = useState(false);
+  const [cancellingMeetingId, setCancellingMeetingId] = useState(null);
 
   useEffect(() => {
     if (isOpen && group?.id) {
@@ -107,6 +108,19 @@ export default function GroupDetailsModal({
     }
   }
 
+  async function handleCancelForMe(meetingId) {
+    setCancellingMeetingId(meetingId);
+    try {
+      await circlesApi.updateAttendance(meetingId, false);
+      // Reload meetings to reflect the change
+      await loadMeetings();
+    } catch (err) {
+      console.error('Failed to cancel attendance:', err);
+    } finally {
+      setCancellingMeetingId(null);
+    }
+  }
+
   if (!group) return null;
 
   const { name, members = [], pool } = group;
@@ -119,7 +133,7 @@ export default function GroupDetailsModal({
     monthly: t('circles:groups.monthly', 'Monthly'),
   }[cadence] || cadence;
 
-  const upcomingMeetings = meetings.filter(m => new Date(m.scheduledAt) >= new Date());
+  const upcomingMeetings = meetings.filter(m => new Date(m.scheduledAt) >= new Date() && m.status !== 'cancelled');
   const pastMeetings = meetings.filter(m => new Date(m.scheduledAt) < new Date());
 
   return (
@@ -183,17 +197,29 @@ export default function GroupDetailsModal({
                       {formatMeetingDate(meeting.scheduledAt)}
                     </span>
                   </div>
-                  {meeting.meetingLink && (
-                    <a
-                      href={ensureProtocol(meeting.meetingLink)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn btn-primary btn-small"
+                  <div className="group-details-meeting-actions">
+                    {meeting.meetingLink && (
+                      <a
+                        href={ensureProtocol(meeting.meetingLink)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn btn-primary btn-small"
+                      >
+                        {icons.video}
+                        <span>{t('circles:groups.join', 'Join')}</span>
+                      </a>
+                    )}
+                    <button
+                      type="button"
+                      className="btn-link-underline"
+                      onClick={() => handleCancelForMe(meeting.id)}
+                      disabled={cancellingMeetingId === meeting.id}
                     >
-                      {icons.video}
-                      <span>{t('circles:groups.join', 'Join')}</span>
-                    </a>
-                  )}
+                      {cancellingMeetingId === meeting.id
+                        ? t('common:loading', 'Loading...')
+                        : t('circles:groups.cancel', 'Cancel')}
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>

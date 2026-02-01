@@ -51,7 +51,11 @@
     "discussionTopic": "Diskussionsämne",
     "joinCall": "Gå med i samtal",
     "scheduleMeeting": "Boka möte",
+    "scheduleAnother": "Boka möte",
     "viewDetails": "Visa detaljer",
+    "viewUpcomingMeetings": "Visa kommande möten",
+    "editAvailability": "Ändra tillgänglighet",
+    "noLinkYet": "Ingen möteslänk tillagd än",
     "membersTitle": "Medlemmar",
     "currentTopic": "Aktuellt diskussionsämne",
     "upcomingMeetings": "Kommande möten",
@@ -59,7 +63,9 @@
     "noUpcoming": "Inga kommande möten planerade.",
     "join": "Gå med",
     "completed": "Genomfört",
-    "cancelled": "Inställt"
+    "cancelled": "Inställt",
+    "cancelForEveryone": "Avboka för alla",
+    "cancel": "Avboka"
   },
   "schedule": {
     "title": "Boka möte",
