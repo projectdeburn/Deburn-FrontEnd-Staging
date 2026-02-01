@@ -162,6 +162,7 @@ export default function Circles() {
         duration: meetingData.duration || 60,
         meetingLink: meetingData.meetingLink,
         timezone: meetingData.timezone,
+        availableMembers: meetingData.availableMembers,
       });
       if (result.success) {
         await loadCirclesData();

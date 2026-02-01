@@ -82,22 +82,15 @@ export function AuthProvider({ children }) {
         if (result.success && result.data?.user) {
           let userData = result.data.user;
 
-          // Check org admin status
-          try {
-            const adminResult = await authApi.getAdminStatus();
-            if (adminResult.success && adminResult.data) {
-              userData = { ...userData, isOrgAdmin: adminResult.data.isAdmin };
-            }
-          } catch {
-            userData = { ...userData, isOrgAdmin: false };
-          }
-
           // Sync language from user profile
           syncLanguageFromUser(userData);
 
           // Update user data and cache
           setUser(userData);
           localStorage.setItem(USER_KEY, JSON.stringify(userData));
+
+          // Fetch admin status async (doesn't block auth)
+          fetchAdminStatusAsync(userData);
         } else {
           // Invalid session - logout silently
           clearStoredAuth();
@@ -112,21 +105,26 @@ export function AuthProvider({ children }) {
       }
     }
 
+    // Fetch admin status without blocking
+    async function fetchAdminStatusAsync(userData) {
+      try {
+        const adminResult = await authApi.getAdminStatus();
+        if (adminResult.success && adminResult.data) {
+          const updatedUser = { ...userData, isOrgAdmin: adminResult.data.isAdmin };
+          setUser(updatedUser);
+          localStorage.setItem(USER_KEY, JSON.stringify(updatedUser));
+        }
+      } catch {
+        // Silently fail - user just won't have admin access
+      }
+    }
+
     // Full session fetch (blocks rendering until complete)
     async function fetchSession() {
       try {
         const result = await authApi.getSession();
         if (result.success && result.data?.user) {
-          let userData = result.data.user;
-
-          try {
-            const adminResult = await authApi.getAdminStatus();
-            if (adminResult.success && adminResult.data) {
-              userData = { ...userData, isOrgAdmin: adminResult.data.isAdmin };
-            }
-          } catch {
-            userData = { ...userData, isOrgAdmin: false };
-          }
+          const userData = result.data.user;
 
           // Sync language from user profile
           syncLanguageFromUser(userData);
@@ -134,6 +132,9 @@ export function AuthProvider({ children }) {
           setUser(userData);
           setIsAuthenticated(true);
           localStorage.setItem(USER_KEY, JSON.stringify(userData));
+
+          // Fetch admin status async (doesn't block auth)
+          fetchAdminStatusAsync(userData);
         } else {
           clearStoredAuth();
           setUser(null);

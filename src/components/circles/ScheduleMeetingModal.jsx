@@ -238,6 +238,7 @@ export default function ScheduleMeetingModal({
         duration: 60,
         meetingLink: normalizeUrl(meetingLink),
         timezone,
+        availableMembers: selectedSlot.availableMembers || [],
       });
       onClose();
     } finally {
