@@ -15,8 +15,9 @@ export function getApiBaseUrl() {
 /**
  * Auth token management
  * Token is stored in memory for API requests
+ * Initialize from localStorage to avoid race condition on page load
  */
-let authToken = null;
+let authToken = localStorage.getItem('hfai_auth_token');
 
 export function setAuthToken(token) {
   authToken = token;
