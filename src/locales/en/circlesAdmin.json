@@ -61,7 +61,9 @@
     "removeConfirm": "Remove {{name}} from {{group}}?",
     "removeWarning": "This will also remove their invitation. They will need to be re-invited to join again.",
     "removing": "Removing...",
-    "confirmRemove": "Remove Member"
+    "confirmRemove": "Remove Member",
+    "editName": "Edit name",
+    "editGroupTitle": "Edit Group Name"
   },
   "unassigned": {
     "title": "Unassigned Members",

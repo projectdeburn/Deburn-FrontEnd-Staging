@@ -70,57 +70,36 @@ function normalizeUrl(url) {
   return `https://${trimmed}`;
 }
 
-function getNextDateForDayOfWeek(dayOfWeek, weeksAhead = 0) {
-  const today = new Date();
-  const currentDay = today.getDay();
-  let daysUntil = dayOfWeek - currentDay;
+function filterAndSortSlots(slots) {
+  // Filter out past dates and slots with only 1 person available
+  const today = new Date().toISOString().split('T')[0];
 
-  // If the day is today or already passed this week, go to next week's occurrence
-  if (daysUntil <= 0) {
-    daysUntil += 7;
-  }
-
-  // Add additional weeks
-  daysUntil += weeksAhead * 7;
-
-  const targetDate = new Date(today);
-  targetDate.setDate(today.getDate() + daysUntil);
-  return targetDate;
-}
-
-function convertSlotsToUpcomingDates(slots, weeksToShow = 4) {
-  const upcomingSlots = [];
-
-  for (let week = 0; week < weeksToShow; week++) {
-    for (const slot of slots) {
-      // Skip slots where only 1 person is available (just the user)
-      if (slot.availableCount <= 1) continue;
-
-      const date = getNextDateForDayOfWeek(slot.day, week);
-      const dateStr = date.toISOString().split('T')[0];
-      upcomingSlots.push({
-        date: dateStr,
-        day: slot.day,
-        hour: slot.hour,
-        availableCount: slot.availableCount,
-        availableMembers: slot.availableMembers || [],
-        dateObj: date,
-      });
-    }
-  }
-
-  // Sort by availability (most available first), then by date, then by hour
-  upcomingSlots.sort((a, b) => {
-    if (b.availableCount !== a.availableCount) return b.availableCount - a.availableCount;
-    if (a.date !== b.date) return a.date.localeCompare(b.date);
-    return a.hour - b.hour;
+  const filteredSlots = slots.filter(slot => {
+    // Skip slots where only 1 person is available
+    if (slot.availableCount <= 1) return false;
+    // Skip past dates
+    if (slot.date < today) return false;
+    return true;
   });
 
-  return upcomingSlots;
+  // Sort by date first, then by hour, then by availability count (descending)
+  filteredSlots.sort((a, b) => {
+    if (a.date !== b.date) return a.date.localeCompare(b.date);
+    if (a.hour !== b.hour) return a.hour - b.hour;
+    return b.availableCount - a.availableCount;
+  });
+
+  return filteredSlots.map(slot => ({
+    date: slot.date,
+    hour: slot.hour,
+    availableCount: slot.availableCount,
+    availableMembers: slot.availableMembers || [],
+  }));
 }
 
 function formatSlotDate(slot) {
-  const date = new Date(slot.date);
+  // Parse YYYY-MM-DD without timezone issues
+  const date = new Date(slot.date + 'T00:00:00');
   return date.toLocaleDateString('en-US', {
     weekday: 'short',
     month: 'short',
@@ -175,11 +154,11 @@ export default function ScheduleMeetingModal({
       ]);
 
       if (availResult.success) {
-        const weeklySlots = availResult.data.slots || [];
+        const rawSlots = availResult.data.slots || [];
         const members = availResult.data.totalMembers || group?.members?.length || 5;
         const memberNames = availResult.data.members || [];
-        const upcomingSlots = convertSlotsToUpcomingDates(weeklySlots, 4);
-        setAllSlots(upcomingSlots);
+        const filteredSlots = filterAndSortSlots(rawSlots);
+        setAllSlots(filteredSlots);
         setAllMembers(memberNames);
         setTotalMembers(members);
       }

@@ -6260,6 +6260,21 @@ body > .toast-notification.fade-out {
     flex: 1;
 }
 
+.admin-group-name-edit {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.admin-group-name-edit .btn-icon {
+    opacity: 0.6;
+    transition: opacity var(--duration-fast);
+}
+
+.admin-group-name-edit .btn-icon:hover {
+    opacity: 1;
+}
+
 .admin-group-header h4 {
     font-size: var(--text-body-base);
     font-weight: 600;
@@ -6939,6 +6954,224 @@ body > .toast-notification.fade-out {
 .availability-banner-actions {
     display: flex;
     gap: var(--space-3);
+}
+
+/* Date Picker for Availability */
+.availability-date-picker {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3);
+    padding: var(--space-4) 0;
+}
+
+.availability-date-nav {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--neutral-200);
+    border-radius: var(--radius-md);
+    background: white;
+    cursor: pointer;
+    color: var(--neutral-600);
+    transition: all var(--duration-fast);
+}
+
+.availability-date-nav:hover {
+    border-color: var(--neutral-300);
+    background: var(--neutral-50);
+    color: var(--color-ink);
+}
+
+.availability-date-display {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-width: 200px;
+}
+
+.availability-date-input {
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+}
+
+.availability-date-label {
+    width: 100%;
+    text-align: center;
+    padding: var(--space-3) var(--space-4);
+    background: white;
+    border: 1px solid var(--neutral-200);
+    border-radius: var(--radius-md);
+    font-size: var(--text-body);
+    font-weight: 600;
+    color: var(--color-ink);
+    cursor: pointer;
+    transition: all var(--duration-fast);
+}
+
+.availability-date-display:hover .availability-date-label {
+    border-color: var(--color-deep-forest);
+    background: var(--neutral-50);
+}
+
+.availability-date-info {
+    text-align: center;
+    margin-bottom: var(--space-3);
+}
+
+.availability-date-count {
+    font-size: var(--text-body-sm);
+    color: var(--neutral-500);
+}
+
+.availability-past-warning {
+    text-align: center;
+    padding: var(--space-2) var(--space-3);
+    margin-bottom: var(--space-3);
+    background: rgba(255, 152, 0, 0.1);
+    border: 1px solid rgba(255, 152, 0, 0.3);
+    border-radius: var(--radius-md);
+    color: #e65100;
+    font-size: var(--text-body-sm);
+}
+
+.availability-chip:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Calendar Grid for Availability */
+.availability-calendar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-4) 0;
+}
+
+.availability-month-label {
+    font-size: var(--text-body);
+    font-weight: 600;
+    color: var(--color-ink);
+    min-width: 160px;
+    text-align: center;
+}
+
+.availability-calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin-bottom: var(--space-1);
+}
+
+.availability-weekday {
+    text-align: center;
+    font-size: var(--text-caption);
+    font-weight: 600;
+    color: var(--neutral-500);
+    padding: var(--space-1) 0;
+}
+
+.availability-calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+
+.availability-calendar-day {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    padding: var(--space-1) var(--space-2);
+    min-height: 36px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    background: white;
+    cursor: pointer;
+    transition: all var(--duration-fast);
+    position: relative;
+}
+
+.availability-calendar-day:hover:not(.past):not(:disabled) {
+    background: var(--neutral-100);
+    border-color: var(--neutral-300);
+}
+
+.availability-calendar-day-empty {
+    min-height: 36px;
+}
+
+.availability-calendar-day.past {
+    opacity: 0.3;
+    cursor: not-allowed;
+    background: var(--neutral-50);
+}
+
+.availability-calendar-day.today {
+    border-color: var(--color-deep-forest);
+    font-weight: 600;
+}
+
+.availability-calendar-day.selected {
+    background: var(--color-deep-forest);
+    border-color: var(--color-deep-forest);
+    color: white;
+}
+
+.availability-calendar-day.selected:hover {
+    background: #234541;
+}
+
+.availability-calendar-day.has-slots:not(.selected) {
+    background: rgba(90, 154, 130, 0.15);
+    border-color: rgba(90, 154, 130, 0.4);
+}
+
+.availability-calendar-day.has-slots:not(.selected):hover {
+    background: rgba(90, 154, 130, 0.25);
+}
+
+.availability-day-number {
+    font-size: var(--text-body-sm);
+    font-weight: 500;
+    line-height: 1;
+}
+
+.availability-day-indicator {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--color-success);
+    line-height: 1;
+}
+
+.availability-calendar-day.selected .availability-day-indicator {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* Hour selection section when a date is selected */
+.availability-hours-section {
+    margin-top: var(--space-4);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--neutral-200);
+}
+
+.availability-hours-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-3);
+}
+
+.availability-selected-date {
+    font-size: var(--text-body);
+    font-weight: 600;
+    color: var(--color-ink);
 }
 
 /* Circle Card - Enhanced with consistent layout */

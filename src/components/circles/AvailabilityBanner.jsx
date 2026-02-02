@@ -26,37 +26,62 @@ const icons = {
       <polyline points="18 15 12 9 6 15"></polyline>
     </svg>
   ),
-};
-
-const DAYS_ORDER = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-
-const DAY_TO_NUMBER = {
-  sunday: 0,
-  monday: 1,
-  tuesday: 2,
-  wednesday: 3,
-  thursday: 4,
-  friday: 5,
-  saturday: 6,
-};
-
-const NUMBER_TO_DAY = {
-  0: 'sunday',
-  1: 'monday',
-  2: 'tuesday',
-  3: 'wednesday',
-  4: 'thursday',
-  5: 'friday',
-  6: 'saturday',
+  chevronLeft: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="15 18 9 12 15 6"></polyline>
+    </svg>
+  ),
+  chevronRight: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  ),
 };
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
+const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+// Helper to format date as YYYY-MM-DD
+function formatDateKey(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+// Get today's date as YYYY-MM-DD
+function getTodayKey() {
+  return formatDateKey(new Date());
+}
 
 function formatHour(hour) {
   if (hour === 0) return '12am';
   if (hour === 12) return '12pm';
   if (hour > 12) return `${hour - 12}pm`;
   return `${hour}am`;
+}
+
+// Get calendar days for a month (current month only, with empty slots for alignment)
+function getCalendarDays(year, month) {
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const startPadding = firstDay.getDay(); // 0-6 (Sun-Sat)
+  const totalDays = lastDay.getDate();
+
+  const days = [];
+
+  // Add empty slots for alignment
+  for (let i = 0; i < startPadding; i++) {
+    days.push({ date: null, isEmpty: true });
+  }
+
+  // Add days of current month only
+  for (let i = 1; i <= totalDays; i++) {
+    const d = new Date(year, month, i);
+    days.push({ date: d, isEmpty: false });
+  }
+
+  return days;
 }
 
 export default function AvailabilityBanner({
@@ -66,31 +91,75 @@ export default function AvailabilityBanner({
   isExpanded = false,
   onToggleExpanded,
 }) {
-  const { t } = useTranslation(['circles', 'common']);
+  const { t, i18n } = useTranslation(['circles', 'common']);
 
   // Use internal state if no external control provided
   const [internalExpanded, setInternalExpanded] = useState(false);
   const expanded = onToggleExpanded ? isExpanded : internalExpanded;
   const setExpanded = onToggleExpanded || setInternalExpanded;
-  const [selectedDay, setSelectedDay] = useState('monday');
+
+  // Calendar state
+  const today = new Date();
+  const [viewYear, setViewYear] = useState(today.getFullYear());
+  const [viewMonth, setViewMonth] = useState(today.getMonth());
+  const [selectedDate, setSelectedDate] = useState(null); // Date that's expanded to show hours
   const [selectedSlots, setSelectedSlots] = useState(new Set());
   const [hasChanges, setHasChanges] = useState(false);
 
   const hasAvailability = availability && availability.length > 0;
   const slotCount = availability.length;
+  const todayKey = getTodayKey();
 
   useEffect(() => {
     if (availability.length > 0) {
-      const slotKeys = availability.map(slot => {
-        const dayName = NUMBER_TO_DAY[slot.day] || 'monday';
-        return `${dayName}-${slot.hour}`;
-      });
+      const slotKeys = availability.map(slot => `${slot.date}-${slot.hour}`);
       setSelectedSlots(new Set(slotKeys));
     }
   }, [availability]);
 
+  // Get calendar days for current view
+  const calendarDays = getCalendarDays(viewYear, viewMonth);
+
+  // Month name for header
+  const monthName = new Date(viewYear, viewMonth).toLocaleDateString(i18n.language, {
+    month: 'long',
+    year: 'numeric'
+  });
+
+  // Navigate months
+  function goToPrevMonth() {
+    if (viewMonth === 0) {
+      setViewYear(viewYear - 1);
+      setViewMonth(11);
+    } else {
+      setViewMonth(viewMonth - 1);
+    }
+  }
+
+  function goToNextMonth() {
+    if (viewMonth === 11) {
+      setViewYear(viewYear + 1);
+      setViewMonth(0);
+    } else {
+      setViewMonth(viewMonth + 1);
+    }
+  }
+
+  // Check if a date has any slots selected
+  function getDateSlotCount(dateKey) {
+    return HOURS.filter(hour => selectedSlots.has(`${dateKey}-${hour}`)).length;
+  }
+
+  // Toggle a date's expanded state
+  function handleDateClick(dateKey, isPast) {
+    if (isPast) return;
+    setSelectedDate(selectedDate === dateKey ? null : dateKey);
+  }
+
+  // Toggle hour slot
   function toggleSlot(hour) {
-    const key = `${selectedDay}-${hour}`;
+    if (!selectedDate) return;
+    const key = `${selectedDate}-${hour}`;
     setSelectedSlots(prev => {
       const newSet = new Set(prev);
       if (newSet.has(key)) {
@@ -104,71 +173,55 @@ export default function AvailabilityBanner({
   }
 
   function isSlotSelected(hour) {
-    return selectedSlots.has(`${selectedDay}-${hour}`);
+    return selectedDate && selectedSlots.has(`${selectedDate}-${hour}`);
   }
 
   function handleSave() {
     const slots = Array.from(selectedSlots).map(key => {
-      const [dayName, hour] = key.split('-');
-      return { day: DAY_TO_NUMBER[dayName], hour: parseInt(hour, 10) };
+      const lastDash = key.lastIndexOf('-');
+      const date = key.substring(0, lastDash);
+      const hour = parseInt(key.substring(lastDash + 1), 10);
+      return { date, hour };
     });
     onSaveAvailability?.(slots);
     setHasChanges(false);
   }
 
-  function handleClearAll() {
+  function handleClearDate() {
+    if (!selectedDate) return;
     setSelectedSlots(prev => {
       const newSet = new Set(prev);
       HOURS.forEach(hour => {
-        newSet.delete(`${selectedDay}-${hour}`);
+        newSet.delete(`${selectedDate}-${hour}`);
       });
       return newSet;
     });
     setHasChanges(true);
   }
 
-  function handleClearAllDays() {
+  function handleClearAll() {
     setSelectedSlots(new Set());
     setHasChanges(true);
   }
 
   function handleCancel() {
-    const slotKeys = availability.map(slot => {
-      const dayName = NUMBER_TO_DAY[slot.day] || 'monday';
-      return `${dayName}-${slot.hour}`;
-    });
+    const slotKeys = availability.map(slot => `${slot.date}-${slot.hour}`);
     setSelectedSlots(new Set(slotKeys));
     setHasChanges(false);
+    setSelectedDate(null);
     setExpanded(false);
   }
 
-  const currentDaySlotCount = HOURS.filter(hour =>
-    selectedSlots.has(`${selectedDay}-${hour}`)
-  ).length;
+  const currentDateSlotCount = selectedDate ? getDateSlotCount(selectedDate) : 0;
 
-  function getDaySlotCount(day) {
-    return HOURS.filter(hour => selectedSlots.has(`${day}-${hour}`)).length;
-  }
-
-  const shortDayNames = {
-    monday: t('circles:availability.days.mon', 'Mon'),
-    tuesday: t('circles:availability.days.tue', 'Tue'),
-    wednesday: t('circles:availability.days.wed', 'Wed'),
-    thursday: t('circles:availability.days.thu', 'Thu'),
-    friday: t('circles:availability.days.fri', 'Fri'),
-    saturday: t('circles:availability.days.sat', 'Sat'),
-    sunday: t('circles:availability.days.sun', 'Sun'),
-  };
-
-  const dayNames = {
-    sunday: t('circles:availability.days.sunday', 'Sunday'),
-    monday: t('circles:availability.days.monday', 'Monday'),
-    tuesday: t('circles:availability.days.tuesday', 'Tuesday'),
-    wednesday: t('circles:availability.days.wednesday', 'Wednesday'),
-    thursday: t('circles:availability.days.thursday', 'Thursday'),
-    friday: t('circles:availability.days.friday', 'Friday'),
-    saturday: t('circles:availability.days.saturday', 'Saturday'),
-  };
+  // Format selected date for display
+  const selectedDateDisplay = selectedDate
+    ? new Date(selectedDate + 'T00:00:00').toLocaleDateString(i18n.language, {
+        weekday: 'long',
+        month: 'long',
+        day: 'numeric'
+      })
+    : '';
 
   return (
     <div className={`availability-banner ${hasAvailability ? 'availability-banner--set' : ''} ${expanded ? 'availability-banner--expanded' : ''}`}>
@@ -196,66 +249,110 @@ export default function AvailabilityBanner({
 
       {expanded && (
         <div className="availability-banner-body">
-          <div className="availability-day-boxes">
-            {DAYS_ORDER.map(day => {
-              const dayHasSlots = getDaySlotCount(day) > 0;
-              const isSelected = selectedDay === day;
+          {/* Calendar Header */}
+          <div className="availability-calendar-header">
+            <button
+              type="button"
+              className="availability-date-nav"
+              onClick={goToPrevMonth}
+              aria-label={t('circles:availability.previousMonth', 'Previous month')}
+            >
+              {icons.chevronLeft}
+            </button>
+            <span className="availability-month-label">{monthName}</span>
+            <button
+              type="button"
+              className="availability-date-nav"
+              onClick={goToNextMonth}
+              aria-label={t('circles:availability.nextMonth', 'Next month')}
+            >
+              {icons.chevronRight}
+            </button>
+          </div>
+
+          {/* Weekday Headers */}
+          <div className="availability-calendar-weekdays">
+            {WEEKDAYS.map(day => (
+              <div key={day} className="availability-weekday">{day}</div>
+            ))}
+          </div>
+
+          {/* Calendar Grid */}
+          <div className="availability-calendar-grid">
+            {calendarDays.map(({ date, isEmpty }, idx) => {
+              if (isEmpty) {
+                return <div key={idx} className="availability-calendar-day-empty" />;
+              }
+
+              const dateKey = formatDateKey(date);
+              const isPast = dateKey < todayKey;
+              const isToday = dateKey === todayKey;
+              const isSelected = selectedDate === dateKey;
+              const slotCount = getDateSlotCount(dateKey);
+              const hasSlots = slotCount > 0;
+
               return (
                 <button
-                  key={day}
+                  key={idx}
                   type="button"
-                  className={`availability-day-box ${isSelected ? 'active' : ''} ${dayHasSlots ? 'has-slots' : ''}`}
-                  onClick={() => setSelectedDay(day)}
-                  aria-label={`${dayNames[day]}${dayHasSlots ? ` - ${getDaySlotCount(day)} slots selected` : ''}`}
-                  aria-pressed={isSelected}
+                  className={`availability-calendar-day ${isPast ? 'past' : ''} ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''} ${hasSlots ? 'has-slots' : ''}`}
+                  onClick={() => handleDateClick(dateKey, isPast)}
+                  disabled={isPast}
                 >
-                  <span className="availability-day-box-label">{dayNames[day]}</span>
+                  <span className="availability-day-number">{date.getDate()}</span>
+                  {hasSlots && <span className="availability-day-indicator">{slotCount}</span>}
                 </button>
               );
             })}
           </div>
 
-          <div className="availability-day-info">
-            <span className="availability-day-name">{dayNames[selectedDay]}</span>
-            <span className="availability-day-count">
-              {t('circles:availability.daySlots', '{{count}} selected', { count: currentDaySlotCount })}
-            </span>
-          </div>
+          {/* Hour Selection (when a date is selected) */}
+          {selectedDate && (
+            <div className="availability-hours-section">
+              <div className="availability-hours-header">
+                <span className="availability-selected-date">{selectedDateDisplay}</span>
+                <span className="availability-date-count">
+                  {t('circles:availability.dateSlots', '{{count}} slots selected for this date', { count: currentDateSlotCount })}
+                </span>
+              </div>
+              <div className="availability-chips">
+                {HOURS.map(hour => (
+                  <button
+                    key={hour}
+                    type="button"
+                    className={`availability-chip ${isSlotSelected(hour) ? 'selected' : ''}`}
+                    onClick={() => toggleSlot(hour)}
+                    aria-label={`${formatHour(hour)} on ${selectedDateDisplay}`}
+                    aria-pressed={isSlotSelected(hour)}
+                  >
+                    {formatHour(hour)}
+                  </button>
+                ))}
+              </div>
+              {currentDateSlotCount > 0 && (
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-small"
+                  onClick={handleClearDate}
+                  style={{ marginTop: 'var(--space-2)' }}
+                >
+                  {t('circles:availability.clearDate', 'Clear Date')}
+                </button>
+              )}
+            </div>
+          )}
 
-          <div className="availability-chips">
-            {HOURS.map(hour => (
-              <button
-                key={hour}
-                type="button"
-                className={`availability-chip ${isSlotSelected(hour) ? 'selected' : ''}`}
-                onClick={() => toggleSlot(hour)}
-                aria-label={`${formatHour(hour)} on ${dayNames[selectedDay]}`}
-                aria-pressed={isSlotSelected(hour)}
-              >
-                {formatHour(hour)}
-              </button>
-            ))}
-          </div>
-
+          {/* Footer */}
           <div className="availability-banner-footer">
             <span className="availability-slot-count">
               {t('circles:availability.slotsSelected', '{{count}} slots selected', { count: selectedSlots.size })}
             </span>
             <div className="availability-banner-actions">
-              {currentDaySlotCount > 0 && (
-                <button
-                  type="button"
-                  className="btn btn-ghost btn-small"
-                  onClick={handleClearAll}
-                >
-                  {t('circles:availability.clearDay', 'Clear Day')}
-                </button>
-              )}
               {selectedSlots.size > 0 && (
                 <button
                   type="button"
                   className="btn btn-ghost btn-small"
-                  onClick={handleClearAllDays}
+                  onClick={handleClearAll}
                 >
                   {t('circles:availability.clearAll', 'Clear All')}
                 </button>

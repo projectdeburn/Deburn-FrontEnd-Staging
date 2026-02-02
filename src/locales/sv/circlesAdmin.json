@@ -61,7 +61,9 @@
     "removeConfirm": "Ta bort {{name}} från {{group}}?",
     "removeWarning": "Detta tar även bort deras inbjudan. De måste bjudas in igen för att gå med.",
     "removing": "Tar bort...",
-    "confirmRemove": "Ta bort medlem"
+    "confirmRemove": "Ta bort medlem",
+    "editName": "Redigera namn",
+    "editGroupTitle": "Redigera gruppnamn"
   },
   "unassigned": {
     "title": "Ej tilldelade medlemmar",

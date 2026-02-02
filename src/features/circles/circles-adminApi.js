@@ -3,7 +3,7 @@
  * Handles admin API requests for circle pools, invitations, and groups
  */
 
-import { get, post, del } from '@/utils/api';
+import { get, post, del, patch } from '@/utils/api';
 
 const AUTH_BASE = '/api/auth';
 const CIRCLES_BASE = '/api/circles';
@@ -106,6 +106,17 @@ export const circlesAdminApi = {
    */
   createGroup(poolId, name) {
     return post(`${CIRCLES_BASE}/pools/${poolId}/groups`, { name });
+  },
+
+  /**
+   * Update a group's name
+   * @param {string} poolId - Pool ID
+   * @param {string} groupId - Group ID
+   * @param {string} name - New group name
+   * @returns {Promise<{success: boolean, data: {id: string, name: string, memberCount: number}}>}
+   */
+  updateGroup(poolId, groupId, name) {
+    return patch(`${CIRCLES_BASE}/pools/${poolId}/groups/${groupId}`, { name });
   },
 
   /**

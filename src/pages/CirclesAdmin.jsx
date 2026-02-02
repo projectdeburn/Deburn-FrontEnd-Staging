@@ -69,6 +69,12 @@ const icons = {
       <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
     </svg>
   ),
+  edit: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
+      <path d="m15 5 4 4"></path>
+    </svg>
+  ),
 };
 
 /**
@@ -160,6 +166,14 @@ export default function CirclesAdmin() {
     fromGroup: null,
   });
   const [isRemoving, setIsRemoving] = useState(false);
+
+  // Edit group state
+  const [editGroupModal, setEditGroupModal] = useState({
+    isOpen: false,
+    group: null,
+    name: '',
+  });
+  const [isEditingGroup, setIsEditingGroup] = useState(false);
 
   // Check admin status on mount
   useEffect(() => {
@@ -621,6 +635,58 @@ export default function CirclesAdmin() {
   }
 
   /**
+   * Open edit group modal
+   */
+  function handleOpenEditGroupModal(group) {
+    setEditGroupModal({
+      isOpen: true,
+      group,
+      name: group.name,
+    });
+  }
+
+  /**
+   * Close edit group modal
+   */
+  function handleCloseEditGroupModal() {
+    setEditGroupModal({
+      isOpen: false,
+      group: null,
+      name: '',
+    });
+  }
+
+  /**
+   * Execute update group name
+   */
+  async function handleUpdateGroupName() {
+    if (!currentPool || !editGroupModal.group || !editGroupModal.name.trim()) {
+      return;
+    }
+
+    setIsEditingGroup(true);
+
+    try {
+      const result = await circlesAdminApi.updateGroup(
+        currentPool.id,
+        editGroupModal.group.id,
+        editGroupModal.name.trim()
+      );
+
+      if (result.success) {
+        // Reload data to reflect the change
+        await loadPoolData(currentPool.id);
+        handleCloseEditGroupModal();
+      }
+    } catch (err) {
+      console.error('Error updating group:', err);
+      alert(err.message || 'Failed to update group name');
+    } finally {
+      setIsEditingGroup(false);
+    }
+  }
+
+  /**
    * Get groups that have capacity for new members
    */
   function getGroupsWithCapacity() {
@@ -951,7 +1017,16 @@ export default function CirclesAdmin() {
                   <div key={group.id} className="admin-group-card">
                     <div className="admin-group-header">
                       <div className="admin-group-title-row">
-                        <h4>{group.name}</h4>
+                        <div className="admin-group-name-edit">
+                          <h4>{group.name}</h4>
+                          <button
+                            className="btn btn-icon btn-ghost btn-sm"
+                            onClick={() => handleOpenEditGroupModal(group)}
+                            title={t('circlesAdmin:groups.editName', 'Edit name')}
+                          >
+                            {icons.edit}
+                          </button>
+                        </div>
                         <span className="admin-group-count">
                           {t('circlesAdmin:groups.memberCount', '{{count}} members', { count: group.members?.length || 0 })}
                         </span>
@@ -1277,6 +1352,48 @@ export default function CirclesAdmin() {
             {isRemoving
               ? t('circlesAdmin:groups.removing', 'Removing...')
               : t('circlesAdmin:groups.confirmRemove', 'Remove Member')
+            }
+          </button>
+        </ModalFooter>
+      </Modal>
+
+      {/* Edit Group Name Modal */}
+      <Modal
+        isOpen={editGroupModal.isOpen}
+        onClose={handleCloseEditGroupModal}
+        title={t('circlesAdmin:groups.editGroupTitle', 'Edit Group Name')}
+        size="sm"
+      >
+        <div style={{ marginBottom: 'var(--space-4)' }}>
+          <label htmlFor="edit-group-name" className="form-label">
+            {t('circlesAdmin:groups.groupName', 'Group Name')}
+          </label>
+          <input
+            id="edit-group-name"
+            type="text"
+            className="form-input"
+            value={editGroupModal.name}
+            onChange={(e) => setEditGroupModal(prev => ({ ...prev, name: e.target.value }))}
+            placeholder={t('circlesAdmin:groups.groupNamePlaceholder', 'Enter group name')}
+            disabled={isEditingGroup}
+          />
+        </div>
+        <ModalFooter>
+          <button
+            className="btn btn-ghost"
+            onClick={handleCloseEditGroupModal}
+            disabled={isEditingGroup}
+          >
+            {t('common:cancel', 'Cancel')}
+          </button>
+          <button
+            className="btn btn-primary"
+            onClick={handleUpdateGroupName}
+            disabled={isEditingGroup || !editGroupModal.name.trim()}
+          >
+            {isEditingGroup
+              ? t('common:saving', 'Saving...')
+              : t('common:save', 'Save')
             }
           </button>
         </ModalFooter>
