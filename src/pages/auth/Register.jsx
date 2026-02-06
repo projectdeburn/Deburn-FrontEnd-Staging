@@ -384,7 +384,7 @@ export default function Register() {
                   onChange={handleChange}
                   required
                 />
-                <label className="checkbox-label" htmlFor="consent-terms" dangerouslySetInnerHTML={{ __html: t('consent.terms', 'I agree to the <a href="/legal/terms-of-service" target="_blank">Terms of Service</a>') }} />
+                <label className="checkbox-label" htmlFor="consent-terms" dangerouslySetInnerHTML={{ __html: t('consent.terms', 'I agree to the <a href="/terms-of-service" target="_blank">Terms of Service</a>') }} />
               </div>
 
               <div className="checkbox-group">
@@ -397,7 +397,7 @@ export default function Register() {
                   onChange={handleChange}
                   required
                 />
-                <label className="checkbox-label" htmlFor="consent-privacy" dangerouslySetInnerHTML={{ __html: t('consent.privacy', 'I agree to the <a href="/legal/privacy-policy" target="_blank">Privacy Policy</a>') }} />
+                <label className="checkbox-label" htmlFor="consent-privacy" dangerouslySetInnerHTML={{ __html: t('consent.privacy', 'I agree to the <a href="/privacy-policy" target="_blank">Privacy Policy</a>') }} />
               </div>
 
               <div className="checkbox-group">
