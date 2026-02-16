@@ -3,6 +3,8 @@
  * Converts plain text from LLM to structured HTML
  */
 
+import { memo, useMemo } from 'react';
+
 /**
  * Escape HTML entities to prevent XSS
  * @param {string} text - Raw text
@@ -61,9 +63,10 @@ export function formatCoachResponse(text) {
 /**
  * React component for rendering formatted coach response
  * Uses dangerouslySetInnerHTML safely since we escape input first
+ * Memoized to prevent re-rendering when content hasn't changed
  */
-export function FormattedMessage({ content }) {
-  const formattedHtml = formatCoachResponse(content);
+export const FormattedMessage = memo(function FormattedMessage({ content }) {
+  const formattedHtml = useMemo(() => formatCoachResponse(content), [content]);
 
   return (
     <div
@@ -71,15 +74,15 @@ export function FormattedMessage({ content }) {
       dangerouslySetInnerHTML={{ __html: formattedHtml }}
     />
   );
-}
+});
 
 /**
  * React component for rendering streaming formatted content
  * Formats progressively without buffering - same approach as Claude/ChatGPT
- * Incomplete markers briefly show as raw text until closed
+ * useMemo guards against parent re-renders that don't change content
  */
 export function StreamingMessage({ content }) {
-  const formattedHtml = formatCoachResponse(content);
+  const formattedHtml = useMemo(() => formatCoachResponse(content), [content]);
 
   return (
     <div

@@ -3,7 +3,7 @@
  * AI coaching chat interface with streaming responses
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { coachApi } from '@/features/coach/coachApi';
 import { get, del } from '@/utils/api';
@@ -86,12 +86,81 @@ const CoachAvatar = () => (
   </svg>
 );
 
+// Get icon based on action type/contentType (pure function, no component deps)
+function getActionIcon(action) {
+  const contentType = action.metadata?.contentType || '';
+  if (contentType === 'audio_article' || contentType === 'audio_exercise') {
+    return icons.playCircle;
+  } else if (action.type === 'exercise') {
+    return icons.headphones;
+  }
+  return icons.bookOpen;
+}
+
+// Memoized message item — only re-renders when its message or playingMessageId changes.
+// Prevents re-rendering all historical messages during streaming ticks.
+const MessageItem = memo(function MessageItem({ message, playingMessageId, onActionClick, onPlayTTS, onStopTTS, getActionTitle, t }) {
+  return (
+    <div className={`message ${message.role === 'user' ? 'message-user' : 'message-coach'}`}>
+      {message.role === 'assistant' && (
+        <div className="message-avatar">
+          <CoachAvatar />
+        </div>
+      )}
+      <div className="message-content">
+        <FormattedMessage content={message.content} />
+        {message.role === 'assistant' && message.actions && message.actions.length > 0 && (
+          <div className="coach-content-suggestions">
+            {message.actions.map((action) => (
+              <button
+                key={action.id}
+                className="coach-content-card"
+                onClick={() => onActionClick(action)}
+              >
+                <div className="coach-content-card-icon">
+                  {getActionIcon(action)}
+                </div>
+                <div className="coach-content-card-title">
+                  {getActionTitle(action)}
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+        {message.role === 'assistant' && message.content.length > 10 && (
+          <button
+            className={`coach-listen-btn ${playingMessageId === message.id ? 'playing' : ''}`}
+            onClick={() => {
+              if (playingMessageId === message.id) {
+                onStopTTS();
+              } else {
+                onPlayTTS(message.content, message.id);
+              }
+            }}
+          >
+            {playingMessageId === message.id ? icons.stop : icons.volume}
+            <span className="listen-text">
+              {playingMessageId === message.id
+                ? t('coach:stop', 'Stop')
+                : t('coach:listen', 'Listen')}
+            </span>
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}, (prev, next) => {
+  return prev.message === next.message && prev.playingMessageId === next.playingMessageId;
+});
+
 export default function Coach() {
   const { t, i18n } = useTranslation(['coach', 'common']);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const streamingContentRef = useRef('');
   const actionsRef = useRef([]);
+  const messagesRef = useRef([]);
+  const conversationIdRef = useRef(null);
 
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
@@ -293,15 +362,43 @@ export default function Coach() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, streamingContent]);
 
-  // Save messages to localStorage whenever they change
+  // Save messages to localStorage whenever they change (debounced to avoid blocking during rapid updates)
+  const saveTimerRef = useRef(null);
+  messagesRef.current = messages;
+  conversationIdRef.current = conversationId;
   useEffect(() => {
     if (messages.length > 0) {
-      localStorage.setItem(CONVERSATION_STORAGE_KEY, JSON.stringify({
-        messages,
-        conversationId,
-      }));
+      if (saveTimerRef.current) {
+        clearTimeout(saveTimerRef.current);
+      }
+      saveTimerRef.current = setTimeout(() => {
+        localStorage.setItem(CONVERSATION_STORAGE_KEY, JSON.stringify({
+          messages,
+          conversationId,
+        }));
+      }, 1500);
     }
+    return () => {
+      if (saveTimerRef.current) {
+        clearTimeout(saveTimerRef.current);
+      }
+    };
   }, [messages, conversationId]);
+
+  // Flush pending localStorage write on unmount to prevent data loss
+  useEffect(() => {
+    return () => {
+      if (saveTimerRef.current) {
+        clearTimeout(saveTimerRef.current);
+        if (messagesRef.current.length > 0) {
+          localStorage.setItem(CONVERSATION_STORAGE_KEY, JSON.stringify({
+            messages: messagesRef.current,
+            conversationId: conversationIdRef.current,
+          }));
+        }
+      }
+    };
+  }, []);
 
   // Translate conversation when language changes
   useEffect(() => {
@@ -479,17 +576,6 @@ export default function Coach() {
     sendMessage(reply);
   }
 
-  // Get icon based on action type/contentType
-  function getActionIcon(action) {
-    const contentType = action.metadata?.contentType || '';
-    if (contentType === 'audio_article' || contentType === 'audio_exercise') {
-      return icons.playCircle;
-    } else if (action.type === 'exercise') {
-      return icons.headphones;
-    }
-    return icons.bookOpen;
-  }
-
   // Get localized title for action card
   function getActionTitle(action) {
     const category = action.metadata?.category;
@@ -653,58 +739,16 @@ export default function Coach() {
 
           {/* Messages */}
           {messages.map((message) => (
-            <div
+            <MessageItem
               key={message.id}
-              className={`message ${message.role === 'user' ? 'message-user' : 'message-coach'}`}
-            >
-              {message.role === 'assistant' && (
-                <div className="message-avatar">
-                  <CoachAvatar />
-                </div>
-              )}
-              <div className="message-content">
-                <FormattedMessage content={message.content} />
-                {/* Action Cards for assistant messages */}
-                {message.role === 'assistant' && message.actions && message.actions.length > 0 && (
-                  <div className="coach-content-suggestions">
-                    {message.actions.map((action) => (
-                      <button
-                        key={action.id}
-                        className="coach-content-card"
-                        onClick={() => handleActionClick(action)}
-                      >
-                        <div className="coach-content-card-icon">
-                          {getActionIcon(action)}
-                        </div>
-                        <div className="coach-content-card-title">
-                          {getActionTitle(action)}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                )}
-                {/* Listen Button for assistant messages */}
-                {message.role === 'assistant' && message.content.length > 10 && (
-                  <button
-                    className={`coach-listen-btn ${playingMessageId === message.id ? 'playing' : ''}`}
-                    onClick={() => {
-                      if (playingMessageId === message.id) {
-                        stopTTS();
-                      } else {
-                        playTTS(message.content, message.id);
-                      }
-                    }}
-                  >
-                    {playingMessageId === message.id ? icons.stop : icons.volume}
-                    <span className="listen-text">
-                      {playingMessageId === message.id
-                        ? t('coach:stop', 'Stop')
-                        : t('coach:listen', 'Listen')}
-                    </span>
-                  </button>
-                )}
-              </div>
-            </div>
+              message={message}
+              playingMessageId={playingMessageId}
+              onActionClick={handleActionClick}
+              onPlayTTS={playTTS}
+              onStopTTS={stopTTS}
+              getActionTitle={getActionTitle}
+              t={t}
+            />
           ))}
 
           {/* Streaming Content */}
