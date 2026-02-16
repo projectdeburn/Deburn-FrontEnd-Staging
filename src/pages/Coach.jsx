@@ -186,55 +186,24 @@ export default function Coach() {
   const [isVoiceInput, setIsVoiceInput] = useState(false);
   const [playingMessageId, setPlayingMessageId] = useState(null);
   const audioRef = useRef(null);
-  const recognitionRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
+  const recordingTimeoutRef = useRef(null);
 
-  // Initialize speech recognition
+  // Cleanup media recorder and audio on unmount
   useEffect(() => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (SpeechRecognition) {
-      const recognition = new SpeechRecognition();
-      recognition.continuous = false;
-      recognition.interimResults = true;
-      recognition.lang = i18n.language === 'sv' ? 'sv-SE' : 'en-US';
-
-      recognition.onresult = (event) => {
-        const transcript = Array.from(event.results)
-          .map(result => result[0].transcript)
-          .join('');
-
-        setInputValue(transcript);
-
-        // If final result, send the message
-        if (event.results[event.results.length - 1].isFinal) {
-          setIsRecording(false);
-          setIsVoiceInput(true);
-          setTimeout(() => {
-            sendMessage(transcript);
-          }, 100);
-        }
-      };
-
-      recognition.onend = () => {
-        setIsRecording(false);
-      };
-
-      recognition.onerror = (event) => {
-        console.error('Speech recognition error:', event.error);
-        setIsRecording(false);
-      };
-
-      recognitionRef.current = recognition;
-    }
-
     return () => {
-      if (recognitionRef.current) {
-        recognitionRef.current.abort();
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+        mediaRecorderRef.current.stop();
+      }
+      if (recordingTimeoutRef.current) {
+        clearTimeout(recordingTimeoutRef.current);
       }
       if (audioRef.current) {
         audioRef.current.pause();
       }
     };
-  }, [i18n.language]);
+  }, []);
 
   // Pre-load learning content for action cards
   useEffect(() => {
@@ -342,18 +311,94 @@ export default function Coach() {
     setPlayingMessageId(null);
   };
 
-  const toggleVoiceInput = () => {
-    if (!recognitionRef.current) {
-      console.warn('Speech recognition not supported');
+  const toggleVoiceInput = async () => {
+    if (isRecording) {
+      // Stop recording — onstop handler will handle transcription
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+        mediaRecorderRef.current.stop();
+      }
+      if (recordingTimeoutRef.current) {
+        clearTimeout(recordingTimeoutRef.current);
+        recordingTimeoutRef.current = null;
+      }
       return;
     }
 
-    if (isRecording) {
-      recognitionRef.current.stop();
-      setIsRecording(false);
-    } else {
-      recognitionRef.current.start();
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+      // Determine supported MIME type (webm for Chrome/Firefox, mp4 for Safari)
+      let mimeType = 'audio/webm;codecs=opus';
+      let fileExtension = 'webm';
+      if (typeof MediaRecorder !== 'undefined' && !MediaRecorder.isTypeSupported(mimeType)) {
+        mimeType = 'audio/mp4';
+        fileExtension = 'mp4';
+        if (!MediaRecorder.isTypeSupported(mimeType)) {
+          mimeType = '';
+          fileExtension = 'webm';
+        }
+      }
+
+      const mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : {});
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = async () => {
+        // Release microphone
+        stream.getTracks().forEach(track => track.stop());
+        setIsRecording(false);
+
+        const audioBlob = new Blob(audioChunksRef.current, { type: mimeType || 'audio/webm' });
+        audioChunksRef.current = [];
+
+        // Skip empty/silent recordings
+        if (audioBlob.size < 1000) return;
+
+        setIsLoading(true);
+        try {
+          const transcript = await coachApi.transcribeAudio(audioBlob, {
+            language: i18n.language,
+            filename: `recording.${fileExtension}`,
+          });
+
+          if (transcript && transcript.trim()) {
+            setInputValue(transcript);
+            setIsVoiceInput(true);
+            setTimeout(() => {
+              sendMessage(transcript);
+            }, 100);
+          }
+        } catch (error) {
+          console.error('Transcription error:', error);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      mediaRecorder.onerror = () => {
+        stream.getTracks().forEach(track => track.stop());
+        setIsRecording(false);
+      };
+
+      mediaRecorder.start();
       setIsRecording(true);
+
+      // Auto-stop after 120 seconds
+      recordingTimeoutRef.current = setTimeout(() => {
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+          mediaRecorderRef.current.stop();
+        }
+      }, 120000);
+
+    } catch (error) {
+      console.error('Microphone access error:', error);
+      setIsRecording(false);
     }
   };
 
@@ -805,7 +850,7 @@ export default function Coach() {
         <div className="chat-input-container">
           <div className="chat-input-wrapper">
             <button
-              className={`voice-input-btn ${isRecording ? 'recording' : ''} ${!recognitionRef.current ? 'not-supported' : ''}`}
+              className={`voice-input-btn ${isRecording ? 'recording' : ''}`}
               id="voice-input-btn"
               title={t('coach:input.voice', 'Voice input')}
               onClick={toggleVoiceInput}

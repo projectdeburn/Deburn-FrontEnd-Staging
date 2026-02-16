@@ -226,4 +226,40 @@ export const coachApi = {
       count,
     });
   },
+
+  /**
+   * Transcribe audio to text using Whisper
+   * @param {Blob} audioBlob - Recorded audio blob
+   * @param {object} options - Options including language, filename
+   * @returns {Promise<string>} Transcribed text
+   */
+  async transcribeAudio(audioBlob, options = {}) {
+    const { language = 'en', filename = 'recording.webm' } = options;
+
+    const formData = new FormData();
+    formData.append('file', audioBlob, filename);
+    formData.append('language', language);
+
+    const baseUrl = getApiBaseUrl();
+    const token = getAuthToken();
+    const headers = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(`${baseUrl}${BASE}/transcribe`, {
+      method: 'POST',
+      headers,
+      credentials: 'include',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.detail?.message || 'Transcription failed');
+    }
+
+    const data = await response.json();
+    return data.data.text;
+  },
 };
