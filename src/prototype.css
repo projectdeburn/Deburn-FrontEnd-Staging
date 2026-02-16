@@ -2103,7 +2103,7 @@ p {
 .chat-input-wrapper {
     display: flex;
     gap: var(--space-3);
-    align-items: center;
+    align-items: flex-end;
 }
 
 .chat-input {
@@ -2113,6 +2113,10 @@ p {
     border-radius: var(--radius-md);
     font-size: var(--text-body);
     font-family: var(--font-primary);
+    line-height: 1.5;
+    resize: none;
+    overflow-y: auto;
+    max-height: 150px;
     transition: border-color var(--duration-normal) var(--ease-standard);
 }
 

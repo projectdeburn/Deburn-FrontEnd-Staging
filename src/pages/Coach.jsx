@@ -478,6 +478,10 @@ export default function Coach() {
     };
     setMessages((prev) => [...prev, userMessage]);
     setInputValue('');
+    // Reset textarea height after sending
+    if (inputRef.current) {
+      inputRef.current.style.height = 'auto';
+    }
     setShowStarters(false);
     setQuickReplies([]);
     setActions([]);
@@ -810,16 +814,21 @@ export default function Coach() {
               {icons.mic}
               <div className="voice-recording-indicator" id="voice-recording-indicator"></div>
             </button>
-            <input
+            <textarea
               ref={inputRef}
-              type="text"
               className="chat-input"
               id="coach-input"
               value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
+              onChange={(e) => {
+                setInputValue(e.target.value);
+                // Auto-grow: reset height then set to scrollHeight
+                e.target.style.height = 'auto';
+                e.target.style.height = e.target.scrollHeight + 'px';
+              }}
               onKeyDown={handleKeyPress}
               placeholder={t('coach:input.placeholder', 'Type a message...')}
               disabled={isLoading}
+              rows={1}
             />
             <button
               className="chat-send-btn"
