@@ -8010,6 +8010,11 @@ body > .toast-notification.fade-out {
     color: var(--neutral-500);
 }
 
+.group-details-meeting-date--skipped {
+    text-decoration: line-through;
+    color: var(--neutral-400);
+}
+
 .group-details-meeting-recurring-badge {
     display: inline-block;
     margin-left: var(--space-2);

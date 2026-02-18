@@ -215,8 +215,11 @@ export default function GroupDetailsModal({
                     {meeting.recurrence && meeting.upcomingOccurrences?.length > 0 ? (
                       <div className="group-details-meeting-next-dates">
                         {meeting.upcomingOccurrences.map((occ, i) => (
-                          <span key={i} className="group-details-meeting-date">
-                            {formatMeetingDate(occ)}
+                          <span
+                            key={i}
+                            className={`group-details-meeting-date${occ.skipped ? ' group-details-meeting-date--skipped' : ''}`}
+                          >
+                            {formatMeetingDate(occ.date)}
                           </span>
                         ))}
                       </div>
@@ -240,19 +243,24 @@ export default function GroupDetailsModal({
                     )}
                     {meeting.recurrence && meeting.upcomingOccurrences?.length > 0 ? (
                       <>
-                        <button
-                          type="button"
-                          className="btn-link-underline"
-                          onClick={() => handleSkipOccurrence(
-                            meeting.id,
-                            meeting.upcomingOccurrences[0].split('T')[0]
-                          )}
-                          disabled={skippingOccurrence === `${meeting.id}-${meeting.upcomingOccurrences[0].split('T')[0]}`}
-                        >
-                          {skippingOccurrence === `${meeting.id}-${meeting.upcomingOccurrences[0].split('T')[0]}`
-                            ? t('common:loading', 'Loading...')
-                            : t('circles:groups.skipThis', 'Not this time')}
-                        </button>
+                        {(() => {
+                          const nextActive = meeting.upcomingOccurrences.find(o => !o.skipped);
+                          if (!nextActive) return null;
+                          const dateStr = nextActive.date.split('T')[0];
+                          const key = `${meeting.id}-${dateStr}`;
+                          return (
+                            <button
+                              type="button"
+                              className="btn-link-underline"
+                              onClick={() => handleSkipOccurrence(meeting.id, dateStr)}
+                              disabled={skippingOccurrence === key}
+                            >
+                              {skippingOccurrence === key
+                                ? t('common:loading', 'Loading...')
+                                : t('circles:groups.skipThis', 'Not this time')}
+                            </button>
+                          );
+                        })()}
                         <button
                           type="button"
                           className="btn-link-underline btn-link-underline--danger"
