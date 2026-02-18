@@ -6889,9 +6889,10 @@ body > .toast-notification.fade-out {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: var(--space-2) var(--space-3);
-        background: var(--color-warm-white);
-        border-bottom: 1px solid var(--neutral-200);
+        padding: var(--space-3) var(--space-4);
+        background: var(--color-deep-forest);
+        border-bottom: none;
+        border-radius: var(--radius-lg);
         cursor: pointer;
         user-select: none;
         flex-shrink: 0;
@@ -6902,15 +6903,16 @@ body > .toast-notification.fade-out {
         order: 3;
         flex: 1;
         min-height: 0;
+        margin-top: var(--space-2);
     }
 
     .conversation-dropdown-title {
         display: flex;
         align-items: center;
         gap: var(--space-2);
-        font-size: var(--text-body-sm);
-        font-weight: 500;
-        color: var(--color-deep-forest);
+        font-size: var(--text-body);
+        font-weight: 600;
+        color: #fff;
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
@@ -6920,26 +6922,26 @@ body > .toast-notification.fade-out {
     .conversation-dropdown-actions {
         display: flex;
         align-items: center;
-        gap: var(--space-1);
+        gap: var(--space-2);
         flex-shrink: 0;
-        color: var(--neutral-500);
+        color: rgba(255, 255, 255, 0.8);
     }
 
     .new-chat-header-btn {
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 32px;
-        height: 32px;
+        width: 34px;
+        height: 34px;
         border: none;
         border-radius: var(--radius-md);
-        background: transparent;
-        color: var(--neutral-600);
+        background: rgba(255, 255, 255, 0.15);
+        color: #fff;
         cursor: pointer;
     }
 
     .new-chat-header-btn:hover {
-        background: var(--neutral-100);
+        background: rgba(255, 255, 255, 0.25);
     }
 
     /* Sidebar becomes collapsible panel below the bar */
