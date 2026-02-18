@@ -2071,8 +2071,13 @@ p {
     display: none;
 }
 
-/* Chat header bar with sidebar toggle */
+/* Chat header bar with sidebar toggle — desktop hidden */
 .chat-header-bar {
+    display: none;
+}
+
+/* Conversation dropdown bar — desktop hidden */
+.conversation-dropdown-bar {
     display: none;
 }
 
@@ -2383,6 +2388,55 @@ p {
 .clear-history-link:hover {
     color: var(--neutral-700);
     text-decoration: underline;
+}
+
+/* Recording Bar (replaces input area while recording) */
+.recording-bar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    width: 100%;
+    padding: var(--space-4);
+    background: var(--color-coral);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-size: var(--text-body);
+    font-family: var(--font-primary);
+    animation: pulse-recording-bar 1.5s ease-in-out infinite;
+}
+
+.recording-bar:hover {
+    background: #d9685a;
+}
+
+.recording-bar-dot {
+    width: 12px;
+    height: 12px;
+    background: white;
+    border-radius: 50%;
+    flex-shrink: 0;
+    animation: pulse-dot 1s ease-in-out infinite;
+}
+
+.recording-bar-label {
+    flex: 1;
+    font-weight: 500;
+    text-align: left;
+}
+
+.recording-bar-stop {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    font-size: var(--text-body-sm);
+    opacity: 0.9;
+}
+
+@keyframes pulse-recording-bar {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(233, 121, 108, 0.4); }
+    50% { box-shadow: 0 0 0 6px rgba(233, 121, 108, 0); }
 }
 
 /* Voice Input Button */
@@ -6717,11 +6771,12 @@ body > .toast-notification.fade-out {
         padding: 0;
     }
 
-    /* Chat container fills screen */
+    /* Chat container fills remaining space */
     #screen-coach .chat-container {
         border: none;
         border-radius: 0;
-        height: 100%;
+        flex: 1;
+        min-height: 0;
     }
 
     /* Optimize messages area */
@@ -6817,49 +6872,65 @@ body > .toast-notification.fade-out {
     body.coach-active .mobile-nav {
         display: none;
     }
+}
 
-    /* --- Conversation Sidebar: mobile overlay mode --- */
-    #screen-coach .conversation-sidebar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        bottom: 0;
-        z-index: 200;
-        width: 300px;
-        transform: translateX(-100%);
-        transition: transform var(--duration-normal) var(--ease-standard);
-        box-shadow: none;
+/* ==========================================================================
+   Conversation Sidebar → Top Dropdown (narrow screens)
+   ========================================================================== */
+
+@media (max-width: 1024px) {
+    /* --- Conversation dropdown: top bar + collapsible list --- */
+    .coach-body {
+        flex-direction: column;
     }
 
-    #screen-coach .conversation-sidebar.open {
-        transform: translateX(0);
-        box-shadow: var(--shadow-xl, 0 20px 25px -5px rgba(0,0,0,.1), 0 8px 10px -6px rgba(0,0,0,.1));
-    }
-
-    .sidebar-overlay {
-        display: block;
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.3);
-        z-index: 199;
-    }
-
-    #screen-coach .chat-header-bar {
+    /* Dropdown trigger bar — always visible */
+    .conversation-dropdown-bar {
         display: flex;
         align-items: center;
         justify-content: space-between;
         padding: var(--space-2) var(--space-3);
-        border-bottom: 1px solid var(--neutral-200);
         background: var(--color-warm-white);
+        border-bottom: 1px solid var(--neutral-200);
+        cursor: pointer;
+        user-select: none;
+        flex-shrink: 0;
+        order: 1;
     }
 
-    .sidebar-toggle-btn,
+    .chat-container {
+        order: 3;
+        flex: 1;
+        min-height: 0;
+    }
+
+    .conversation-dropdown-title {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        font-size: var(--text-body-sm);
+        font-weight: 500;
+        color: var(--color-deep-forest);
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        min-width: 0;
+    }
+
+    .conversation-dropdown-actions {
+        display: flex;
+        align-items: center;
+        gap: var(--space-1);
+        flex-shrink: 0;
+        color: var(--neutral-500);
+    }
+
     .new-chat-header-btn {
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 36px;
-        height: 36px;
+        width: 32px;
+        height: 32px;
         border: none;
         border-radius: var(--radius-md);
         background: transparent;
@@ -6867,9 +6938,44 @@ body > .toast-notification.fade-out {
         cursor: pointer;
     }
 
-    .sidebar-toggle-btn:hover,
     .new-chat-header-btn:hover {
         background: var(--neutral-100);
+    }
+
+    /* Sidebar becomes collapsible panel below the bar */
+    .conversation-sidebar {
+        order: 2;
+        width: 100%;
+        min-width: 0;
+        max-height: 0;
+        overflow: hidden;
+        border-right: none;
+        border-bottom: 1px solid var(--neutral-200);
+        transition: max-height var(--duration-normal) var(--ease-standard);
+    }
+
+    .conversation-sidebar.open {
+        max-height: 40vh;
+        overflow-y: auto;
+    }
+
+    .conversation-sidebar .new-chat-btn {
+        margin: var(--space-2) var(--space-3);
+        padding: var(--space-2) var(--space-3);
+        font-size: var(--text-caption);
+    }
+
+    .conversation-sidebar .conversation-list {
+        padding: 0 var(--space-2) var(--space-2);
+    }
+
+    /* Hide the old overlay and header bar */
+    .sidebar-overlay {
+        display: none;
+    }
+
+    .chat-header-bar {
+        display: none;
     }
 }
 

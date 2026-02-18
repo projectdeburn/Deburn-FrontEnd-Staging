@@ -114,6 +114,16 @@ const icons = {
       <line x1="9" x2="9" y1="3" y2="21"></line>
     </svg>
   ),
+  chevronDown: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="6 9 12 15 18 9"></polyline>
+    </svg>
+  ),
+  chevronUp: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  ),
 };
 
 // Coach avatar SVG component
@@ -243,6 +253,7 @@ export default function Coach() {
   // Translation state
   const [isTranslating, setIsTranslating] = useState(false);
   const prevLanguageRef = useRef(i18n.language);
+  const prevConversationIdRef = useRef(null);
 
   // Voice state
   const [isRecording, setIsRecording] = useState(false);
@@ -479,18 +490,24 @@ export default function Coach() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, streamingContent]);
 
-  // Translate conversation when language changes
+  // Translate conversation when language changes or conversation switches while on non-default language
   useEffect(() => {
     const prevLanguage = prevLanguageRef.current;
+    const prevConvId = prevConversationIdRef.current;
     const currentLanguage = i18n.language;
 
-    // Update ref for next comparison
-    prevLanguageRef.current = currentLanguage;
+    const languageChanged = prevLanguage !== currentLanguage;
+    const conversationSwitched = prevConvId !== conversationId;
 
-    // Skip if no language change or no conversation
-    if (prevLanguage === currentLanguage || !conversationId || messages.length === 0) {
-      return;
-    }
+    // Update refs
+    prevLanguageRef.current = currentLanguage;
+    prevConversationIdRef.current = conversationId;
+
+    if (!conversationId || messages.length === 0) return;
+
+    // Translate if language changed, or conversation switched while on non-default language
+    const needsTranslation = languageChanged || (conversationSwitched && currentLanguage !== 'en');
+    if (!needsTranslation) return;
 
     async function translateMessages() {
       setIsTranslating(true);
@@ -933,26 +950,29 @@ export default function Coach() {
           </div>
         </div>
 
-        {/* Sidebar overlay for mobile */}
-        {sidebarOpen && (
-          <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />
-        )}
+        {/* Mobile dropdown trigger bar */}
+        <div className="conversation-dropdown-bar" onClick={() => setSidebarOpen(!sidebarOpen)}>
+          <span className="conversation-dropdown-title">
+            {icons.messageSquare}
+            {conversationId
+              ? (conversationList.find(c => c.conversationId === conversationId)?.title
+                || t('coach:yourConversation', 'Your Conversation'))
+              : t('coach:newChat', 'New Chat')}
+          </span>
+          <div className="conversation-dropdown-actions">
+            <button
+              className="new-chat-header-btn"
+              onClick={(e) => { e.stopPropagation(); handleNewChat(); }}
+              title={t('coach:newChat', 'New Chat')}
+            >
+              {icons.plus}
+            </button>
+            {sidebarOpen ? icons.chevronUp : icons.chevronDown}
+          </div>
+        </div>
 
         {/* Chat Interface */}
         <div className="chat-container">
-          {/* Sidebar toggle for mobile */}
-          <div className="chat-header-bar">
-            <button
-              className="sidebar-toggle-btn"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              title={t('coach:toggleSidebar', 'Toggle conversations')}
-            >
-              {icons.sidebar}
-            </button>
-            <button className="new-chat-header-btn" onClick={handleNewChat} title={t('coach:newChat', 'New Chat')}>
-              {icons.plus}
-            </button>
-          </div>
 
           {/* Translation Indicator */}
           {isTranslating && (
@@ -1061,45 +1081,54 @@ export default function Coach() {
 
           {/* Chat Input */}
           <div className="chat-input-container">
-            <div className="chat-input-wrapper">
-              <button
-                className={`voice-input-btn ${isRecording ? 'recording' : ''}`}
-                id="voice-input-btn"
-                title={t('coach:input.voice', 'Voice input')}
-                onClick={toggleVoiceInput}
-                disabled={isLoading}
-              >
-                {icons.mic}
-                <div className="voice-recording-indicator" id="voice-recording-indicator"></div>
+            {isRecording ? (
+              <button className="recording-bar" onClick={toggleVoiceInput}>
+                <span className="recording-bar-dot"></span>
+                <span className="recording-bar-label">{t('coach:recording', 'Recording...')}</span>
+                <span className="recording-bar-stop">{icons.stop} {t('coach:tapToStop', 'Tap to stop')}</span>
               </button>
-              <textarea
-                ref={inputRef}
-                className="chat-input"
-                id="coach-input"
-                value={inputValue}
-                onChange={(e) => {
-                  setInputValue(e.target.value);
-                  // Auto-grow: reset height then set to scrollHeight
-                  e.target.style.height = 'auto';
-                  e.target.style.height = e.target.scrollHeight + 'px';
-                }}
-                onKeyDown={handleKeyPress}
-                placeholder={t('coach:input.placeholder', 'Type a message...')}
-                disabled={isLoading}
-                rows={1}
-              />
-              <button
-                className="chat-send-btn"
-                id="coach-send-btn"
-                onClick={handleSubmit}
-                disabled={!inputValue.trim() || isLoading}
-              >
-                {icons.send}
-              </button>
-            </div>
-            <p className="chat-hint">
-              <span>{t('coach:input.hint', 'Your conversations are private and confidential')}</span>
-            </p>
+            ) : (
+              <>
+                <div className="chat-input-wrapper">
+                  <button
+                    className="voice-input-btn"
+                    id="voice-input-btn"
+                    title={t('coach:input.voice', 'Voice input')}
+                    onClick={toggleVoiceInput}
+                    disabled={isLoading}
+                  >
+                    {icons.mic}
+                  </button>
+                  <textarea
+                    ref={inputRef}
+                    className="chat-input"
+                    id="coach-input"
+                    value={inputValue}
+                    onChange={(e) => {
+                      setInputValue(e.target.value);
+                      // Auto-grow: reset height then set to scrollHeight
+                      e.target.style.height = 'auto';
+                      e.target.style.height = e.target.scrollHeight + 'px';
+                    }}
+                    onKeyDown={handleKeyPress}
+                    placeholder={t('coach:input.placeholder', 'Type a message...')}
+                    disabled={isLoading}
+                    rows={1}
+                  />
+                  <button
+                    className="chat-send-btn"
+                    id="coach-send-btn"
+                    onClick={handleSubmit}
+                    disabled={!inputValue.trim() || isLoading}
+                  >
+                    {icons.send}
+                  </button>
+                </div>
+                <p className="chat-hint">
+                  <span>{t('coach:input.hint', 'Your conversations are private and confidential')}</span>
+                </p>
+              </>
+            )}
           </div>
         </div>
       </div>
