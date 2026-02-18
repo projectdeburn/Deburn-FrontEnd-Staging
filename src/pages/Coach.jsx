@@ -221,6 +221,7 @@ export default function Coach() {
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingConversation, setLoadingConversation] = useState(false);
   const [conversationId, setConversationId] = useState(null);
   const [showStarters, setShowStarters] = useState(true);
   const [quickReplies, setQuickReplies] = useState([]);
@@ -316,10 +317,13 @@ export default function Coach() {
 
   // Load a specific conversation by id
   async function loadConversation(convId) {
+    setLoadingConversation(true);
     try {
       const response = await coachApi.getConversation(convId);
-      if (response.success && response.data?.messages) {
-        const loadedMessages = response.data.messages.map((msg, index) => ({
+      // Real backend returns messages directly; mock wraps in {success, data}
+      const msgs = response.messages || response.data?.messages;
+      if (msgs) {
+        const loadedMessages = msgs.map((msg, index) => ({
           id: index,
           role: msg.role,
           content: msg.content,
@@ -333,6 +337,8 @@ export default function Coach() {
       }
     } catch (error) {
       console.error('Error loading conversation:', error);
+    } finally {
+      setLoadingConversation(false);
     }
   }
 
@@ -891,7 +897,7 @@ export default function Coach() {
                     </div>
                   ) : (
                     <>
-                      <span className="conversation-item-title">{conv.title}</span>
+                      <span className="conversation-item-title">{conv.title || t('coach:yourConversation', 'Your Conversation')}</span>
                       <span className="conversation-item-meta">
                         {conv.messageCount} {t('coach:messages', 'messages')}
                         {conv.lastMessageAt && ` · ${formatRelativeTime(conv.lastMessageAt)}`}
@@ -956,6 +962,11 @@ export default function Coach() {
             </div>
           )}
           <div className="chat-messages" id="chat-messages">
+            {loadingConversation && (
+              <div className="chat-loading-overlay">
+                <div className="loading-spinner"></div>
+              </div>
+            )}
             {/* Welcome Message */}
             <div className="message message-coach" id="welcome-message">
               <div className="message-avatar">

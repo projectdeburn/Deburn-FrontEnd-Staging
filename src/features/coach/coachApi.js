@@ -162,7 +162,7 @@ export const coachApi = {
    * List all conversations (summaries)
    */
   listConversations(skip = 0, limit = 20) {
-    return get(`${BASE}/conversations?skip=${skip}&limit=${limit}`);
+    return get(`${BASE}/conversations/list?skip=${skip}&limit=${limit}`);
   },
 
   /**
