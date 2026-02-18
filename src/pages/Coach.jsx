@@ -1,18 +1,18 @@
 /**
  * Coach Page
- * AI coaching chat interface with streaming responses
+ * AI coaching chat interface with streaming responses and multiple conversations
  */
 
 import { useState, useEffect, useRef, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { coachApi } from '@/features/coach/coachApi';
-import { get, del } from '@/utils/api';
+import { get } from '@/utils/api';
 import { FormattedMessage, StreamingMessage } from '@/utils/formatCoachResponse.jsx';
 import ArticleModal from '@/components/learning/ArticleModal';
 import AudioModal from '@/components/learning/AudioModal';
 
-// LocalStorage key for conversation history
-const CONVERSATION_STORAGE_KEY = 'hfai_coach_conversation';
+// LocalStorage key — only persist which conversation was last active
+const ACTIVE_CONVERSATION_KEY = 'hfai_coach_active_conversation';
 
 // Hero image import
 import heroCoach from '@/assets/images/hero-coach.jpg';
@@ -71,6 +71,47 @@ const icons = {
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
       <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+    </svg>
+  ),
+  // Sidebar icons
+  plus: (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="12" x2="12" y1="5" y2="19"></line>
+      <line x1="5" x2="19" y1="12" y2="12"></line>
+    </svg>
+  ),
+  messageSquare: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+    </svg>
+  ),
+  edit: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
+    </svg>
+  ),
+  trash: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 6h18"></path>
+      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+    </svg>
+  ),
+  check: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="20 6 9 17 4 12"></polyline>
+    </svg>
+  ),
+  x: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="18" x2="6" y1="6" y2="18"></line>
+      <line x1="6" x2="18" y1="6" y2="18"></line>
+    </svg>
+  ),
+  sidebar: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+      <line x1="9" x2="9" y1="3" y2="21"></line>
     </svg>
   ),
 };
@@ -153,14 +194,29 @@ const MessageItem = memo(function MessageItem({ message, playingMessageId, onAct
   return prev.message === next.message && prev.playingMessageId === next.playingMessageId;
 });
 
+// Format relative time for sidebar
+function formatRelativeTime(isoString) {
+  if (!isoString) return '';
+  const date = new Date(isoString);
+  const now = new Date();
+  const diffMs = now - date;
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) return 'Just now';
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 7) return `${diffDays}d ago`;
+  return date.toLocaleDateString();
+}
+
 export default function Coach() {
   const { t, i18n } = useTranslation(['coach', 'common']);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const streamingContentRef = useRef('');
   const actionsRef = useRef([]);
-  const messagesRef = useRef([]);
-  const conversationIdRef = useRef(null);
 
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
@@ -171,6 +227,12 @@ export default function Coach() {
   const [actions, setActions] = useState([]);
   const [streamingContent, setStreamingContent] = useState('');
   const [learningContent, setLearningContent] = useState([]);
+
+  // Conversation list (sidebar)
+  const [conversationList, setConversationList] = useState([]);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [editingTitle, setEditingTitle] = useState(null);
+  const [editTitleValue, setEditTitleValue] = useState('');
 
   // Modal state for action content
   const [selectedModule, setSelectedModule] = useState(null);
@@ -220,55 +282,59 @@ export default function Coach() {
     loadLearningContent();
   }, []);
 
-  // Load conversation from localStorage on mount, then sync with backend
+  // Load conversation list and restore last active conversation on mount
   useEffect(() => {
-    async function loadConversation() {
-      // Step 1: Load from localStorage for instant display
-      const stored = localStorage.getItem(CONVERSATION_STORAGE_KEY);
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored);
-          if (parsed.messages && parsed.messages.length > 0) {
-            setMessages(parsed.messages);
-            setConversationId(parsed.conversationId || null);
-            setShowStarters(false);
-          }
-        } catch (e) {
-          console.error('Error parsing stored conversation:', e);
-        }
-      }
-
-      // Step 2: Sync with backend (backend is source of truth)
+    async function loadConversations() {
       try {
-        const response = await get('/api/conversations');
-        if (response.success && response.data?.messages?.length > 0) {
-          const backendMessages = response.data.messages.map((msg, index) => ({
-            id: index,
-            role: msg.role,
-            content: msg.content,
-            actions: msg.actions || [],
-          }));
-          const backendConvId = response.data.conversation?.id || null;
+        const response = await coachApi.listConversations();
+        if (response.conversations) {
+          setConversationList(response.conversations);
 
-          // Backend has data - update localStorage and state
-          setMessages(backendMessages);
-          setConversationId(backendConvId);
-          setShowStarters(false);
+          // Try to restore the last active conversation
+          const savedId = localStorage.getItem(ACTIVE_CONVERSATION_KEY);
+          const targetId = savedId && response.conversations.some(c => c.conversationId === savedId)
+            ? savedId
+            : null;
 
-          // Update localStorage with backend data
-          localStorage.setItem(CONVERSATION_STORAGE_KEY, JSON.stringify({
-            messages: backendMessages,
-            conversationId: backendConvId,
-          }));
+          if (targetId) {
+            await loadConversation(targetId);
+          }
         }
       } catch (error) {
-        // Backend sync failed, keep localStorage data
-        console.error('Error syncing with backend:', error);
+        console.error('Error loading conversations:', error);
       }
     }
-
-    loadConversation();
+    loadConversations();
   }, []);
+
+  // Persist active conversation id
+  useEffect(() => {
+    if (conversationId) {
+      localStorage.setItem(ACTIVE_CONVERSATION_KEY, conversationId);
+    }
+  }, [conversationId]);
+
+  // Load a specific conversation by id
+  async function loadConversation(convId) {
+    try {
+      const response = await coachApi.getConversation(convId);
+      if (response.success && response.data?.messages) {
+        const loadedMessages = response.data.messages.map((msg, index) => ({
+          id: index,
+          role: msg.role,
+          content: msg.content,
+          actions: msg.actions || [],
+        }));
+        setMessages(loadedMessages);
+        setConversationId(convId);
+        setShowStarters(false);
+        setQuickReplies([]);
+        setActions([]);
+      }
+    } catch (error) {
+      console.error('Error loading conversation:', error);
+    }
+  }
 
   // Auto-play TTS when voice input response is ready
   const playTTS = async (text, messageId) => {
@@ -407,44 +473,6 @@ export default function Coach() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, streamingContent]);
 
-  // Save messages to localStorage whenever they change (debounced to avoid blocking during rapid updates)
-  const saveTimerRef = useRef(null);
-  messagesRef.current = messages;
-  conversationIdRef.current = conversationId;
-  useEffect(() => {
-    if (messages.length > 0) {
-      if (saveTimerRef.current) {
-        clearTimeout(saveTimerRef.current);
-      }
-      saveTimerRef.current = setTimeout(() => {
-        localStorage.setItem(CONVERSATION_STORAGE_KEY, JSON.stringify({
-          messages,
-          conversationId,
-        }));
-      }, 1500);
-    }
-    return () => {
-      if (saveTimerRef.current) {
-        clearTimeout(saveTimerRef.current);
-      }
-    };
-  }, [messages, conversationId]);
-
-  // Flush pending localStorage write on unmount to prevent data loss
-  useEffect(() => {
-    return () => {
-      if (saveTimerRef.current) {
-        clearTimeout(saveTimerRef.current);
-        if (messagesRef.current.length > 0) {
-          localStorage.setItem(CONVERSATION_STORAGE_KEY, JSON.stringify({
-            messages: messagesRef.current,
-            conversationId: conversationIdRef.current,
-          }));
-        }
-      }
-    };
-  }, []);
-
   // Translate conversation when language changes
   useEffect(() => {
     const prevLanguage = prevLanguageRef.current;
@@ -512,9 +540,23 @@ export default function Coach() {
     },
   ];
 
+  // Refresh conversation list from backend
+  async function refreshConversationList() {
+    try {
+      const response = await coachApi.listConversations();
+      if (response.conversations) {
+        setConversationList(response.conversations);
+      }
+    } catch (error) {
+      console.error('Error refreshing conversation list:', error);
+    }
+  }
+
   // Send a message
   async function sendMessage(text) {
     if (!text.trim() || isLoading) return;
+
+    const isNewConversation = !conversationId;
 
     const userMessage = {
       id: Date.now(),
@@ -574,6 +616,10 @@ export default function Coach() {
           onMetadata: (metadata) => {
             if (metadata.conversationId) {
               setConversationId(metadata.conversationId);
+              // If this was a new conversation, refresh the sidebar
+              if (isNewConversation) {
+                refreshConversationList();
+              }
             }
           },
           onDone: () => {
@@ -707,21 +753,74 @@ export default function Coach() {
     }
   }
 
-  async function handleClearHistory(e) {
-    e.preventDefault();
-    if (!window.confirm(t('coach:clearHistoryConfirm', 'Are you sure you want to clear your conversation history?'))) {
+  // --- Sidebar handlers ---
+
+  function handleNewChat() {
+    setMessages([]);
+    setConversationId(null);
+    setShowStarters(true);
+    setQuickReplies([]);
+    setActions([]);
+    setStreamingContent('');
+    localStorage.removeItem(ACTIVE_CONVERSATION_KEY);
+    setSidebarOpen(false);
+  }
+
+  async function handleSelectConversation(convId) {
+    if (convId === conversationId) {
+      setSidebarOpen(false);
+      return;
+    }
+    await loadConversation(convId);
+    setSidebarOpen(false);
+  }
+
+  async function handleDeleteConversation(convId) {
+    if (!window.confirm(t('coach:deleteConversationConfirm', 'Delete this conversation?'))) {
       return;
     }
 
     try {
-      await del('/api/conversations');
-      localStorage.removeItem(CONVERSATION_STORAGE_KEY);
-      setMessages([]);
-      setConversationId(null);
-      setShowStarters(true);
-    } catch {
-      // Silent fail
+      await coachApi.deleteConversation(convId);
+      setConversationList((prev) => prev.filter((c) => c.conversationId !== convId));
+
+      // If we deleted the active conversation, reset to new chat
+      if (convId === conversationId) {
+        handleNewChat();
+      }
+    } catch (error) {
+      console.error('Error deleting conversation:', error);
     }
+  }
+
+  function handleStartRename(convId, currentTitle) {
+    setEditingTitle(convId);
+    setEditTitleValue(currentTitle);
+  }
+
+  async function handleSaveRename(convId) {
+    const newTitle = editTitleValue.trim();
+    if (!newTitle) {
+      setEditingTitle(null);
+      return;
+    }
+
+    try {
+      await coachApi.renameConversation(convId, newTitle);
+      setConversationList((prev) =>
+        prev.map((c) =>
+          c.conversationId === convId ? { ...c, title: newTitle } : c
+        )
+      );
+    } catch (error) {
+      console.error('Error renaming conversation:', error);
+    }
+    setEditingTitle(null);
+  }
+
+  function handleCancelRename() {
+    setEditingTitle(null);
+    setEditTitleValue('');
   }
 
   return (
@@ -744,157 +843,253 @@ export default function Coach() {
         </div>
       </div>
 
-      {/* Chat Interface */}
-      <div className="chat-container">
-        {/* Translation Indicator */}
-        {isTranslating && (
-          <div className="translation-indicator">
-            <span className="translation-spinner"></span>
-            <span>{t('coach:translating', 'Translating conversation...')}</span>
+      {/* Coach Body: Sidebar + Chat */}
+      <div className="coach-body">
+        {/* Conversation Sidebar */}
+        <div className={`conversation-sidebar ${sidebarOpen ? 'open' : ''}`}>
+          <button className="new-chat-btn" onClick={handleNewChat}>
+            {icons.plus}
+            <span>{t('coach:newChat', 'New Chat')}</span>
+          </button>
+
+          <div className="conversation-list">
+            {conversationList.map((conv) => (
+              <div
+                key={conv.conversationId}
+                className={`conversation-item ${conv.conversationId === conversationId ? 'active' : ''}`}
+                onClick={() => handleSelectConversation(conv.conversationId)}
+              >
+                <div className="conversation-item-icon">
+                  {icons.messageSquare}
+                </div>
+                <div className="conversation-item-body">
+                  {editingTitle === conv.conversationId ? (
+                    <div className="conversation-item-edit" onClick={(e) => e.stopPropagation()}>
+                      <input
+                        type="text"
+                        className="conversation-rename-input"
+                        value={editTitleValue}
+                        onChange={(e) => setEditTitleValue(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleSaveRename(conv.conversationId);
+                          if (e.key === 'Escape') handleCancelRename();
+                        }}
+                        autoFocus
+                      />
+                      <button
+                        className="conversation-edit-btn save"
+                        onClick={() => handleSaveRename(conv.conversationId)}
+                      >
+                        {icons.check}
+                      </button>
+                      <button
+                        className="conversation-edit-btn cancel"
+                        onClick={handleCancelRename}
+                      >
+                        {icons.x}
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <span className="conversation-item-title">{conv.title}</span>
+                      <span className="conversation-item-meta">
+                        {conv.messageCount} {t('coach:messages', 'messages')}
+                        {conv.lastMessageAt && ` · ${formatRelativeTime(conv.lastMessageAt)}`}
+                      </span>
+                    </>
+                  )}
+                </div>
+                {editingTitle !== conv.conversationId && (
+                  <div className="conversation-item-actions" onClick={(e) => e.stopPropagation()}>
+                    <button
+                      className="conversation-action-btn"
+                      title={t('coach:rename', 'Rename')}
+                      onClick={() => handleStartRename(conv.conversationId, conv.title)}
+                    >
+                      {icons.edit}
+                    </button>
+                    <button
+                      className="conversation-action-btn delete"
+                      title={t('coach:delete', 'Delete')}
+                      onClick={() => handleDeleteConversation(conv.conversationId)}
+                    >
+                      {icons.trash}
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+            {conversationList.length === 0 && (
+              <div className="conversation-list-empty">
+                <p>{t('coach:noConversations', 'No conversations yet')}</p>
+              </div>
+            )}
           </div>
+        </div>
+
+        {/* Sidebar overlay for mobile */}
+        {sidebarOpen && (
+          <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />
         )}
-        <div className="chat-messages" id="chat-messages">
-          {/* Welcome Message */}
-          <div className="message message-coach" id="welcome-message">
-            <div className="message-avatar">
-              <CoachAvatar />
-            </div>
-            <div className="message-content">
-              <p>
-                {t('coach:welcome.greeting', "Hello! I'm your AI Leadership Coach. I'm here to help you grow as a leader, manage stress, and build stronger teams.")}
-              </p>
-              <p style={{ marginTop: '12px' }}>
-                {t('coach:welcome.prompt', 'What would you like to explore today?')}
-              </p>
-            </div>
+
+        {/* Chat Interface */}
+        <div className="chat-container">
+          {/* Sidebar toggle for mobile */}
+          <div className="chat-header-bar">
+            <button
+              className="sidebar-toggle-btn"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              title={t('coach:toggleSidebar', 'Toggle conversations')}
+            >
+              {icons.sidebar}
+            </button>
+            <button className="new-chat-header-btn" onClick={handleNewChat} title={t('coach:newChat', 'New Chat')}>
+              {icons.plus}
+            </button>
           </div>
 
-          {/* Conversation Starters */}
-          {showStarters && (
-            <div className="conversation-starters" id="conversation-starters">
-              {starters.map((starter) => (
+          {/* Translation Indicator */}
+          {isTranslating && (
+            <div className="translation-indicator">
+              <span className="translation-spinner"></span>
+              <span>{t('coach:translating', 'Translating conversation...')}</span>
+            </div>
+          )}
+          <div className="chat-messages" id="chat-messages">
+            {/* Welcome Message */}
+            <div className="message message-coach" id="welcome-message">
+              <div className="message-avatar">
+                <CoachAvatar />
+              </div>
+              <div className="message-content">
+                <p>
+                  {t('coach:welcome.greeting', "Hello! I'm your AI Leadership Coach. I'm here to help you grow as a leader, manage stress, and build stronger teams.")}
+                </p>
+                <p style={{ marginTop: '12px' }}>
+                  {t('coach:welcome.prompt', 'What would you like to explore today?')}
+                </p>
+              </div>
+            </div>
+
+            {/* Conversation Starters */}
+            {showStarters && (
+              <div className="conversation-starters" id="conversation-starters">
+                {starters.map((starter) => (
+                  <button
+                    key={starter.key}
+                    className="starter-btn"
+                    data-starter-key={starter.key}
+                    onClick={() => handleStarterClick(starter)}
+                  >
+                    {starter.icon}
+                    <span>{starter.text}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Messages */}
+            {messages.map((message) => (
+              <MessageItem
+                key={message.id}
+                message={message}
+                playingMessageId={playingMessageId}
+                onActionClick={handleActionClick}
+                onPlayTTS={playTTS}
+                onStopTTS={stopTTS}
+                getActionTitle={getActionTitle}
+                t={t}
+              />
+            ))}
+
+            {/* Streaming Content */}
+            {streamingContent && (
+              <div className="message message-coach">
+                <div className="message-avatar">
+                  <CoachAvatar />
+                </div>
+                <div className="message-content">
+                  <StreamingMessage content={streamingContent} />
+                </div>
+              </div>
+            )}
+
+            {/* Typing Indicator */}
+            {isLoading && !streamingContent && (
+              <div className="message message-coach typing-indicator">
+                <div className="message-avatar">
+                  <CoachAvatar />
+                </div>
+                <div className="message-content">
+                  <div className="typing-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Quick Reply Chips */}
+          {quickReplies.length > 0 && !isLoading && (
+            <div className="quick-replies" id="quick-replies">
+              {quickReplies.map((reply, index) => (
                 <button
-                  key={starter.key}
-                  className="starter-btn"
-                  data-starter-key={starter.key}
-                  onClick={() => handleStarterClick(starter)}
+                  key={index}
+                  className="quick-reply-chip"
+                  onClick={() => handleQuickReply(reply)}
                 >
-                  {starter.icon}
-                  <span>{starter.text}</span>
+                  {reply}
                 </button>
               ))}
             </div>
           )}
 
-          {/* Messages */}
-          {messages.map((message) => (
-            <MessageItem
-              key={message.id}
-              message={message}
-              playingMessageId={playingMessageId}
-              onActionClick={handleActionClick}
-              onPlayTTS={playTTS}
-              onStopTTS={stopTTS}
-              getActionTitle={getActionTitle}
-              t={t}
-            />
-          ))}
-
-          {/* Streaming Content */}
-          {streamingContent && (
-            <div className="message message-coach">
-              <div className="message-avatar">
-                <CoachAvatar />
-              </div>
-              <div className="message-content">
-                <StreamingMessage content={streamingContent} />
-              </div>
-            </div>
-          )}
-
-          {/* Typing Indicator */}
-          {isLoading && !streamingContent && (
-            <div className="message message-coach typing-indicator">
-              <div className="message-avatar">
-                <CoachAvatar />
-              </div>
-              <div className="message-content">
-                <div className="typing-dots">
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <div ref={messagesEndRef} />
-        </div>
-
-        {/* Quick Reply Chips */}
-        {quickReplies.length > 0 && !isLoading && (
-          <div className="quick-replies" id="quick-replies">
-            {quickReplies.map((reply, index) => (
+          {/* Chat Input */}
+          <div className="chat-input-container">
+            <div className="chat-input-wrapper">
               <button
-                key={index}
-                className="quick-reply-chip"
-                onClick={() => handleQuickReply(reply)}
+                className={`voice-input-btn ${isRecording ? 'recording' : ''}`}
+                id="voice-input-btn"
+                title={t('coach:input.voice', 'Voice input')}
+                onClick={toggleVoiceInput}
+                disabled={isLoading}
               >
-                {reply}
+                {icons.mic}
+                <div className="voice-recording-indicator" id="voice-recording-indicator"></div>
               </button>
-            ))}
+              <textarea
+                ref={inputRef}
+                className="chat-input"
+                id="coach-input"
+                value={inputValue}
+                onChange={(e) => {
+                  setInputValue(e.target.value);
+                  // Auto-grow: reset height then set to scrollHeight
+                  e.target.style.height = 'auto';
+                  e.target.style.height = e.target.scrollHeight + 'px';
+                }}
+                onKeyDown={handleKeyPress}
+                placeholder={t('coach:input.placeholder', 'Type a message...')}
+                disabled={isLoading}
+                rows={1}
+              />
+              <button
+                className="chat-send-btn"
+                id="coach-send-btn"
+                onClick={handleSubmit}
+                disabled={!inputValue.trim() || isLoading}
+              >
+                {icons.send}
+              </button>
+            </div>
+            <p className="chat-hint">
+              <span>{t('coach:input.hint', 'Your conversations are private and confidential')}</span>
+            </p>
           </div>
-        )}
-
-        {/* Chat Input */}
-        <div className="chat-input-container">
-          <div className="chat-input-wrapper">
-            <button
-              className={`voice-input-btn ${isRecording ? 'recording' : ''}`}
-              id="voice-input-btn"
-              title={t('coach:input.voice', 'Voice input')}
-              onClick={toggleVoiceInput}
-              disabled={isLoading}
-            >
-              {icons.mic}
-              <div className="voice-recording-indicator" id="voice-recording-indicator"></div>
-            </button>
-            <textarea
-              ref={inputRef}
-              className="chat-input"
-              id="coach-input"
-              value={inputValue}
-              onChange={(e) => {
-                setInputValue(e.target.value);
-                // Auto-grow: reset height then set to scrollHeight
-                e.target.style.height = 'auto';
-                e.target.style.height = e.target.scrollHeight + 'px';
-              }}
-              onKeyDown={handleKeyPress}
-              placeholder={t('coach:input.placeholder', 'Type a message...')}
-              disabled={isLoading}
-              rows={1}
-            />
-            <button
-              className="chat-send-btn"
-              id="coach-send-btn"
-              onClick={handleSubmit}
-              disabled={!inputValue.trim() || isLoading}
-            >
-              {icons.send}
-            </button>
-          </div>
-          <p className="chat-hint">
-            <a
-              href="#"
-              className="clear-history-link"
-              onClick={handleClearHistory}
-            >
-              {t('coach:clearHistory', 'Clear history')}
-            </a>
-            <span className="chat-hint-separator">•</span>
-            <span>{t('coach:input.hint', 'Your conversations are private and confidential')}</span>
-          </p>
         </div>
       </div>
 

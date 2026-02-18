@@ -3,7 +3,7 @@
  * Handles AI coach communication
  */
 
-import { get, post, getApiBaseUrl, getAuthToken } from '@/utils/api';
+import { get, post, del, patch, getApiBaseUrl, getAuthToken } from '@/utils/api';
 
 const BASE = '/api/coach';
 
@@ -156,6 +156,34 @@ export const coachApi = {
     }
 
     return get(`${BASE}/starters?${params.toString()}`);
+  },
+
+  /**
+   * List all conversations (summaries)
+   */
+  listConversations(skip = 0, limit = 20) {
+    return get(`${BASE}/conversations?skip=${skip}&limit=${limit}`);
+  },
+
+  /**
+   * Get a full conversation by ID (with messages)
+   */
+  getConversation(conversationId) {
+    return get(`${BASE}/conversations/${conversationId}`);
+  },
+
+  /**
+   * Delete a conversation
+   */
+  deleteConversation(conversationId) {
+    return del(`${BASE}/conversations/${conversationId}`);
+  },
+
+  /**
+   * Rename a conversation
+   */
+  renameConversation(conversationId, title) {
+    return patch(`${BASE}/conversations/${conversationId}`, { title });
   },
 
   /**
