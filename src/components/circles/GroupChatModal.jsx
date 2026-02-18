@@ -7,6 +7,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal } from '@/components/ui/Modal';
 import { circlesApi } from '@/features/circles/circlesApi';
+import { useAuth } from '@/context/AuthContext';
 
 const AVATAR_COLORS = [
   '#2D4A47', '#7C9885', '#B8A898', '#5C7A6F', '#8B7355', '#6B8E7D',
@@ -17,6 +18,12 @@ const icons = {
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <line x1="22" x2="11" y1="2" y2="13"></line>
       <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+    </svg>
+  ),
+  retry: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="23 4 23 10 17 10"></polyline>
+      <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
     </svg>
   ),
 };
@@ -43,14 +50,20 @@ function formatRelativeTime(dateString) {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
+let tempIdCounter = 0;
+
 export default function GroupChatModal({ isOpen, onClose, group }) {
   const { t } = useTranslation(['circles', 'common']);
+  const { user } = useAuth();
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [newMessage, setNewMessage] = useState('');
-  const [isSending, setIsSending] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+
+  const userName = user
+    ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'You'
+    : 'You';
 
   useEffect(() => {
     if (isOpen && group?.id) {
@@ -88,23 +101,55 @@ export default function GroupChatModal({ isOpen, onClose, group }) {
     }
   }
 
-  async function handleSend(e) {
-    e.preventDefault();
-    const content = newMessage.trim();
-    if (!content || isSending) return;
-    setIsSending(true);
+  async function sendMessage(content, tempId) {
     try {
       const result = await circlesApi.sendGroupMessage(group.id, content);
       if (result.success) {
-        setMessages((prev) => [...prev, result.data]);
-        setNewMessage('');
+        // Swap temp message with server response
+        setMessages((prev) =>
+          prev.map((msg) => (msg.id === tempId ? { ...result.data } : msg))
+        );
+      } else {
+        // Mark as failed
+        setMessages((prev) =>
+          prev.map((msg) => (msg.id === tempId ? { ...msg, _failed: true, _sending: false } : msg))
+        );
       }
-    } catch (err) {
-      console.error('Failed to send message:', err);
-    } finally {
-      setIsSending(false);
-      inputRef.current?.focus();
+    } catch {
+      setMessages((prev) =>
+        prev.map((msg) => (msg.id === tempId ? { ...msg, _failed: true, _sending: false } : msg))
+      );
     }
+  }
+
+  function handleSend(e) {
+    e.preventDefault();
+    const content = newMessage.trim();
+    if (!content) return;
+
+    const tempId = `temp_${++tempIdCounter}`;
+    const optimisticMsg = {
+      id: tempId,
+      userName,
+      content,
+      createdAt: new Date().toISOString(),
+      _sending: true,
+    };
+
+    setMessages((prev) => [...prev, optimisticMsg]);
+    setNewMessage('');
+    inputRef.current?.focus();
+
+    // Fire and forget — UI already updated
+    sendMessage(content, tempId);
+  }
+
+  function handleRetry(msg) {
+    // Reset to sending state and retry
+    setMessages((prev) =>
+      prev.map((m) => (m.id === msg.id ? { ...m, _failed: false, _sending: true } : m))
+    );
+    sendMessage(msg.content, msg.id);
   }
 
   if (!group) return null;
@@ -122,7 +167,7 @@ export default function GroupChatModal({ isOpen, onClose, group }) {
             <p className="group-chat-loading">{t('common:loading', 'Loading...')}</p>
           ) : messages.length > 0 ? (
             messages.map((msg) => (
-              <div key={msg.id} className="group-chat-msg">
+              <div key={msg.id} className={`group-chat-msg${msg._failed ? ' group-chat-msg--failed' : ''}${msg._sending ? ' group-chat-msg--sending' : ''}`}>
                 <div
                   className="group-chat-msg-avatar"
                   style={{ backgroundColor: AVATAR_COLORS[(msg.userName || '').length % AVATAR_COLORS.length] }}
@@ -132,9 +177,17 @@ export default function GroupChatModal({ isOpen, onClose, group }) {
                 <div className="group-chat-msg-body">
                   <div className="group-chat-msg-header">
                     <span className="group-chat-msg-name">{msg.userName}</span>
-                    <span className="group-chat-msg-time">{formatRelativeTime(msg.createdAt)}</span>
+                    <span className="group-chat-msg-time">
+                      {msg._sending ? t('circles:groups.sending', 'Sending...') : formatRelativeTime(msg.createdAt)}
+                    </span>
                   </div>
                   <p className="group-chat-msg-content">{msg.content}</p>
+                  {msg._failed && (
+                    <button className="group-chat-msg-retry" onClick={() => handleRetry(msg)}>
+                      {icons.retry}
+                      <span>{t('circles:groups.retry', 'Failed — tap to retry')}</span>
+                    </button>
+                  )}
                 </div>
               </div>
             ))
@@ -153,9 +206,8 @@ export default function GroupChatModal({ isOpen, onClose, group }) {
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             placeholder={t('circles:groups.messagePlaceholder', 'Write a message...')}
-            disabled={isSending}
           />
-          <button type="submit" disabled={!newMessage.trim() || isSending}>
+          <button type="submit" disabled={!newMessage.trim()}>
             {icons.send}
           </button>
         </form>

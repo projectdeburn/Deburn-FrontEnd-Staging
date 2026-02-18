@@ -75,7 +75,9 @@
     "cancel": "Avboka",
     "messagesTitle": "Gruppmeddelanden",
     "noMessages": "Inga meddelanden ännu. Starta en konversation med din grupp.",
-    "messagePlaceholder": "Skriv ett meddelande..."
+    "messagePlaceholder": "Skriv ett meddelande...",
+    "sending": "Skickar...",
+    "retry": "Misslyckades — tryck för att försöka igen"
   },
   "schedule": {
     "title": "Boka möte",

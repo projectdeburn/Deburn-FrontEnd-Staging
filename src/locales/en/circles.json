@@ -75,7 +75,9 @@
     "cancel": "Cancel",
     "messagesTitle": "Group Messages",
     "noMessages": "No messages yet. Start a conversation with your group.",
-    "messagePlaceholder": "Write a message..."
+    "messagePlaceholder": "Write a message...",
+    "sending": "Sending...",
+    "retry": "Failed — tap to retry"
   },
   "schedule": {
     "title": "Schedule Meeting",

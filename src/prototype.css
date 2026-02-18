@@ -8134,6 +8134,31 @@ body > .toast-notification.fade-out {
     line-height: 1.5;
 }
 
+.group-chat-msg--sending {
+    opacity: 0.6;
+}
+
+.group-chat-msg--failed .group-chat-msg-content {
+    color: var(--color-error, #dc2626);
+}
+
+.group-chat-msg-retry {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 4px;
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--color-error, #dc2626);
+    font-size: var(--text-caption);
+    cursor: pointer;
+}
+
+.group-chat-msg-retry:hover {
+    text-decoration: underline;
+}
+
 .group-chat-empty,
 .group-chat-loading {
     margin: auto;
