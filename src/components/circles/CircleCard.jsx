@@ -123,8 +123,18 @@ export default function CircleCard({
         <div className="circle-card-meeting">
           <div className="circle-card-meeting-badge">
             {icons.calendar}
-            <span>{formatMeetingDate(nextMeeting.scheduledAt)}</span>
+            <span>
+              {nextMeeting.recurrence && nextMeeting.nextOccurrence
+                ? formatMeetingDate(nextMeeting.nextOccurrence)
+                : formatMeetingDate(nextMeeting.scheduledAt)}
+            </span>
           </div>
+          {nextMeeting.recurrence && (
+            <span className="circle-card-recurring-badge">
+              {icons.clock}
+              <span>{t('circles:schedule.recurringMeeting', 'Recurring')}</span>
+            </span>
+          )}
         </div>
       )}
 

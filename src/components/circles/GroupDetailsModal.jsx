@@ -87,6 +87,8 @@ export default function GroupDetailsModal({
   const [meetings, setMeetings] = useState([]);
   const [isLoadingMeetings, setIsLoadingMeetings] = useState(false);
   const [cancellingMeetingId, setCancellingMeetingId] = useState(null);
+  const [skippingOccurrence, setSkippingOccurrence] = useState(null);
+
   useEffect(() => {
     if (isOpen && group?.id) {
       loadMeetings();
@@ -111,12 +113,23 @@ export default function GroupDetailsModal({
     setCancellingMeetingId(meetingId);
     try {
       await circlesApi.updateAttendance(meetingId, false);
-      // Reload meetings to reflect the change
       await loadMeetings();
     } catch (err) {
       console.error('Failed to cancel attendance:', err);
     } finally {
       setCancellingMeetingId(null);
+    }
+  }
+
+  async function handleSkipOccurrence(meetingId, date) {
+    setSkippingOccurrence(`${meetingId}-${date}`);
+    try {
+      await circlesApi.skipOccurrence(meetingId, date);
+      await loadMeetings();
+    } catch (err) {
+      console.error('Failed to skip occurrence:', err);
+    } finally {
+      setSkippingOccurrence(null);
     }
   }
 
@@ -191,10 +204,27 @@ export default function GroupDetailsModal({
               {upcomingMeetings.map(meeting => (
                 <div key={meeting.id} className="group-details-meeting">
                   <div className="group-details-meeting-info">
-                    <span className="group-details-meeting-title">{meeting.title}</span>
-                    <span className="group-details-meeting-date">
-                      {formatMeetingDate(meeting.scheduledAt)}
+                    <span className="group-details-meeting-title">
+                      {meeting.title}
+                      {meeting.recurrence && (
+                        <span className="group-details-meeting-recurring-badge">
+                          {t('circles:schedule.recurringMeeting', 'Recurring')}
+                        </span>
+                      )}
                     </span>
+                    {meeting.recurrence && meeting.upcomingOccurrences?.length > 0 ? (
+                      <div className="group-details-meeting-next-dates">
+                        {meeting.upcomingOccurrences.map((occ, i) => (
+                          <span key={i} className="group-details-meeting-date">
+                            {formatMeetingDate(occ)}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className="group-details-meeting-date">
+                        {formatMeetingDate(meeting.scheduledAt)}
+                      </span>
+                    )}
                   </div>
                   <div className="group-details-meeting-actions">
                     {meeting.meetingLink && (
@@ -208,16 +238,44 @@ export default function GroupDetailsModal({
                         <span>{t('circles:groups.join', 'Join')}</span>
                       </a>
                     )}
-                    <button
-                      type="button"
-                      className="btn-link-underline"
-                      onClick={() => handleCancelForMe(meeting.id)}
-                      disabled={cancellingMeetingId === meeting.id}
-                    >
-                      {cancellingMeetingId === meeting.id
-                        ? t('common:loading', 'Loading...')
-                        : t('circles:groups.cancel', 'Cancel')}
-                    </button>
+                    {meeting.recurrence && meeting.upcomingOccurrences?.length > 0 ? (
+                      <>
+                        <button
+                          type="button"
+                          className="btn-link-underline"
+                          onClick={() => handleSkipOccurrence(
+                            meeting.id,
+                            meeting.upcomingOccurrences[0].split('T')[0]
+                          )}
+                          disabled={skippingOccurrence === `${meeting.id}-${meeting.upcomingOccurrences[0].split('T')[0]}`}
+                        >
+                          {skippingOccurrence === `${meeting.id}-${meeting.upcomingOccurrences[0].split('T')[0]}`
+                            ? t('common:loading', 'Loading...')
+                            : t('circles:groups.skipThis', 'Not this time')}
+                        </button>
+                        <button
+                          type="button"
+                          className="btn-link-underline btn-link-underline--danger"
+                          onClick={() => handleCancelForMe(meeting.id)}
+                          disabled={cancellingMeetingId === meeting.id}
+                        >
+                          {cancellingMeetingId === meeting.id
+                            ? t('common:loading', 'Loading...')
+                            : t('circles:groups.leaveMeeting', 'Leave meeting')}
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        type="button"
+                        className="btn-link-underline"
+                        onClick={() => handleCancelForMe(meeting.id)}
+                        disabled={cancellingMeetingId === meeting.id}
+                      >
+                        {cancellingMeetingId === meeting.id
+                          ? t('common:loading', 'Loading...')
+                          : t('circles:groups.cancel', 'Cancel')}
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}

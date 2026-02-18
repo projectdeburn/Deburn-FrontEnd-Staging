@@ -132,6 +132,8 @@ export default function ScheduleMeetingModal({
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [meetingTitle, setMeetingTitle] = useState('');
   const [meetingLink, setMeetingLink] = useState('');
+  const [recurrence, setRecurrence] = useState(false);
+  const [frequency, setFrequency] = useState('weekly');
   const [membersModalSlot, setMembersModalSlot] = useState(null);
 
   useEffect(() => {
@@ -140,6 +142,8 @@ export default function ScheduleMeetingModal({
       setMeetingTitle(t('circles:schedule.defaultTitle', 'Circle Discussion'));
       setSelectedSlot(null);
       setMeetingLink('');
+      setRecurrence(false);
+      setFrequency('weekly');
       setMembersModalSlot(null);
     }
   }, [isOpen, group?.id]);
@@ -218,6 +222,8 @@ export default function ScheduleMeetingModal({
         meetingLink: normalizeUrl(meetingLink),
         timezone,
         availableMembers: selectedSlot.availableMembers || [],
+        recurrence,
+        frequency: recurrence ? frequency : undefined,
       });
       onClose();
     } finally {
@@ -300,6 +306,28 @@ export default function ScheduleMeetingModal({
                 <p className="schedule-meeting-hint">
                   {t('circles:schedule.meetingLinkHint', 'Add a Zoom, Google Meet, or Teams link for your circle to join')}
                 </p>
+              </div>
+
+              <div className="schedule-meeting-recurrence">
+                <label className="schedule-meeting-toggle-label">
+                  <input
+                    type="checkbox"
+                    checked={recurrence}
+                    onChange={(e) => setRecurrence(e.target.checked)}
+                  />
+                  <span>{t('circles:schedule.recurringMeeting', 'Recurring meeting')}</span>
+                </label>
+                {recurrence && (
+                  <select
+                    className="schedule-meeting-select"
+                    value={frequency}
+                    onChange={(e) => setFrequency(e.target.value)}
+                  >
+                    <option value="weekly">{t('circles:schedule.weekly', 'Weekly')}</option>
+                    <option value="biweekly">{t('circles:schedule.biweekly', 'Bi-weekly')}</option>
+                    <option value="monthly">{t('circles:schedule.monthly', 'Monthly')}</option>
+                  </select>
+                )}
               </div>
 
               <div className="schedule-meeting-field">

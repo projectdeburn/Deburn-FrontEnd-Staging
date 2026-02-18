@@ -51,6 +51,10 @@ export const circlesApi = {
     return post(`${BASE}/meetings/${meetingId}/cancel`, {});
   },
 
+  skipOccurrence(meetingId, date) {
+    return post(`${BASE}/meetings/${meetingId}/skip-occurrence`, { date });
+  },
+
   updateAttendance(meetingId, attending) {
     return post(`${BASE}/meetings/${meetingId}/attendance`, { attending });
   },

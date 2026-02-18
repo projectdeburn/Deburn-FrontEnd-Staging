@@ -1042,6 +1042,14 @@ p {
     cursor: not-allowed;
 }
 
+.btn-link-underline--danger {
+    color: var(--color-error, #dc2626);
+}
+
+.btn-link-underline--danger:hover {
+    color: #b91c1c;
+}
+
 /* ==========================================================================
    Sections
    ========================================================================== */
@@ -7613,6 +7621,19 @@ body > .toast-notification.fade-out {
     flex-shrink: 0;
 }
 
+.circle-card-recurring-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: var(--text-caption);
+    color: var(--neutral-500);
+    font-weight: 400;
+}
+
+.circle-card-recurring-badge svg {
+    flex-shrink: 0;
+}
+
 /* Circle Card Avatars */
 .circle-card-avatars {
     display: flex;
@@ -7989,6 +8010,24 @@ body > .toast-notification.fade-out {
     color: var(--neutral-500);
 }
 
+.group-details-meeting-recurring-badge {
+    display: inline-block;
+    margin-left: var(--space-2);
+    padding: 1px 6px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--primary-700);
+    background: rgba(45, 74, 71, 0.1);
+    border-radius: var(--radius-sm);
+    vertical-align: middle;
+}
+
+.group-details-meeting-next-dates {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
 .group-details-meeting-status {
     display: flex;
     align-items: center;
@@ -8357,6 +8396,36 @@ body > .toast-notification.fade-out {
     margin: var(--space-2) 0 0 0;
     font-size: var(--text-caption);
     color: var(--neutral-500);
+}
+
+.schedule-meeting-recurrence {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) 0;
+}
+
+.schedule-meeting-toggle-label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-body);
+    cursor: pointer;
+}
+
+.schedule-meeting-toggle-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--primary-600);
+}
+
+.schedule-meeting-select {
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--neutral-300);
+    border-radius: var(--radius-md);
+    font-size: var(--text-caption);
+    background: var(--white);
+    color: var(--neutral-700);
 }
 
 .schedule-meeting-slots {

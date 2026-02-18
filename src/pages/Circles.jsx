@@ -163,6 +163,8 @@ export default function Circles() {
         meetingLink: meetingData.meetingLink,
         timezone: meetingData.timezone,
         availableMembers: meetingData.availableMembers,
+        recurrence: meetingData.recurrence || false,
+        frequency: meetingData.frequency || undefined,
       });
       if (result.success) {
         await loadCirclesData();

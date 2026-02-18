@@ -73,6 +73,8 @@
     "cancelled": "Inställt",
     "cancelForEveryone": "Avboka för alla",
     "cancel": "Avboka",
+    "skipThis": "Inte den här gången",
+    "leaveMeeting": "Lämna möte",
     "messagesTitle": "Gruppmeddelanden",
     "noMessages": "Inga meddelanden ännu. Starta en konversation med din grupp.",
     "messagePlaceholder": "Skriv ett meddelande...",
@@ -95,7 +97,11 @@
     "noSlotsForMinimum": "Inga tider där {{count}} eller fler medlemmar är tillgängliga. Prova att sänka minimum.",
     "clickToSeeMembers": "Klicka för att se medlemmar",
     "memberAvailability": "Medlemmars tillgänglighet",
-    "scheduleButton": "Boka"
+    "scheduleButton": "Boka",
+    "recurringMeeting": "Återkommande möte",
+    "weekly": "Varje vecka",
+    "biweekly": "Varannan vecka",
+    "monthly": "Varje månad"
   },
   "empty": {
     "title": "Inga cirklar ännu",

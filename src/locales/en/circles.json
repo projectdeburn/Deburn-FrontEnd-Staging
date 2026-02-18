@@ -73,6 +73,8 @@
     "cancelled": "Cancelled",
     "cancelForEveryone": "Cancel for Everyone",
     "cancel": "Cancel",
+    "skipThis": "Not this time",
+    "leaveMeeting": "Leave meeting",
     "messagesTitle": "Group Messages",
     "noMessages": "No messages yet. Start a conversation with your group.",
     "messagePlaceholder": "Write a message...",
@@ -95,7 +97,11 @@
     "noSlotsForMinimum": "No time slots where {{count}} or more members are available. Try lowering the minimum.",
     "clickToSeeMembers": "Click to see members",
     "memberAvailability": "Member Availability",
-    "scheduleButton": "Schedule"
+    "scheduleButton": "Schedule",
+    "recurringMeeting": "Recurring meeting",
+    "weekly": "Weekly",
+    "biweekly": "Bi-weekly",
+    "monthly": "Monthly"
   },
   "empty": {
     "title": "No circles yet",
