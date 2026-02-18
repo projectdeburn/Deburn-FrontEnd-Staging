@@ -3,7 +3,10 @@
  * Displays individual circle/group with members, next meeting, and actions
  */
 
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { circlesApi } from '@/features/circles/circlesApi';
+import GroupChatModal from './GroupChatModal';
 
 // SVG Icons
 const icons = {
@@ -30,6 +33,11 @@ const icons = {
   messageCircle: (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="m3 21 1.9-5.7a8.5 8.5 0 1 1 3.8 3.8z"></path>
+    </svg>
+  ),
+  chevronRight: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="9 18 15 12 9 6"></polyline>
     </svg>
   ),
 };
@@ -77,6 +85,22 @@ export default function CircleCard({
   onEditAvailability,
 }) {
   const { t } = useTranslation(['circles', 'common']);
+  const [messagePreview, setMessagePreview] = useState({ count: 0, latest: null });
+  const [chatOpen, setChatOpen] = useState(false);
+
+  useEffect(() => {
+    if (group?.id) {
+      circlesApi.getGroupMessages(group.id).then((result) => {
+        if (result.success) {
+          const msgs = result.data.messages || [];
+          setMessagePreview({
+            count: msgs.length,
+            latest: msgs.length > 0 ? msgs[msgs.length - 1] : null,
+          });
+        }
+      }).catch(() => {});
+    }
+  }, [group?.id]);
 
   const { name, members = [], nextMeeting } = group;
   const memberCount = members.length;
@@ -133,6 +157,53 @@ export default function CircleCard({
           <p className="circle-card-topic-text">{topic}</p>
         </div>
       )}
+
+      {/* Group Messages Preview */}
+      <button
+        type="button"
+        className="circle-card-messages-bar"
+        onClick={() => setChatOpen(true)}
+      >
+        <div className="circle-card-messages-bar-left">
+          {icons.messageCircle}
+          <span className="circle-card-messages-bar-title">
+            {t('circles:groups.messagesTitle', 'Group Messages')}
+            {messagePreview.count > 0 && (
+              <span className="circle-card-messages-bar-count">({messagePreview.count})</span>
+            )}
+          </span>
+        </div>
+        {messagePreview.latest ? (
+          <span className="circle-card-messages-bar-preview">
+            {messagePreview.latest.userName}: {messagePreview.latest.content}
+          </span>
+        ) : (
+          <span className="circle-card-messages-bar-preview circle-card-messages-bar-preview--empty">
+            {t('circles:groups.noMessages', 'No messages yet. Start a conversation with your group.')}
+          </span>
+        )}
+        {icons.chevronRight}
+      </button>
+
+      <GroupChatModal
+        isOpen={chatOpen}
+        onClose={() => {
+          setChatOpen(false);
+          // Refresh preview after closing chat
+          if (group?.id) {
+            circlesApi.getGroupMessages(group.id).then((result) => {
+              if (result.success) {
+                const msgs = result.data.messages || [];
+                setMessagePreview({
+                  count: msgs.length,
+                  latest: msgs.length > 0 ? msgs[msgs.length - 1] : null,
+                });
+              }
+            }).catch(() => {});
+          }
+        }}
+        group={group}
+      />
 
       {/* Actions - always at bottom */}
       <div className="circle-card-actions">

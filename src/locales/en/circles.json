@@ -72,7 +72,10 @@
     "completed": "Completed",
     "cancelled": "Cancelled",
     "cancelForEveryone": "Cancel for Everyone",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "messagesTitle": "Group Messages",
+    "noMessages": "No messages yet. Start a conversation with your group.",
+    "messagePlaceholder": "Write a message..."
   },
   "schedule": {
     "title": "Schedule Meeting",

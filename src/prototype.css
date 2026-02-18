@@ -8007,6 +8007,183 @@ body > .toast-notification.fade-out {
     gap: var(--space-2);
 }
 
+/* ── Group Messages Preview Bar (on CircleCard) ── */
+.circle-card-messages-bar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    width: 100%;
+    padding: var(--space-3) var(--space-3);
+    margin-bottom: var(--space-4);
+    background: var(--neutral-50);
+    border: 1px solid var(--neutral-200);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+    transition: border-color var(--duration-normal);
+}
+
+.circle-card-messages-bar:hover {
+    border-color: var(--color-sage);
+}
+
+.circle-card-messages-bar-left {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-shrink: 0;
+    color: var(--color-deep-forest);
+}
+
+.circle-card-messages-bar-title {
+    font-size: var(--text-caption);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.circle-card-messages-bar-count {
+    font-weight: 400;
+    color: var(--neutral-500);
+    margin-left: 2px;
+}
+
+.circle-card-messages-bar-preview {
+    flex: 1;
+    min-width: 0;
+    font-size: var(--text-caption);
+    color: var(--neutral-500);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.circle-card-messages-bar-preview--empty {
+    font-style: italic;
+    color: var(--neutral-400);
+}
+
+.circle-card-messages-bar > svg {
+    flex-shrink: 0;
+    color: var(--neutral-400);
+}
+
+/* ── Group Chat Modal ── */
+.group-chat-modal {
+    display: flex;
+    flex-direction: column;
+    height: 400px;
+    margin: calc(-1 * var(--space-5));
+}
+
+.group-chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.group-chat-msg {
+    display: flex;
+    gap: var(--space-3);
+}
+
+.group-chat-msg-avatar {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: white;
+    margin-top: 2px;
+}
+
+.group-chat-msg-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.group-chat-msg-header {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+    margin-bottom: 2px;
+}
+
+.group-chat-msg-name {
+    font-size: var(--text-body-sm);
+    font-weight: 600;
+    color: var(--color-ink);
+}
+
+.group-chat-msg-time {
+    font-size: var(--text-caption);
+    color: var(--neutral-400);
+}
+
+.group-chat-msg-content {
+    margin: 0;
+    font-size: var(--text-body);
+    color: var(--color-ink);
+    line-height: 1.5;
+}
+
+.group-chat-empty,
+.group-chat-loading {
+    margin: auto;
+    text-align: center;
+    font-size: var(--text-body-sm);
+    color: var(--neutral-400);
+}
+
+.group-chat-input {
+    display: flex;
+    border-top: 1px solid var(--neutral-200);
+    flex-shrink: 0;
+}
+
+.group-chat-input input {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: var(--space-3) var(--space-4);
+    font-size: var(--text-body);
+    font-family: inherit;
+    background: var(--neutral-50);
+}
+
+.group-chat-input input::placeholder {
+    color: var(--neutral-400);
+}
+
+.group-chat-input button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    border: none;
+    background: var(--color-deep-forest);
+    color: white;
+    cursor: pointer;
+    transition: background var(--duration-normal);
+}
+
+.group-chat-input button:hover:not(:disabled) {
+    background: var(--color-sage);
+}
+
+.group-chat-input button:disabled {
+    background: var(--neutral-200);
+    color: var(--neutral-400);
+    cursor: default;
+}
+
 .group-details-meeting-badge {
     font-size: var(--text-caption);
     font-weight: 600;

@@ -87,7 +87,6 @@ export default function GroupDetailsModal({
   const [meetings, setMeetings] = useState([]);
   const [isLoadingMeetings, setIsLoadingMeetings] = useState(false);
   const [cancellingMeetingId, setCancellingMeetingId] = useState(null);
-
   useEffect(() => {
     if (isOpen && group?.id) {
       loadMeetings();

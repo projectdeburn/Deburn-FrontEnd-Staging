@@ -54,4 +54,12 @@ export const circlesApi = {
   updateAttendance(meetingId, attending) {
     return post(`${BASE}/meetings/${meetingId}/attendance`, { attending });
   },
+
+  getGroupMessages(groupId) {
+    return get(`${BASE}/groups/${groupId}/messages`);
+  },
+
+  sendGroupMessage(groupId, content) {
+    return post(`${BASE}/groups/${groupId}/messages`, { content });
+  },
 };

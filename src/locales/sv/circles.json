@@ -72,7 +72,10 @@
     "completed": "Genomfört",
     "cancelled": "Inställt",
     "cancelForEveryone": "Avboka för alla",
-    "cancel": "Avboka"
+    "cancel": "Avboka",
+    "messagesTitle": "Gruppmeddelanden",
+    "noMessages": "Inga meddelanden ännu. Starta en konversation med din grupp.",
+    "messagePlaceholder": "Skriv ett meddelande..."
   },
   "schedule": {
     "title": "Boka möte",
