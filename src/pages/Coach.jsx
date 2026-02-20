@@ -151,8 +151,16 @@ function getActionIcon(action) {
 // Memoized message item — only re-renders when its message or playingMessageId changes.
 // Prevents re-rendering all historical messages during streaming ticks.
 const MessageItem = memo(function MessageItem({ message, playingMessageId, onActionClick, onPlayTTS, onStopTTS, getActionTitle, t }) {
+  if (message.isError) {
+    return (
+      <div className="message message-system message-error">
+        <div className="message-content">{message.content}</div>
+      </div>
+    );
+  }
+
   return (
-    <div className={`message ${message.role === 'user' ? 'message-user' : 'message-coach'}`}>
+    <div className={`message ${message.role === 'user' ? 'message-user' : 'message-coach'}${message.partial ? ' message-partial' : ''}`}>
       {message.role === 'assistant' && (
         <div className="message-avatar">
           <CoachAvatar />
@@ -645,6 +653,17 @@ export default function Coach() {
               }
             }
           },
+          onRetry: () => {
+            // Discard partial content from failed attempt
+            if (updateTimer) {
+              clearTimeout(updateTimer);
+              updateTimer = null;
+            }
+            streamingContentRef.current = '';
+            actionsRef.current = [];
+            setStreamingContent('');
+            setActions([]);
+          },
           onDone: () => {
             // Clear any pending update timer and flush final content
             if (updateTimer) {
@@ -676,6 +695,28 @@ export default function Coach() {
           },
           onError: (error) => {
             console.error('Stream error:', error);
+
+            // Preserve any partial content already streamed
+            const partial = streamingContentRef.current;
+            if (partial) {
+              setMessages((prev) => [...prev, {
+                id: assistantId,
+                role: 'assistant',
+                content: partial,
+                partial: true,
+              }]);
+            }
+
+            // Show user-facing error message
+            setMessages((prev) => [...prev, {
+              id: Date.now() + 2,
+              role: 'system',
+              content: t('coach:streamError', 'I had trouble responding. Please try again.'),
+              isError: true,
+            }]);
+
+            setStreamingContent('');
+            streamingContentRef.current = '';
             setIsLoading(false);
           },
         }

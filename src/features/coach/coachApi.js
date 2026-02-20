@@ -7,6 +7,21 @@ import { get, post, del, patch, getApiBaseUrl, getAuthToken } from '@/utils/api'
 
 const BASE = '/api/coach';
 
+class RetryableStreamError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'RetryableStreamError';
+  }
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function backoff(attempt) {
+  return Math.min(1000 * 2 ** attempt, 4000) + Math.random() * 500;
+}
+
 export const coachApi = {
   /**
    * Send a message to the AI coach (non-streaming)
@@ -21,12 +36,38 @@ export const coachApi = {
   },
 
   /**
-   * Stream a message to the AI coach
+   * Stream a message to the AI coach with automatic retry on transient failures.
+   * Each retry is a fresh request — partial content from failed attempts is discarded.
    * @param {string} message - The message to send
    * @param {object} options - Options including conversationId, context, language
    * @param {object} callbacks - Callback functions for stream events
    */
   async streamMessage(message, options = {}, callbacks = {}) {
+    const maxRetries = 3;
+
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        return await this._doStream(message, options, callbacks);
+      } catch (error) {
+        const isLastAttempt = attempt === maxRetries - 1;
+        const isRetryable = error instanceof RetryableStreamError;
+
+        if (!isRetryable || isLastAttempt) {
+          callbacks.onError?.(error);
+          throw error;
+        }
+
+        // Discard partial content from this attempt and retry
+        callbacks.onRetry?.();
+        await sleep(backoff(attempt));
+      }
+    }
+  },
+
+  /**
+   * Internal: execute a single stream attempt.
+   */
+  async _doStream(message, options = {}, callbacks = {}) {
     const {
       conversationId = null,
       context = {},
@@ -39,20 +80,20 @@ export const coachApi = {
       onQuickReplies = () => {},
       onMetadata = () => {},
       onDone = () => {},
-      onError = () => {},
     } = callbacks;
 
-    try {
-      const baseUrl = getApiBaseUrl();
-      const token = getAuthToken();
-      const headers = {
-        'Content-Type': 'application/json',
-      };
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
+    const baseUrl = getApiBaseUrl();
+    const token = getAuthToken();
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
 
-      const response = await fetch(`${baseUrl}${BASE}/chat`, {
+    let response;
+    try {
+      response = await fetch(`${baseUrl}${BASE}/chat`, {
         method: 'POST',
         headers,
         credentials: 'include',
@@ -63,76 +104,84 @@ export const coachApi = {
           language,
         }),
       });
+    } catch (err) {
+      // Network error (TypeError from fetch) — retryable
+      throw new RetryableStreamError(err.message);
+    }
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to stream message');
+    if (!response.ok) {
+      if (response.status >= 500) {
+        throw new RetryableStreamError(`Server error: ${response.status}`);
+      }
+      // 4xx — not retryable
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.message || `Request failed: ${response.status}`);
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let newConversationId = conversationId;
+
+    while (true) {
+      const { done, value } = await reader.read();
+
+      if (done) {
+        break;
       }
 
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
-      let newConversationId = conversationId;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || '';
 
-      while (true) {
-        const { done, value } = await reader.read();
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const data = line.slice(6);
 
-        if (done) {
-          break;
-        }
+          if (data === '[DONE]') {
+            onDone(newConversationId);
+            return newConversationId;
+          }
 
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || '';
+          let parsed;
+          try {
+            parsed = JSON.parse(data);
+          } catch {
+            // Ignore JSON parse errors for incomplete chunks
+            continue;
+          }
 
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const data = line.slice(6);
-
-            if (data === '[DONE]') {
+          switch (parsed.type) {
+            case 'text':
+              onText(parsed.content);
+              break;
+            case 'actions':
+              onActions(parsed.content);
+              break;
+            case 'quickReplies':
+              onQuickReplies(parsed.content);
+              break;
+            case 'metadata':
+              if (parsed.content.conversationId) {
+                newConversationId = parsed.content.conversationId;
+              }
+              onMetadata(parsed.content);
+              break;
+            case 'error':
+              if (parsed.retryable) {
+                throw new RetryableStreamError(parsed.content);
+              }
+              throw new Error(parsed.content);
+            case 'done':
               onDone(newConversationId);
               return newConversationId;
-            }
-
-            try {
-              const parsed = JSON.parse(data);
-
-              switch (parsed.type) {
-                case 'text':
-                  onText(parsed.content);
-                  break;
-                case 'actions':
-                  onActions(parsed.content);
-                  break;
-                case 'quickReplies':
-                  onQuickReplies(parsed.content);
-                  break;
-                case 'metadata':
-                  if (parsed.content.conversationId) {
-                    newConversationId = parsed.content.conversationId;
-                  }
-                  onMetadata(parsed.content);
-                  break;
-                case 'error':
-                  onError(new Error(parsed.content));
-                  break;
-                case 'done':
-                  onDone(newConversationId);
-                  return newConversationId;
-              }
-            } catch {
-              // Ignore JSON parse errors for incomplete chunks
-            }
           }
         }
       }
-
-      onDone(newConversationId);
-      return newConversationId;
-    } catch (error) {
-      onError(error);
-      throw error;
     }
+
+    onDone(newConversationId);
+    return newConversationId;
   },
 
   /**
