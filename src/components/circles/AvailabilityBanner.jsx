@@ -57,9 +57,8 @@ const icons = {
   ),
 };
 
-const HOURS = Array.from({ length: 24 }, (_, i) => i);
-// Display labels for the 12-hour chips: 12, 1, 2, ... 11
-const DISPLAY_HOURS = [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+// 8am to 8pm (hours 8-20)
+const HOURS = Array.from({ length: 13 }, (_, i) => i + 8);
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 // Helper to format date as YYYY-MM-DD
@@ -80,14 +79,6 @@ function formatHour(hour) {
   if (hour === 12) return '12pm';
   if (hour > 12) return `${hour - 12}pm`;
   return `${hour}am`;
-}
-
-// Convert display hour (12,1,2,...11) + period (AM/PM) to 24h hour (0-23)
-function to24Hour(displayHour, period) {
-  if (period === 'AM') {
-    return displayHour === 12 ? 0 : displayHour;
-  }
-  return displayHour === 12 ? 12 : displayHour + 12;
 }
 
 // Get calendar days for a month (current month only, with empty slots for alignment)
@@ -137,7 +128,6 @@ export default function AvailabilityBanner({
   const [selectedDate, setSelectedDate] = useState(null); // Date that's expanded to show hours
   const [selectedSlots, setSelectedSlots] = useState(new Set());
   const [hasChanges, setHasChanges] = useState(false);
-  const [amPm, setAmPm] = useState('AM'); // AM or PM toggle
   const [showMembersFor, setShowMembersFor] = useState(null); // hour24 to show members popover
 
   // Build lookup maps from group availability data
@@ -397,41 +387,24 @@ export default function AvailabilityBanner({
                   {t('circles:availability.dateSlots', '{{count}} slots selected for this date', { count: currentDateSlotCount })}
                 </span>
               </div>
-              <div className="availability-ampm-toggle">
-                <button
-                  type="button"
-                  className={`availability-ampm-btn ${amPm === 'AM' ? 'active' : ''}`}
-                  onClick={() => setAmPm('AM')}
-                >
-                  AM
-                </button>
-                <button
-                  type="button"
-                  className={`availability-ampm-btn ${amPm === 'PM' ? 'active' : ''}`}
-                  onClick={() => setAmPm('PM')}
-                >
-                  PM
-                </button>
-              </div>
               <div className="availability-chips">
-                {DISPLAY_HOURS.map(displayHour => {
-                  const hour24 = to24Hour(displayHour, amPm);
-                  const groupHour = groupHourMap[`${selectedDate}-${hour24}`];
+                {HOURS.map(hour => {
+                  const groupHour = groupHourMap[`${selectedDate}-${hour}`];
                   const hasGroupMembers = groupHour && groupHour.names.length > 0;
                   return (
-                    <div key={displayHour} className="availability-chip-wrapper">
+                    <div key={hour} className="availability-chip-wrapper">
                       <button
                         type="button"
-                        className={`availability-chip ${isSlotSelected(hour24) ? 'selected' : ''}`}
-                        onClick={() => toggleSlot(hour24)}
-                        aria-label={`${displayHour} ${amPm} on ${selectedDateDisplay}`}
-                        aria-pressed={isSlotSelected(hour24)}
+                        className={`availability-chip ${isSlotSelected(hour) ? 'selected' : ''}`}
+                        onClick={() => toggleSlot(hour)}
+                        aria-label={`${formatHour(hour)} on ${selectedDateDisplay}`}
+                        aria-pressed={isSlotSelected(hour)}
                       >
-                        <span className="availability-chip-number">{displayHour}</span>
+                        <span className="availability-chip-number">{hour}:00</span>
                         {hasGroupMembers && (
                           <span
                             className="availability-chip-person-icon"
-                            onClick={(e) => { e.stopPropagation(); setShowMembersFor(hour24); }}
+                            onClick={(e) => { e.stopPropagation(); setShowMembersFor(hour); }}
                             role="button"
                             tabIndex={0}
                           >
