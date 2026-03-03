@@ -6,7 +6,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import i18n from '@/utils/i18n';
-import { get, getAuthToken } from '@/utils/api';
+import { get, post, del, getAuthToken } from '@/utils/api';
 
 // Modal components
 import ArticleModal from '@/components/learning/ArticleModal';
@@ -74,6 +74,7 @@ export default function Learning() {
   const [isLoading, setIsLoading] = useState(true);
   const [modules, setModules] = useState([]);
   const [activeFilter, setActiveFilter] = useState('all');
+  const [bookmarkedIds, setBookmarkedIds] = useState(new Set());
 
   // Modal state
   const [selectedModule, setSelectedModule] = useState(null);
@@ -87,6 +88,7 @@ export default function Learning() {
 
   useEffect(() => {
     loadLearningContent();
+    loadBookmarks();
 
     // Cleanup preloaded audio on unmount
     return () => {
@@ -106,6 +108,52 @@ export default function Learning() {
       console.error('Error loading learning content:', error);
     } finally {
       setIsLoading(false);
+    }
+  }
+
+  async function loadBookmarks() {
+    try {
+      const response = await get('/api/learning/bookmarks');
+      if (response.success) {
+        setBookmarkedIds(new Set(response.data.bookmarkIds || []));
+      }
+    } catch (error) {
+      console.error('Error loading bookmarks:', error);
+    }
+  }
+
+  async function handleToggleBookmark(contentId) {
+    const isCurrentlyBookmarked = bookmarkedIds.has(contentId);
+
+    // Optimistic update
+    setBookmarkedIds((prev) => {
+      const next = new Set(prev);
+      if (isCurrentlyBookmarked) {
+        next.delete(contentId);
+      } else {
+        next.add(contentId);
+      }
+      return next;
+    });
+
+    try {
+      if (isCurrentlyBookmarked) {
+        await del(`/api/learning/content/${contentId}/bookmark`);
+      } else {
+        await post(`/api/learning/content/${contentId}/bookmark`);
+      }
+    } catch (error) {
+      console.error('Error toggling bookmark:', error);
+      // Revert on failure
+      setBookmarkedIds((prev) => {
+        const next = new Set(prev);
+        if (isCurrentlyBookmarked) {
+          next.add(contentId);
+        } else {
+          next.delete(contentId);
+        }
+        return next;
+      });
     }
   }
 
@@ -207,12 +255,14 @@ export default function Learning() {
   }
 
   // Filter categories for the filter buttons
-  const filterCategories = ['all', 'featured', 'leadership', 'breath', 'meditation'];
+  const filterCategories = ['all', 'bookmarks', 'featured', 'leadership', 'breath', 'meditation'];
 
   // Filter modules based on active filter
   const filteredModules = activeFilter === 'all'
     ? modules
-    : modules.filter(m => m.category === activeFilter);
+    : activeFilter === 'bookmarks'
+      ? modules.filter(m => bookmarkedIds.has(m.id))
+      : modules.filter(m => m.category === activeFilter);
 
   // Group modules by category
   const groupedModules = filteredModules.reduce((acc, module) => {
@@ -255,7 +305,9 @@ export default function Learning() {
           >
             {category === 'all'
               ? t('learning:filters.all', 'All')
-              : t(`learning:categories.${category}`, category)}
+              : category === 'bookmarks'
+                ? t('learning:bookmarks', 'Bookmarks')
+                : t(`learning:categories.${category}`, category)}
           </button>
         ))}
       </div>
@@ -280,6 +332,8 @@ export default function Learning() {
                     onClick={() => handleCardClick(module)}
                     onMouseEnter={() => handleAudioHover(module)}
                     onMouseLeave={() => handleAudioLeave(module)}
+                    isBookmarked={bookmarkedIds.has(module.id)}
+                    onToggleBookmark={() => handleToggleBookmark(module.id)}
                   />
                 ))}
               </div>
@@ -327,7 +381,7 @@ function getDisplayType(contentType) {
 }
 
 // Learning Card Component
-function LearningCard({ module, onClick, onMouseEnter, onMouseLeave }) {
+function LearningCard({ module, onClick, onMouseEnter, onMouseLeave, isBookmarked, onToggleBookmark }) {
   const { t } = useTranslation(['learning', 'common']);
   const displayType = getDisplayType(module.contentType);
   const contentIcon = contentIcons[displayType] || icons.fileText;
@@ -352,6 +406,16 @@ function LearningCard({ module, onClick, onMouseEnter, onMouseLeave }) {
       onMouseLeave={isDisabled ? undefined : onMouseLeave}
       style={{ cursor: isDisabled ? 'not-allowed' : 'pointer' }}
     >
+      <button
+        className={`learning-card-bookmark${isBookmarked ? ' active' : ''}`}
+        onClick={(e) => { e.stopPropagation(); onToggleBookmark(); }}
+        title={isBookmarked ? t('learning:removeBookmark', 'Unsave') : t('learning:addBookmark', 'Save')}
+        aria-label={isBookmarked ? t('learning:removeBookmark', 'Unsave') : t('learning:addBookmark', 'Save')}
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill={isBookmarked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+        </svg>
+      </button>
       <div className="learning-card-icon">
         {contentIcon}
       </div>

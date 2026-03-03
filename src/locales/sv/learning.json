@@ -163,6 +163,9 @@
     "anonymous": "Skicka anonymt",
     "thanks": "Tack!"
   },
+  "bookmarks": "Bokmärken",
+  "addBookmark": "Spara",
+  "removeBookmark": "Ta bort",
   "minRead": "min läsning",
   "noModules": "Inga lärmoduler tillgängliga ännu."
 }

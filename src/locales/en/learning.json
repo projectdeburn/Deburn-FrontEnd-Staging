@@ -163,6 +163,9 @@
     "anonymous": "Submit anonymously",
     "thanks": "Thanks!"
   },
+  "bookmarks": "Bookmarks",
+  "addBookmark": "Save",
+  "removeBookmark": "Unsave",
   "minRead": "min read",
   "noModules": "No learning modules available yet."
 }
