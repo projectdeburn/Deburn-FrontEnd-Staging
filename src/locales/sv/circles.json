@@ -24,6 +24,7 @@
     "previousMonth": "Föregående månad",
     "nextMonth": "Nästa månad",
     "pastDateWarning": "Detta datum har passerat. Vänligen välj ett framtida datum.",
+    "membersAvailable": "{{count}}/{{total}} medlemmar tillgängliga",
     "days": {
       "mon": "Mån",
       "tue": "Tis",
@@ -101,7 +102,11 @@
     "recurringMeeting": "Återkommande möte",
     "weekly": "Varje vecka",
     "biweekly": "Varannan vecka",
-    "monthly": "Varje månad"
+    "monthly": "Varje månad",
+    "slotsCount": "{{count}} tider",
+    "booked": "Bokad",
+    "alreadyBooked": "Redan bokad",
+    "meetingLinkHint": "Lägg till en Zoom-, Google Meet- eller Teams-länk för din cirkel"
   },
   "empty": {
     "title": "Inga cirklar ännu",

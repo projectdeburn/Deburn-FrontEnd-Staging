@@ -44,6 +44,7 @@ export default function Circles() {
   const [pendingInvitations, setPendingInvitations] = useState([]);
   const [acceptedInvitations, setAcceptedInvitations] = useState([]);
   const [availability, setAvailability] = useState([]);
+  const [groupAvailability, setGroupAvailability] = useState(null);
 
   const [showGroupDetailsModal, setShowGroupDetailsModal] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
@@ -79,9 +80,15 @@ export default function Circles() {
 
       if (loadedGroups.length > 0) {
         const firstGroupId = loadedGroups[0].id;
-        const availRes = await circlesApi.getAvailability(firstGroupId).catch(() => ({ success: false }));
+        const [availRes, groupAvailRes] = await Promise.all([
+          circlesApi.getAvailability(firstGroupId).catch(() => ({ success: false })),
+          circlesApi.getGroupAvailability(firstGroupId).catch(() => ({ success: false })),
+        ]);
         if (availRes.success) {
           setAvailability(availRes.data.slots || []);
+        }
+        if (groupAvailRes.success) {
+          setGroupAvailability(groupAvailRes.data);
         }
       }
     } catch (err) {
@@ -218,6 +225,7 @@ export default function Circles() {
         <div ref={availabilityBannerRef}>
           <AvailabilityBanner
             availability={availability}
+            groupAvailability={groupAvailability}
             onSaveAvailability={handleSaveAvailability}
             isSaving={isSavingAvailability}
             isExpanded={availabilityExpanded}

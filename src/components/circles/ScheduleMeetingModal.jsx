@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal, ModalFooter } from '@/components/ui/Modal';
 import { circlesApi } from '@/features/circles/circlesApi';
@@ -114,6 +114,15 @@ function formatHour(hour) {
   return `${hour}:00 AM`;
 }
 
+function formatDayHeader(dateStr) {
+  const date = new Date(dateStr + 'T00:00:00');
+  return date.toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'short',
+    day: 'numeric',
+  });
+}
+
 export default function ScheduleMeetingModal({
   isOpen,
   onClose,
@@ -135,6 +144,18 @@ export default function ScheduleMeetingModal({
   const [recurrence, setRecurrence] = useState(false);
   const [frequency, setFrequency] = useState('weekly');
   const [membersModalSlot, setMembersModalSlot] = useState(null);
+
+  // Group slots by date for day-grouped layout
+  const slotsByDay = useMemo(() => {
+    const groups = {};
+    for (const slot of allSlots) {
+      if (!groups[slot.date]) {
+        groups[slot.date] = [];
+      }
+      groups[slot.date].push(slot);
+    }
+    return Object.entries(groups).sort(([a], [b]) => a.localeCompare(b));
+  }, [allSlots]);
 
   useEffect(() => {
     if (isOpen && group?.id) {
@@ -335,80 +356,95 @@ export default function ScheduleMeetingModal({
                   {t('circles:schedule.selectTime', 'Select a Time')}
                 </label>
 
-                <div className="schedule-meeting-slots">
-                  {allSlots.map((slot) => {
-                    const slotKey = `${slot.date}-${slot.hour}`;
-                    const isSelected = selectedSlot &&
-                      selectedSlot.date === slot.date &&
-                      selectedSlot.hour === slot.hour;
-                    const bookedMeeting = getBookedMeeting(slot);
-                    const isBooked = !!bookedMeeting;
+                <div className="schedule-meeting-days">
+                  {slotsByDay.map(([dateStr, daySlots]) => (
+                    <div key={dateStr} className="schedule-meeting-day-group">
+                      <div className="schedule-meeting-day-header">
+                        <span>{formatDayHeader(dateStr)}</span>
+                        <span className="schedule-meeting-day-count">
+                          {t('circles:schedule.slotsCount', '{{count}} slots', { count: daySlots.length })}
+                        </span>
+                      </div>
+                      <div className="schedule-meeting-day-slots">
+                        {daySlots.map((slot) => {
+                          const slotKey = `${slot.date}-${slot.hour}`;
+                          const isSelected = selectedSlot &&
+                            selectedSlot.date === slot.date &&
+                            selectedSlot.hour === slot.hour;
+                          const bookedMeeting = getBookedMeeting(slot);
+                          const isBooked = !!bookedMeeting;
+                          const densityPct = totalMembers > 0 ? (slot.availableCount / totalMembers) * 100 : 0;
+                          const firstNames = (slot.availableMembers || []).slice(0, 3).map(n => n.split(' ')[0]);
+                          const moreCount = (slot.availableMembers || []).length - 3;
 
-                    // Use div for booked slots (contains cancel button), button for available slots
-                    if (isBooked) {
-                      return (
-                        <div
-                          key={slotKey}
-                          className="schedule-meeting-slot schedule-meeting-slot--booked"
-                        >
-                          <span className="schedule-meeting-slot-date">
-                            {icons.calendar}
-                            {formatSlotDate(slot)}
-                          </span>
-                          <span className="schedule-meeting-slot-time">
-                            {icons.clock}
-                            {formatHour(slot.hour)}
-                          </span>
-                          <div className="schedule-meeting-slot-booked-actions">
-                            <span
-                              className="schedule-meeting-slot-availability schedule-meeting-slot-availability--booked"
-                              title={bookedMeeting.title || t('circles:schedule.alreadyBooked', 'Already booked')}
-                            >
-                              {t('circles:schedule.booked', 'Booked')}
-                            </span>
+                          if (isBooked) {
+                            return (
+                              <div
+                                key={slotKey}
+                                className="schedule-slot-card booked"
+                              >
+                                <div className="schedule-slot-card-time">
+                                  {icons.clock}
+                                  <span>{formatHour(slot.hour)}</span>
+                                </div>
+                                <div className="schedule-slot-card-bar" style={{ width: `${densityPct}%` }} />
+                                <div className="schedule-slot-card-booked-row">
+                                  <span className="schedule-slot-card-booked-label">
+                                    {t('circles:schedule.booked', 'Booked')}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    className="btn-link-underline"
+                                    onClick={(e) => handleCancelMeeting(e, bookedMeeting.id)}
+                                    disabled={isCancelling === bookedMeeting.id}
+                                  >
+                                    {isCancelling === bookedMeeting.id
+                                      ? '...'
+                                      : t('circles:groups.cancel', 'Cancel')}
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          }
+
+                          return (
                             <button
+                              key={slotKey}
                               type="button"
-                              className="btn-link-underline"
-                              onClick={(e) => handleCancelMeeting(e, bookedMeeting.id)}
-                              disabled={isCancelling === bookedMeeting.id}
+                              className={`schedule-slot-card ${isSelected ? 'selected' : ''}`}
+                              onClick={() => setSelectedSlot(slot)}
                             >
-                              {isCancelling === bookedMeeting.id
-                                ? '...'
-                                : t('circles:groups.cancel', 'Cancel')}
+                              <div className="schedule-slot-card-time">
+                                {icons.clock}
+                                <span>{formatHour(slot.hour)}</span>
+                                <span
+                                  className="schedule-slot-card-count"
+                                  onClick={(e) => showMembersModal(e, slot)}
+                                  role="button"
+                                  tabIndex={0}
+                                  title={t('circles:schedule.clickToSeeMembers', 'Click to see members')}
+                                >
+                                  {icons.users}
+                                  {slot.availableCount}/{totalMembers}
+                                </span>
+                              </div>
+                              <div className="schedule-slot-card-bar" style={{ width: `${densityPct}%` }} />
+                              {firstNames.length > 0 && (
+                                <div className="schedule-slot-card-names">
+                                  {firstNames.map(name => (
+                                    <span key={name} className="schedule-slot-card-name">{name}</span>
+                                  ))}
+                                  {moreCount > 0 && (
+                                    <span className="schedule-slot-card-name schedule-slot-card-name--more">+{moreCount}</span>
+                                  )}
+                                </div>
+                              )}
                             </button>
-                          </div>
-                        </div>
-                      );
-                    }
-
-                    return (
-                      <button
-                        key={slotKey}
-                        type="button"
-                        className={`schedule-meeting-slot ${isSelected ? 'schedule-meeting-slot--selected' : ''}`}
-                        onClick={() => setSelectedSlot(slot)}
-                      >
-                        <span className="schedule-meeting-slot-date">
-                          {icons.calendar}
-                          {formatSlotDate(slot)}
-                        </span>
-                        <span className="schedule-meeting-slot-time">
-                          {icons.clock}
-                          {formatHour(slot.hour)}
-                        </span>
-                        <span
-                          className="schedule-meeting-slot-availability"
-                          onClick={(e) => showMembersModal(e, slot)}
-                          role="button"
-                          tabIndex={0}
-                          title={t('circles:schedule.clickToSeeMembers', 'Click to see members')}
-                        >
-                          {icons.users}
-                          {slot.availableCount}/{totalMembers}
-                        </span>
-                      </button>
-                    );
-                  })}
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </>

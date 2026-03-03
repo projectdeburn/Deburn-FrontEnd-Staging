@@ -138,22 +138,20 @@ export default function CircleCard({
         </div>
       )}
 
-      {/* Member Avatars */}
-      <div className="circle-card-avatars">
+      {/* Member Names */}
+      <div className="circle-card-members-list">
         {members.slice(0, 6).map((member, index) => (
-          <div
+          <span
             key={member.id || index}
-            className="circle-avatar"
-            style={{ backgroundColor: AVATAR_COLORS[index % AVATAR_COLORS.length] }}
-            title={member.name}
+            className="circle-card-member-name"
           >
-            {getInitials(member.name)}
-          </div>
+            {member.name}
+          </span>
         ))}
         {members.length > 6 && (
-          <div className="circle-avatar circle-avatar-more">
-            +{members.length - 6}
-          </div>
+          <span className="circle-card-member-name circle-card-member-name--more">
+            +{members.length - 6} {t('circles:groups.members', 'members')}
+          </span>
         )}
       </div>
 

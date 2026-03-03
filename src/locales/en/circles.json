@@ -24,6 +24,7 @@
     "previousMonth": "Previous month",
     "nextMonth": "Next month",
     "pastDateWarning": "This date is in the past. Please select a future date.",
+    "membersAvailable": "{{count}}/{{total}} members available",
     "days": {
       "mon": "Mon",
       "tue": "Tue",
@@ -101,7 +102,11 @@
     "recurringMeeting": "Recurring meeting",
     "weekly": "Weekly",
     "biweekly": "Bi-weekly",
-    "monthly": "Monthly"
+    "monthly": "Monthly",
+    "slotsCount": "{{count}} slots",
+    "booked": "Booked",
+    "alreadyBooked": "Already booked",
+    "meetingLinkHint": "Add a Zoom, Google Meet, or Teams link for your circle to join"
   },
   "empty": {
     "title": "No circles yet",

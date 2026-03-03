@@ -1,5 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Modal, ModalFooter } from '@/components/ui/Modal';
+import { useAuth } from '@/context/AuthContext';
 
 const icons = {
   calendar: (
@@ -36,9 +38,28 @@ const icons = {
       <polyline points="9 18 15 12 9 6"></polyline>
     </svg>
   ),
+  person: (
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+      <circle cx="12" cy="7" r="4"></circle>
+    </svg>
+  ),
+  check: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="20 6 9 17 4 12"></polyline>
+    </svg>
+  ),
+  x: (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+  ),
 };
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
+// Display labels for the 12-hour chips: 12, 1, 2, ... 11
+const DISPLAY_HOURS = [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 // Helper to format date as YYYY-MM-DD
@@ -59,6 +80,14 @@ function formatHour(hour) {
   if (hour === 12) return '12pm';
   if (hour > 12) return `${hour - 12}pm`;
   return `${hour}am`;
+}
+
+// Convert display hour (12,1,2,...11) + period (AM/PM) to 24h hour (0-23)
+function to24Hour(displayHour, period) {
+  if (period === 'AM') {
+    return displayHour === 12 ? 0 : displayHour;
+  }
+  return displayHour === 12 ? 12 : displayHour + 12;
 }
 
 // Get calendar days for a month (current month only, with empty slots for alignment)
@@ -86,12 +115,15 @@ function getCalendarDays(year, month) {
 
 export default function AvailabilityBanner({
   availability = [],
+  groupAvailability = null,
   onSaveAvailability,
   isSaving = false,
   isExpanded = false,
   onToggleExpanded,
 }) {
   const { t, i18n } = useTranslation(['circles', 'common']);
+  const { user } = useAuth();
+  const currentUserName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : '';
 
   // Use internal state if no external control provided
   const [internalExpanded, setInternalExpanded] = useState(false);
@@ -105,6 +137,42 @@ export default function AvailabilityBanner({
   const [selectedDate, setSelectedDate] = useState(null); // Date that's expanded to show hours
   const [selectedSlots, setSelectedSlots] = useState(new Set());
   const [hasChanges, setHasChanges] = useState(false);
+  const [amPm, setAmPm] = useState('AM'); // AM or PM toggle
+  const [showMembersFor, setShowMembersFor] = useState(null); // hour24 to show members popover
+
+  // Build lookup maps from group availability data
+  const groupTotalMembers = groupAvailability?.totalMembers || 0;
+  const groupDayMap = useMemo(() => {
+    if (!groupAvailability?.slots) return {};
+    const map = {};
+    for (const slot of groupAvailability.slots) {
+      if (!map[slot.date]) {
+        map[slot.date] = { count: 0, names: new Set() };
+      }
+      if (slot.availableCount > map[slot.date].count) {
+        map[slot.date].count = slot.availableCount;
+      }
+      (slot.availableMembers || []).forEach(name => map[slot.date].names.add(name));
+    }
+    // Convert sets to arrays
+    for (const key of Object.keys(map)) {
+      map[key].names = Array.from(map[key].names);
+    }
+    return map;
+  }, [groupAvailability]);
+
+  const groupHourMap = useMemo(() => {
+    if (!groupAvailability?.slots) return {};
+    const map = {};
+    for (const slot of groupAvailability.slots) {
+      const key = `${slot.date}-${slot.hour}`;
+      map[key] = {
+        count: slot.availableCount,
+        names: slot.availableMembers || [],
+      };
+    }
+    return map;
+  }, [groupAvailability]);
 
   const hasAvailability = availability && availability.length > 0;
   const slotCount = availability.length;
@@ -223,7 +291,15 @@ export default function AvailabilityBanner({
       })
     : '';
 
+  // Members modal data — exclude current user
+  const membersModalData = showMembersFor !== null ? groupHourMap[`${selectedDate}-${showMembersFor}`] : null;
+  const allGroupMembers = groupAvailability?.members || [];
+  const availableSet = membersModalData ? new Set(membersModalData.names) : new Set();
+  const modalAvailableNames = membersModalData ? membersModalData.names.filter(n => n !== currentUserName) : [];
+  const unavailableMembers = membersModalData ? allGroupMembers.filter(m => !availableSet.has(m) && m !== currentUserName) : [];
+
   return (
+    <>
     <div className={`availability-banner ${hasAvailability ? 'availability-banner--set' : ''} ${expanded ? 'availability-banner--expanded' : ''}`}>
       <div className="availability-banner-header" onClick={() => setExpanded(!expanded)}>
         <div className={`availability-banner-icon ${hasAvailability ? 'availability-banner-icon--success' : ''}`}>
@@ -290,6 +366,7 @@ export default function AvailabilityBanner({
               const isSelected = selectedDate === dateKey;
               const slotCount = getDateSlotCount(dateKey);
               const hasSlots = slotCount > 0;
+              const groupDay = !isPast ? groupDayMap[dateKey] : null;
 
               return (
                 <button
@@ -300,7 +377,12 @@ export default function AvailabilityBanner({
                   disabled={isPast}
                 >
                   <span className="availability-day-number">{date.getDate()}</span>
-                  {hasSlots && <span className="availability-day-indicator">{slotCount}</span>}
+                  {groupDay && groupTotalMembers > 0 && (
+                    <span className="availability-day-group-count" title={groupDay.names.join(', ')}>
+                      {icons.person}
+                      {groupDay.count}
+                    </span>
+                  )}
                 </button>
               );
             })}
@@ -315,19 +397,51 @@ export default function AvailabilityBanner({
                   {t('circles:availability.dateSlots', '{{count}} slots selected for this date', { count: currentDateSlotCount })}
                 </span>
               </div>
+              <div className="availability-ampm-toggle">
+                <button
+                  type="button"
+                  className={`availability-ampm-btn ${amPm === 'AM' ? 'active' : ''}`}
+                  onClick={() => setAmPm('AM')}
+                >
+                  AM
+                </button>
+                <button
+                  type="button"
+                  className={`availability-ampm-btn ${amPm === 'PM' ? 'active' : ''}`}
+                  onClick={() => setAmPm('PM')}
+                >
+                  PM
+                </button>
+              </div>
               <div className="availability-chips">
-                {HOURS.map(hour => (
-                  <button
-                    key={hour}
-                    type="button"
-                    className={`availability-chip ${isSlotSelected(hour) ? 'selected' : ''}`}
-                    onClick={() => toggleSlot(hour)}
-                    aria-label={`${formatHour(hour)} on ${selectedDateDisplay}`}
-                    aria-pressed={isSlotSelected(hour)}
-                  >
-                    {formatHour(hour)}
-                  </button>
-                ))}
+                {DISPLAY_HOURS.map(displayHour => {
+                  const hour24 = to24Hour(displayHour, amPm);
+                  const groupHour = groupHourMap[`${selectedDate}-${hour24}`];
+                  const hasGroupMembers = groupHour && groupHour.names.length > 0;
+                  return (
+                    <div key={displayHour} className="availability-chip-wrapper">
+                      <button
+                        type="button"
+                        className={`availability-chip ${isSlotSelected(hour24) ? 'selected' : ''}`}
+                        onClick={() => toggleSlot(hour24)}
+                        aria-label={`${displayHour} ${amPm} on ${selectedDateDisplay}`}
+                        aria-pressed={isSlotSelected(hour24)}
+                      >
+                        <span className="availability-chip-number">{displayHour}</span>
+                        {hasGroupMembers && (
+                          <span
+                            className="availability-chip-person-icon"
+                            onClick={(e) => { e.stopPropagation(); setShowMembersFor(hour24); }}
+                            role="button"
+                            tabIndex={0}
+                          >
+                            {icons.person}
+                          </span>
+                        )}
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
               {currentDateSlotCount > 0 && (
                 <button
@@ -378,5 +492,46 @@ export default function AvailabilityBanner({
         </div>
       )}
     </div>
+
+    <Modal
+      isOpen={showMembersFor !== null && !!membersModalData}
+      onClose={() => setShowMembersFor(null)}
+      title={t('circles:schedule.memberAvailability', 'Member Availability')}
+      size="sm"
+    >
+      {membersModalData && (
+        <div className="members-availability-content">
+          <p className="members-availability-time">
+            {icons.calendar} {selectedDateDisplay} &nbsp;
+            {formatHour(showMembersFor)}
+          </p>
+
+          <div className="members-availability-list">
+            {modalAvailableNames.map((name) => (
+              <div key={name} className="members-availability-item members-availability-item--available">
+                {icons.check}
+                <span>{name}</span>
+              </div>
+            ))}
+            {unavailableMembers.map((name) => (
+              <div key={name} className="members-availability-item members-availability-item--unavailable">
+                {icons.x}
+                <span>{name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      <ModalFooter>
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={() => setShowMembersFor(null)}
+        >
+          {t('common:close', 'Close')}
+        </button>
+      </ModalFooter>
+    </Modal>
+    </>
   );
 }
