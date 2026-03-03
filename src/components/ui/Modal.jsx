@@ -4,7 +4,7 @@
  * Uses prototype.css classes (no Tailwind)
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, Children, isValidElement } from 'react';
 
 // Close icon SVG
 const CloseIcon = () => (
@@ -92,10 +92,17 @@ export function Modal({
           )}
         </div>
 
-        {/* Body */}
+        {/* Body — render everything except ModalFooter */}
         <div className="circles-modal-body">
-          {children}
+          {Children.toArray(children).filter(
+            child => !(isValidElement(child) && child.type === ModalFooter)
+          )}
         </div>
+
+        {/* Footer — rendered outside scrollable body so it stays pinned */}
+        {Children.toArray(children).filter(
+          child => isValidElement(child) && child.type === ModalFooter
+        )}
       </div>
     </div>
   );

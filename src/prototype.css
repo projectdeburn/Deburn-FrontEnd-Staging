@@ -4543,6 +4543,8 @@ p {
     padding: var(--space-5);
     overflow-y: auto;
     background-color: var(--color-bg-primary);
+    flex: 1 1 auto;
+    min-height: 0;
 }
 
 /* Group Detail Section */
@@ -5167,6 +5169,7 @@ body > .toast-notification.fade-out {
     padding: var(--space-4) var(--space-5);
     border-top: 1px solid var(--color-border);
     background-color: var(--color-bg-secondary);
+    flex-shrink: 0;
 }
 
 .availability-instructions {
@@ -8769,9 +8772,7 @@ body > .toast-notification.fade-out {
 .schedule-meeting-days {
     display: flex;
     flex-direction: column;
-    gap: var(--space-4);
-    max-height: 340px;
-    overflow-y: auto;
+    gap: var(--space-2);
 }
 
 .schedule-meeting-day-group {

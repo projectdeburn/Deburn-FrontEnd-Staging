@@ -71,12 +71,11 @@ function normalizeUrl(url) {
 }
 
 function filterAndSortSlots(slots) {
-  // Filter out past dates and slots with only 1 person available
   const today = new Date().toISOString().split('T')[0];
 
   const filteredSlots = slots.filter(slot => {
-    // Skip slots where only 1 person is available
-    if (slot.availableCount <= 1) return false;
+    // Show slots where at least 1 member is available
+    if (slot.availableCount < 1) return false;
     // Skip past dates
     if (slot.date < today) return false;
     return true;
@@ -98,20 +97,12 @@ function filterAndSortSlots(slots) {
 }
 
 function formatSlotDate(slot) {
-  // Parse YYYY-MM-DD without timezone issues
   const date = new Date(slot.date + 'T00:00:00');
   return date.toLocaleDateString('en-US', {
     weekday: 'short',
     month: 'short',
     day: 'numeric',
   });
-}
-
-function formatHour(hour) {
-  if (hour === 0) return '12:00 AM';
-  if (hour === 12) return '12:00 PM';
-  if (hour > 12) return `${hour - 12}:00 PM`;
-  return `${hour}:00 AM`;
 }
 
 function formatDayHeader(dateStr) {
@@ -172,7 +163,6 @@ export default function ScheduleMeetingModal({
   async function loadAvailability() {
     setIsLoading(true);
     try {
-      // Fetch availability and existing meetings in parallel
       const [availResult, meetingsResult] = await Promise.all([
         circlesApi.getGroupAvailability(group.id),
         circlesApi.getGroupMeetings(group.id),
@@ -201,8 +191,6 @@ export default function ScheduleMeetingModal({
     }
   }
 
-  // Check if a slot clashes with an existing meeting, returns the meeting if found
-  // Excludes cancelled meetings so slot returns to unbooked state
   function getBookedMeeting(slot) {
     return existingMeetings.find(meeting => {
       if (!meeting.scheduledAt) return false;
@@ -219,7 +207,6 @@ export default function ScheduleMeetingModal({
     setIsCancelling(meetingId);
     try {
       await circlesApi.cancelMeeting(meetingId);
-      // Reload availability to refresh the booked slots
       await loadAvailability();
       onMeetingCancelled?.();
     } catch (err) {
@@ -261,7 +248,6 @@ export default function ScheduleMeetingModal({
 
   const hasSlots = allSlots.length > 0;
 
-  // Get unavailable members for the members modal
   const availableSet = membersModalSlot ? new Set(membersModalSlot.availableMembers) : new Set();
   const unavailableMembers = membersModalSlot ? allMembers.filter(m => !availableSet.has(m)) : [];
 
@@ -286,7 +272,7 @@ export default function ScheduleMeetingModal({
           ) : !hasSlots ? (
             <div className="schedule-meeting-no-availability">
               {icons.alertCircle}
-              <h4>{t('circles:schedule.noAvailability', 'No Common Availability')}</h4>
+              <h4>{t('circles:schedule.noAvailability', 'No Availability Yet')}</h4>
               <p>
                 {t('circles:schedule.noAvailabilityDesc', 'There are no time slots where members are available. Ask members to update their availability.')}
               </p>
@@ -385,7 +371,7 @@ export default function ScheduleMeetingModal({
                               >
                                 <div className="schedule-slot-card-time">
                                   {icons.clock}
-                                  <span>{formatHour(slot.hour)}</span>
+                                  <span>{slot.hour}:00</span>
                                 </div>
                                 <div className="schedule-slot-card-bar" style={{ width: `${densityPct}%` }} />
                                 <div className="schedule-slot-card-booked-row">
@@ -416,7 +402,7 @@ export default function ScheduleMeetingModal({
                             >
                               <div className="schedule-slot-card-time">
                                 {icons.clock}
-                                <span>{formatHour(slot.hour)}</span>
+                                <span>{slot.hour}:00</span>
                                 <span
                                   className="schedule-slot-card-count"
                                   onClick={(e) => showMembersModal(e, slot)}
@@ -482,7 +468,7 @@ export default function ScheduleMeetingModal({
           <div className="members-availability-content">
             <p className="members-availability-time">
               {icons.calendar} {formatSlotDate(membersModalSlot)} &nbsp;
-              {icons.clock} {formatHour(membersModalSlot.hour)}
+              {icons.clock} {membersModalSlot.hour}:00
             </p>
 
             <div className="members-availability-list">
