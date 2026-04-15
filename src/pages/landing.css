@@ -407,7 +407,8 @@
   color: var(--l-white);
 }
 
-.l-compare-card.l-new .l-compare-title {
+.l-compare-card.l-new .l-compare-title,
+.l-compare-card.l-new .l-compare-label {
   color: var(--l-white);
 }
 

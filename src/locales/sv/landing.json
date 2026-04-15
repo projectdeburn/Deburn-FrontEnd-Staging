@@ -33,7 +33,7 @@
     "body": "De flesta ledarskapsutvecklingsprogram avslutas i utbildningssalen. Verklig beteendeförändring sker i mötet, det svåra samtalet, det högstressiga beslutet. Human First AI bryggar det gapet — med AI-coaching, mikrolärande och kollegialt ansvar mitt i arbetsdagen, där det faktiskt spelar roll.",
     "old": {
       "label": "Gammal modell",
-      "title": "Episodisk intervention",
+      "title": "Episodisk Intervention",
       "1": "Årliga ledarskapsretreats",
       "2": "Reaktiv coaching efter prestandatapp",
       "3": "Generiska workshops frånkopplade från det dagliga arbetet",
@@ -41,7 +41,7 @@
     },
     "new": {
       "label": "Human First AI",
-      "title": "Daglig intelligens",
+      "title": "Daglig Intelligens",
       "1": "Daglig incheckning håller ledare medvetna om sitt eget tillstånd på 60 sekunder",
       "2": "Eve coachar ledare inför samtal, efter möten och under verkliga utmaningar",
       "3": "Mikrolärande utlöst av verkliga arbetsplatssituationer",
@@ -62,7 +62,7 @@
     "sub": "Fyra integrerade funktioner som samverkar — varje dag."
   },
   "pillar1": {
-    "title": "Daglig intelligens",
+    "title": "Daglig Intelligens",
     "body": "60-sekunders incheckning avslöjar humör, energi och risksignaler innan de blir kriser."
   },
   "pillar2": {
