@@ -1,6 +1,7 @@
 /* Import original CSS files */
 @import './prototype.css';
 @import './hub.css';
+@import './pages/landing.css';
 /* Note: styles.css is NOT imported - it's for chat.html only */
 
 /* ==========================================================================

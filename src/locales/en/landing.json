@@ -1,0 +1,125 @@
+{
+  "nav": {
+    "brand": "Human First AI",
+    "login": "Member Login",
+    "demo": "Request a Demo"
+  },
+  "hero": {
+    "eyebrow": "AI tailor made for leadership coaching",
+    "headline": "Bitesized leadership support everyday",
+    "sub": "Human First AI is a leadership platform that extends leadership programs into daily decisions, conversations, and challenges.",
+    "cta1": "Request a Demo",
+    "cta2": "See How It Works"
+  },
+  "problem": {
+    "headline": "Behaviour doesn't change in programs. It changes in how leaders act every day.",
+    "body": "Using AI leadership coaching, micro-learning, and peer accountability, we support leaders in real situations — giving them clarity and direction to navigate pressure, complexity, and constant change. That's where most leadership development breaks down. The gap is expensive: slower decisions, disengaged teams, and leaders falling back into old patterns. We close that gap. By making behaviour visible and supported daily, leaders don't just learn, they act differently. Organisations see clearer decisions, less friction in teams, and leaders who don't fall back into old patterns when pressure hits."
+  },
+  "stat1": {
+    "number": "70%",
+    "label": "of senior leaders show signs of stress and exhaustion, yet most never seek support"
+  },
+  "stat2": {
+    "number": "$322B",
+    "label": "lost globally each year to leadership performance gaps and organizational disengagement"
+  },
+  "stat3": {
+    "number": "75%",
+    "label": "of organizational transformations fail — leadership behaviour gaps are the leading hidden cause"
+  },
+  "insight": {
+    "eyebrow": "The paradigm shift",
+    "headline": "Not more workshops. Daily practice.",
+    "body": "Most leadership development ends in the training room. Real behaviour change happens in the meeting, the difficult conversation, the high-pressure decision. Human First AI bridges that gap — delivering AI coaching, micro-learning, and peer accountability inside the workday, where it actually matters.",
+    "old": {
+      "label": "Old model",
+      "title": "Episodic intervention",
+      "1": "Annual leadership retreats",
+      "2": "Reactive coaching after performance drops",
+      "3": "Generic workshops disconnected from daily work",
+      "4": "Metrics measured once a year"
+    },
+    "new": {
+      "label": "Human First AI",
+      "title": "Daily intelligence",
+      "1": "Daily check-in keeps leaders aware of their own state in 60 seconds",
+      "2": "Eve coaches leaders before conversations, after meetings, and during real challenges",
+      "3": "Micro-learning triggered by actual workplace situations",
+      "4": "Continuous behaviour signals and peer accountability across your organization"
+    }
+  },
+  "eve": {
+    "eyebrow": "Meet Eve",
+    "headline": "Your AI coach for sustainable leadership.",
+    "body": "Eve is the AI leadership coach at the heart of Human First AI. She combines clinical coaching methodology with the daily habits that science shows actually change behaviour — supporting leaders in real situations, not just training rooms.",
+    "cap1": "Personalized daily check-in and reflection prompts",
+    "cap2": "Real-time coaching conversations on demand",
+    "cap3": "Evidence-based micro-learning in under 5 minutes",
+    "cap4": "Aggregated team performance insights for HR and leadership"
+  },
+  "pillars": {
+    "headline": "Everything you need. Nothing you don't.",
+    "sub": "Four integrated capabilities that work together — every day."
+  },
+  "pillar1": {
+    "title": "Daily Intelligence",
+    "body": "60-second check-ins reveal mood, energy, and risk signals before they become crises."
+  },
+  "pillar2": {
+    "title": "Ask Eve",
+    "body": "On-demand coaching for real leadership challenges — available at 11 pm when it matters most."
+  },
+  "pillar3": {
+    "title": "Learning Library",
+    "body": "Curated micro-modules on resilience, communication, and sustainable performance. 5 minutes, evidence-backed."
+  },
+  "pillar4": {
+    "title": "Team Circles",
+    "body": "Facilitated peer groups for leaders navigating shared challenges — built for trust and candor."
+  },
+  "how": {
+    "headline": "Three steps to a resilient organization."
+  },
+  "step1": {
+    "title": "Check in",
+    "body": "Leaders complete a 60-second daily check-in. Eve surfaces patterns invisible to the naked eye."
+  },
+  "step2": {
+    "title": "Get coached",
+    "body": "Eve delivers personalized guidance, micro-learning, and exercises tailored to each leader's state."
+  },
+  "step3": {
+    "title": "Build together",
+    "body": "Circle conversations and team insights transform individual practice into organizational resilience."
+  },
+  "testimonials": {
+    "headline": "What early users are saying.",
+    "sub": "From the beta programme — honest feedback from leaders in the field.",
+    "empty": "Testimonials coming soon."
+  },
+  "demo": {
+    "headline": "Ready to protect your most important asset?",
+    "sub": "Request a demo and see how Human First AI fits into your organization."
+  },
+  "form": {
+    "name": "Your name",
+    "company": "Company",
+    "email": "Work email",
+    "message": "Tell us about your organization and what you're trying to solve (optional)",
+    "submit": "Request a Demo",
+    "sending": "Sending…",
+    "success": {
+      "title": "Thank you — we'll be in touch.",
+      "body": "Expect a reply within one business day."
+    },
+    "error": {
+      "generic": "Something went wrong. Please try again."
+    }
+  },
+  "footer": {
+    "brand": "Human First AI · A BrainBank product",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "login": "Member Login"
+  }
+}

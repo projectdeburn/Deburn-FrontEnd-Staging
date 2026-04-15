@@ -13,6 +13,7 @@ import { LoadingOverlay } from '@/components/ui';
 import '@/utils/i18n';
 
 // Pages
+import Landing from '@/pages/Landing';
 import Dashboard from '@/pages/Dashboard';
 import Checkin from '@/pages/Checkin';
 import Coach from '@/pages/Coach';
@@ -72,28 +73,15 @@ function PublicRoute({ children }) {
 }
 
 /**
- * Root Redirect - Sends to dashboard if authenticated, login if not
- */
-function RootRedirect() {
-  const { isAuthenticated, isLoading } = useAuth();
-
-  if (isLoading) {
-    return <LoadingOverlay fullScreen message="Loading..." />;
-  }
-
-  return <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />;
-}
-
-/**
  * App Routes
  */
 function AppRoutes() {
   return (
     <Routes>
-      {/* Root redirect - to dashboard if authenticated, login if not */}
+      {/* Landing page - redirects to dashboard if authenticated */}
       <Route
         path="/"
-        element={<RootRedirect />}
+        element={<Landing />}
       />
 
       {/* Auth routes */}
