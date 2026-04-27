@@ -737,18 +737,23 @@ export default function Coach() {
 
   // Get localized title for action card
   function getActionTitle(action) {
-    const category = action.metadata?.category;
-    const contentType = action.metadata?.contentType;
+    const contentId = action.metadata?.contentId || action.id;
 
-    // Try to find matching content for localized title
+    // Match by real content ID first
     let module = null;
-    if (category && contentType) {
-      module = learningContent.find(
-        (item) => item.category === category && item.contentType === contentType
-      );
+    if (contentId) {
+      module = learningContent.find((item) => item.id === contentId);
     }
-    if (!module && contentType) {
-      module = learningContent.find((item) => item.contentType === contentType);
+
+    // Fall back to category + contentType match (legacy)
+    if (!module) {
+      const category = action.metadata?.category;
+      const contentType = action.metadata?.contentType;
+      if (category && contentType) {
+        module = learningContent.find(
+          (item) => item.category === category && item.contentType === contentType
+        );
+      }
     }
 
     if (module) {
@@ -761,22 +766,25 @@ export default function Coach() {
 
   // Handle action card click - find module from pre-loaded content and open modal
   function handleActionClick(action) {
-    // Find matching content from pre-loaded learning content
-    // Match by category and contentType from action metadata
+    const contentId = action.metadata?.contentId || action.id;
     const category = action.metadata?.category;
     const contentType = action.metadata?.contentType;
 
     let module = null;
 
-    if (category && contentType) {
-      // First try exact match on category and contentType
+    // Match by real content ID first (from HubContentRetriever)
+    if (contentId) {
+      module = learningContent.find((item) => item.id === contentId);
+    }
+
+    // Fall back to category + contentType match (legacy static actions)
+    if (!module && category && contentType) {
       module = learningContent.find(
         (item) => item.category === category && item.contentType === contentType
       );
     }
 
     if (!module && contentType) {
-      // Fall back to just contentType match
       module = learningContent.find((item) => item.contentType === contentType);
     }
 
