@@ -3,10 +3,12 @@
     "dashboard": "Dashboard",
     "checkin": "Check-in",
     "coach": "Ask Eve",
-    "learning": "Learning",
-    "circles": "Circles",
+    "learning": "Micro-Courses",
+    "circles": "Think Tanks",
     "progress": "Progress",
     "settings": "Settings",
+    "feedback": "Feedback",
+    "admin": "Admin",
     "home": "Home",
     "learn": "Learn"
   },
@@ -59,5 +61,25 @@
     "label": "Language",
     "english": "English",
     "swedish": "Svenska"
-  }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No notifications yet",
+    "markAllRead": "Mark all read",
+    "loadMore": "Load more"
+  },
+  "loading": "Loading...",
+  "saving": "Saving...",
+  "adding": "Adding...",
+  "creating": "Creating...",
+  "searching": "Searching...",
+  "save": "Save",
+  "saveChanges": "Save Changes",
+  "cancel": "Cancel",
+  "remove": "Remove",
+  "delete": "Delete",
+  "edit": "Edit",
+  "refresh": "Refresh",
+  "logout": "Sign Out",
+  "submitting": "Submitting..."
 }

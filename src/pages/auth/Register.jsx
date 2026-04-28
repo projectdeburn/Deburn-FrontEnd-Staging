@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/context/AuthContext';
 
 function getPasswordStrength(password) {
-  if (!password) return { strength: 0, text: '', dataStrength: '' };
+  if (!password) return { strength: 0, textKey: '', dataStrength: '' };
 
   let score = 0;
   if (password.length >= 8) score++;
@@ -18,11 +18,11 @@ function getPasswordStrength(password) {
   if (/[^a-zA-Z0-9]/.test(password)) score++;
 
   const levels = [
-    { strength: 0, text: '', dataStrength: '' },
-    { strength: 1, text: 'Weak', dataStrength: 'weak' },
-    { strength: 2, text: 'Fair', dataStrength: 'fair' },
-    { strength: 3, text: 'Good', dataStrength: 'good' },
-    { strength: 4, text: 'Strong', dataStrength: 'strong' },
+    { strength: 0, textKey: '', dataStrength: '' },
+    { strength: 1, textKey: 'passwordStrength.weak', dataStrength: 'weak' },
+    { strength: 2, textKey: 'passwordStrength.fair', dataStrength: 'fair' },
+    { strength: 3, textKey: 'passwordStrength.good', dataStrength: 'good' },
+    { strength: 4, textKey: 'passwordStrength.strong', dataStrength: 'strong' },
   ];
 
   return levels[Math.min(score, 4)];
@@ -98,7 +98,7 @@ export default function Register() {
           dataProcessing: formData.dataProcessing,
           marketing: formData.marketing,
         },
-      });
+      }, i18n.language);
 
       if (result.success) {
         setSuccess(true);
@@ -162,7 +162,7 @@ export default function Register() {
       <div className="auth-container" style={{ maxWidth: '480px' }}>
         <div className="auth-header">
           <div className="auth-logo">
-            <span className="auth-logo-text">Eve</span>
+            <span className="auth-logo-text">Human First AI</span>
           </div>
           <h1 className="auth-title">{t('register.title', 'Create your account')}</h1>
           <p className="auth-subtitle">{t('register.subtitle', 'Start your leadership development journey')}</p>
@@ -191,7 +191,7 @@ export default function Register() {
                   id="register-firstname"
                   name="firstName"
                   className={`form-input ${fieldErrors.firstName ? 'error' : ''}`}
-                  placeholder="Your first name"
+                  placeholder={t('register.firstNamePlaceholder', 'Your first name')}
                   value={formData.firstName}
                   onChange={handleChange}
                   required
@@ -207,7 +207,7 @@ export default function Register() {
                   id="register-lastname"
                   name="lastName"
                   className={`form-input ${fieldErrors.lastName ? 'error' : ''}`}
-                  placeholder="Your last name"
+                  placeholder={t('register.lastNamePlaceholder', 'Your last name')}
                   value={formData.lastName}
                   onChange={handleChange}
                   required
@@ -225,7 +225,7 @@ export default function Register() {
                 id="register-email"
                 name="email"
                 className={`form-input ${fieldErrors.email ? 'error' : ''}`}
-                placeholder="you@company.com"
+                placeholder={t('register.emailPlaceholder', 'you@company.com')}
                 value={formData.email}
                 onChange={handleChange}
                 required
@@ -242,7 +242,7 @@ export default function Register() {
                 id="register-organization"
                 name="organization"
                 className="form-input"
-                placeholder="Your company name"
+                placeholder={t('register.organizationPlaceholder', 'Your company name')}
                 value={formData.organization}
                 onChange={handleChange}
                 required
@@ -261,8 +261,8 @@ export default function Register() {
                 onChange={handleChange}
                 required
               >
-                <option value="">Select your country</option>
-                <optgroup label="European Union">
+                <option value="">{t('register.countryPlaceholder', 'Select your country')}</option>
+                <optgroup label={t('countries.eu', 'European Union')}>
                   <option value="SE">Sweden</option>
                   <option value="FI">Finland</option>
                   <option value="DK">Denmark</option>
@@ -279,7 +279,7 @@ export default function Register() {
                   <option value="PL">Poland</option>
                   <option value="CZ">Czech Republic</option>
                 </optgroup>
-                <optgroup label="Other Countries">
+                <optgroup label={t('countries.other', 'Other Countries')}>
                   <option value="GB">United Kingdom</option>
                   <option value="CH">Switzerland</option>
                   <option value="US">United States</option>
@@ -300,7 +300,7 @@ export default function Register() {
                   id="register-password"
                   name="password"
                   className={`form-input ${fieldErrors.password ? 'error' : ''}`}
-                  placeholder="Create a strong password"
+                  placeholder={t('register.passwordPlaceholder', 'Create a strong password')}
                   value={formData.password}
                   onChange={handleChange}
                   required
@@ -330,7 +330,7 @@ export default function Register() {
                   <div className="strength-segment"></div>
                   <div className="strength-segment"></div>
                 </div>
-                <span className="strength-text">{passwordStrength.text}</span>
+                <span className="strength-text">{passwordStrength.textKey ? t(passwordStrength.textKey) : ''}</span>
               </div>
               {fieldErrors.password && <span className="form-error">{fieldErrors.password}</span>}
             </div>
@@ -345,7 +345,7 @@ export default function Register() {
                   id="register-password-confirm"
                   name="passwordConfirm"
                   className={`form-input ${fieldErrors.passwordConfirm ? 'error' : ''}`}
-                  placeholder="Confirm your password"
+                  placeholder={t('register.confirmPasswordPlaceholder', 'Confirm your password')}
                   value={formData.passwordConfirm}
                   onChange={handleChange}
                   required
@@ -372,7 +372,7 @@ export default function Register() {
             </div>
 
             <div className="consent-section">
-              <h4 className="consent-section-title">{t('register.consentTitle', 'Terms and Agreements')}</h4>
+              <h4 className="consent-section-title">{t('consent.title', 'Terms and Agreements')}</h4>
 
               <div className="checkbox-group">
                 <input
@@ -384,9 +384,7 @@ export default function Register() {
                   onChange={handleChange}
                   required
                 />
-                <label className="checkbox-label" htmlFor="consent-terms">
-                  I agree to the <Link to="/terms-of-service" target="_blank">Terms of Service</Link>
-                </label>
+                <label className="checkbox-label" htmlFor="consent-terms" dangerouslySetInnerHTML={{ __html: t('consent.terms', 'I agree to the <a href="/terms-of-service" target="_blank">Terms of Service</a>') }} />
               </div>
 
               <div className="checkbox-group">
@@ -399,9 +397,7 @@ export default function Register() {
                   onChange={handleChange}
                   required
                 />
-                <label className="checkbox-label" htmlFor="consent-privacy">
-                  I agree to the <Link to="/privacy-policy" target="_blank">Privacy Policy</Link>
-                </label>
+                <label className="checkbox-label" htmlFor="consent-privacy" dangerouslySetInnerHTML={{ __html: t('consent.privacy', 'I agree to the <a href="/privacy-policy" target="_blank">Privacy Policy</a>') }} />
               </div>
 
               <div className="checkbox-group">
@@ -415,7 +411,7 @@ export default function Register() {
                   required
                 />
                 <label className="checkbox-label" htmlFor="consent-data">
-                  I consent to the processing of my personal data as described in the Privacy Policy
+                  {t('consent.dataProcessing', 'I consent to the processing of my personal data as described in the Privacy Policy')}
                 </label>
               </div>
 
@@ -429,7 +425,7 @@ export default function Register() {
                   onChange={handleChange}
                 />
                 <label className="checkbox-label" htmlFor="consent-marketing">
-                  I'd like to receive product updates and leadership tips (optional)
+                  {t('consent.marketing', "I'd like to receive product updates and leadership tips (optional)")}
                 </label>
               </div>
             </div>

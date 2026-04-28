@@ -1,13 +1,21 @@
 {
   "hero": {
-    "title": "Learning",
+    "title": "Micro-Courses",
     "tagline": "Micro-lessons for busy leaders"
   },
+  "filters": {
+    "all": "All"
+  },
   "categories": {
+    "featured": "Featured",
     "leadership": "Leadership",
+    "breath": "Breath Techniques",
     "breathTechniques": "Breath Techniques",
     "meditation": "Meditation",
-    "audio": "Audio Learning"
+    "burnout": "Burnout Prevention",
+    "wellbeing": "Wellbeing",
+    "audio": "Audio Learning",
+    "other": "Other"
   },
   "types": {
     "video": "Video",
@@ -147,5 +155,21 @@
     "timeNinja": {
       "title": "Time Ninja: Master Your Schedule"
     }
-  }
+  },
+  "rating": {
+    "title": "How helpful was this content?",
+    "helpful": "Helpful",
+    "notHelpful": "Not helpful",
+    "anonymous": "Submit anonymously",
+    "thanks": "Thanks!"
+  },
+  "search": {
+    "placeholder": "Search micro-courses...",
+    "noResults": "No courses match your search."
+  },
+  "bookmarks": "Bookmarks",
+  "addBookmark": "Save",
+  "removeBookmark": "Unsave",
+  "minRead": "min read",
+  "noModules": "No learning modules available yet."
 }

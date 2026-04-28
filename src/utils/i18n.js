@@ -18,6 +18,11 @@ import enLearning from '@/locales/en/learning.json';
 import enProfile from '@/locales/en/profile.json';
 import enProgress from '@/locales/en/progress.json';
 import enValidation from '@/locales/en/validation.json';
+import enHub from '@/locales/en/hub.json';
+import enFeedback from '@/locales/en/feedback.json';
+import enCirclesAdmin from '@/locales/en/circlesAdmin.json';
+import enAdmin from '@/locales/en/admin.json';
+import enLanding from '@/locales/en/landing.json';
 
 import svCommon from '@/locales/sv/common.json';
 import svAuth from '@/locales/sv/auth.json';
@@ -30,6 +35,11 @@ import svLearning from '@/locales/sv/learning.json';
 import svProfile from '@/locales/sv/profile.json';
 import svProgress from '@/locales/sv/progress.json';
 import svValidation from '@/locales/sv/validation.json';
+import svHub from '@/locales/sv/hub.json';
+import svFeedback from '@/locales/sv/feedback.json';
+import svCirclesAdmin from '@/locales/sv/circlesAdmin.json';
+import svAdmin from '@/locales/sv/admin.json';
+import svLanding from '@/locales/sv/landing.json';
 
 const resources = {
   en: {
@@ -44,6 +54,11 @@ const resources = {
     profile: enProfile,
     progress: enProgress,
     validation: enValidation,
+    hub: enHub,
+    feedback: enFeedback,
+    circlesAdmin: enCirclesAdmin,
+    admin: enAdmin,
+    landing: enLanding,
   },
   sv: {
     common: svCommon,
@@ -57,6 +72,11 @@ const resources = {
     profile: svProfile,
     progress: svProgress,
     validation: svValidation,
+    hub: svHub,
+    feedback: svFeedback,
+    circlesAdmin: svCirclesAdmin,
+    admin: svAdmin,
+    landing: svLanding,
   },
 };
 
@@ -78,7 +98,7 @@ i18n
     lng: getInitialLanguage(),
     fallbackLng: 'en',
     defaultNS: 'common',
-    ns: ['common', 'auth', 'checkin', 'circles', 'coach', 'dashboard', 'errors', 'learning', 'profile', 'progress', 'validation'],
+    ns: ['common', 'auth', 'checkin', 'circles', 'circlesAdmin', 'coach', 'dashboard', 'errors', 'learning', 'profile', 'progress', 'validation', 'hub', 'feedback', 'admin', 'landing'],
     interpolation: {
       escapeValue: false, // React already escapes values
     },

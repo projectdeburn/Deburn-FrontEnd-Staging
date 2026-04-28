@@ -147,12 +147,21 @@ const moodFaces = {
 };
 
 export default function Checkin() {
-  const { t } = useTranslation(['checkin', 'common']);
+  const { t, i18n } = useTranslation(['checkin', 'common']);
   const navigate = useNavigate();
 
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [completionData, setCompletionData] = useState(null);
+
+  // Get insight/tip based on current language
+  const isSwedish = i18n.language?.startsWith('sv');
+  const displayInsight = isSwedish
+    ? (completionData?.insightSv || completionData?.insight)
+    : completionData?.insight;
+  const displayTip = isSwedish
+    ? (completionData?.tipSv || completionData?.tip)
+    : completionData?.tip;
 
   // Check-in data
   const [mood, setMood] = useState(null);
@@ -162,6 +171,14 @@ export default function Checkin() {
   const [stress, setStress] = useState(4);
 
   const totalSteps = 4;
+
+  // Helper function to calculate slider fill gradient
+  function getSliderStyle(value, min = 1, max = 10) {
+    const percentage = ((value - min) / (max - min)) * 100;
+    return {
+      background: `linear-gradient(90deg, var(--color-sage) 0%, var(--color-deep-forest) ${percentage}%, var(--neutral-200) ${percentage}%)`,
+    };
+  }
 
   // Mood labels
   const moodLabels = {
@@ -202,7 +219,7 @@ export default function Checkin() {
     } else if (currentStep === totalSteps - 1) {
       await submitCheckin();
     } else {
-      navigate('/');
+      navigate('/dashboard');
     }
   }
 
@@ -235,10 +252,11 @@ export default function Checkin() {
   }
 
   return (
-    <div className="checkin-container">
-      {/* Check-in Header */}
-      <header className="checkin-header">
-        <button className="back-btn" onClick={() => navigate('/')}>
+    <div className="checkin-screen">
+      <div className="checkin-container">
+        {/* Check-in Header */}
+        <header className="checkin-header">
+        <button className="back-btn" onClick={() => navigate('/dashboard')}>
           {icons.arrowLeft}
         </button>
         <h2 className="checkin-title">{t('checkin:title', 'Daily Check-in')}</h2>
@@ -303,6 +321,7 @@ export default function Checkin() {
                 value={physicalEnergy}
                 onChange={(e) => setPhysicalEnergy(parseInt(e.target.value))}
                 className="slider"
+                style={getSliderStyle(physicalEnergy)}
               />
               <div className="slider-labels">
                 <span>{t('common:low', 'Low')}</span>
@@ -324,6 +343,7 @@ export default function Checkin() {
                 value={mentalEnergy}
                 onChange={(e) => setMentalEnergy(parseInt(e.target.value))}
                 className="slider"
+                style={getSliderStyle(mentalEnergy)}
               />
               <div className="slider-labels">
                 <span>{t('common:low', 'Low')}</span>
@@ -393,53 +413,54 @@ export default function Checkin() {
             <span className="streak-label">{t('checkin:complete.streak', 'Day Streak!')}</span>
           </div>
 
-          {completionData?.insight && (
+          {displayInsight && (
             <div className="insight-card">
               <div className="insight-header">
                 {icons.lightbulb}
                 <span>{t('checkin:complete.insight', "Today's Insight")}</span>
               </div>
-              <p className="insight-text">{completionData.insight}</p>
+              <p className="insight-text">{displayInsight}</p>
             </div>
           )}
 
-          {completionData?.tip && (
+          {displayTip && (
             <div className="tip-card">
               <p className="tip-label">{t('checkin:complete.tipLabel', 'Your morning tip:')}</p>
-              <p className="tip-text">"{completionData.tip}"</p>
+              <p className="tip-text">"{displayTip}"</p>
             </div>
           )}
         </div>
       </div>
 
-      {/* Navigation Buttons */}
-      <div className="checkin-nav">
-        <button
-          className="btn btn-ghost"
-          onClick={handleBack}
-          style={{ visibility: currentStep === 1 || currentStep === 4 ? 'hidden' : 'visible' }}
-        >
-          {icons.arrowLeft}
-          <span>{t('common:back', 'Back')}</span>
-        </button>
-        <button
-          className="btn btn-primary"
-          onClick={handleNext}
-          disabled={!isStepValid() || isSubmitting}
-        >
-          {isSubmitting ? (
-            <span>{t('common:loading', 'Loading...')}</span>
-          ) : currentStep === 4 ? (
-            <span>{t('checkin:complete.done', 'Done')}</span>
-          ) : currentStep === 3 ? (
-            <span>{t('checkin:submit', 'Submit')}</span>
-          ) : (
-            <>
-              <span>{t('common:continue', 'Continue')}</span>
-              {icons.arrowRight}
-            </>
-          )}
-        </button>
+        {/* Navigation Buttons */}
+        <div className="checkin-nav">
+          <button
+            className="btn btn-ghost"
+            onClick={handleBack}
+            style={{ visibility: currentStep === 1 || currentStep === 4 ? 'hidden' : 'visible' }}
+          >
+            {icons.arrowLeft}
+            <span>{t('common:back', 'Back')}</span>
+          </button>
+          <button
+            className="btn btn-primary"
+            onClick={handleNext}
+            disabled={!isStepValid() || isSubmitting}
+          >
+            {isSubmitting ? (
+              <span>{t('common:loading', 'Loading...')}</span>
+            ) : currentStep === 4 ? (
+              <span>{t('checkin:complete.done', 'Done')}</span>
+            ) : currentStep === 3 ? (
+              <span>{t('checkin:submit', 'Submit')}</span>
+            ) : (
+              <>
+                <span>{t('common:continue', 'Continue')}</span>
+                {icons.arrowRight}
+              </>
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );

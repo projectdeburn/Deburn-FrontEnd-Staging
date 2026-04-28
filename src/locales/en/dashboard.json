@@ -1,6 +1,11 @@
 {
   "hero": {
-    "tagline": "Lead with resilience. Build with purpose."
+    "tagline": "Lead with resilience. Build with purpose.",
+    "greeting": {
+      "morning": "Good morning, {{name}}",
+      "afternoon": "Good afternoon, {{name}}",
+      "evening": "Good evening, {{name}}"
+    }
   },
   "checkinCard": {
     "title": "Daily Check-in",

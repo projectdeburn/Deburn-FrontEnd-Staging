@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/context/AuthContext';
 import { get } from '@/utils/api';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 
 // SVG Icons
 const icons = {
@@ -93,7 +94,7 @@ export default function Admin() {
 
   useEffect(() => {
     if (user && !user.isAdmin) {
-      navigate('/');
+      navigate('/dashboard');
       return;
     }
     loadAdminStats();
@@ -114,19 +115,14 @@ export default function Admin() {
   }
 
   if (isLoading) {
-    return (
-      <div className="loading-overlay">
-        <div className="loading-spinner"></div>
-        <p>{t('common:loading', 'Loading...')}</p>
-      </div>
-    );
+    return <LoadingSpinner text={t('common:loading', 'Loading...')} />;
   }
 
   return (
     <div className="admin-page">
       {/* Header */}
       <header className="admin-header">
-        <button className="back-btn" onClick={() => navigate('/')}>
+        <button className="back-btn" onClick={() => navigate('/dashboard')}>
           {icons.arrowLeft}
         </button>
         <div className="admin-title">

@@ -1,6 +1,11 @@
 {
   "hero": {
-    "tagline": "Led med motståndskraft. Bygg med syfte."
+    "tagline": "Led med motståndskraft. Bygg med syfte.",
+    "greeting": {
+      "morning": "God morgon, {{name}}",
+      "afternoon": "God eftermiddag, {{name}}",
+      "evening": "God kväll, {{name}}"
+    }
   },
   "checkinCard": {
     "title": "Daglig incheckning",

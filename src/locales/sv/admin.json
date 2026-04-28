@@ -1,0 +1,39 @@
+{
+  "title": "Adminpanel",
+  "tagline": "Hantera cirkelinbjudningar",
+  "pool": {
+    "loading": "Laddar..."
+  },
+  "invitations": {
+    "title": "Skicka inbjudningar",
+    "pasteEmails": "Klistra in e-postadresser (komma- eller radseparerade)",
+    "placeholder": "email1@example.com, email2@example.com\nemail3@example.com",
+    "emailsDetected": "{{count}} e-postadresser hittade",
+    "sendButton": "Skicka inbjudningar",
+    "invitedUsers": "Inbjudna användare",
+    "noInvitations": "Inga inbjudningar ännu",
+    "pending": "Väntande",
+    "accepted": "Accepterad",
+    "remove": "Åtgärd",
+    "tableEmail": "E-post",
+    "tableStatus": "Status"
+  },
+  "groups": {
+    "title": "Grupper",
+    "assignButton": "Tilldela grupper",
+    "noGroups": "Inga grupper tilldelade ännu",
+    "members": "medlemmar"
+  },
+  "diagnostics": {
+    "title": "E-postdiagnostik",
+    "recipientEmail": "Mottagarens e-post",
+    "recipientPlaceholder": "test@example.com",
+    "subject": "Ämne",
+    "subjectPlaceholder": "Testmeddelandets ämne",
+    "subjectDefault": "Eve e-postdiagnostiktest",
+    "message": "Meddelande",
+    "messagePlaceholder": "Skriv ditt testmeddelande här...",
+    "messageDefault": "Detta är ett diagnostiskt testmeddelande från Eve-adminpanelen.",
+    "sendButton": "Skicka testmeddelande"
+  }
+}

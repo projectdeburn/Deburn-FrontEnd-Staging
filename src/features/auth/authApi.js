@@ -10,9 +10,11 @@ const BASE = '/api/auth';
 export const authApi = {
   /**
    * Register a new user
+   * @param {Object} userData - User registration data
+   * @param {string} language - Current UI language for email
    */
-  register(userData) {
-    return post(`${BASE}/register`, userData);
+  register(userData, language = 'en') {
+    return post(`${BASE}/register`, { ...userData, language });
   },
 
   /**
@@ -24,9 +26,11 @@ export const authApi = {
 
   /**
    * Resend verification email
+   * @param {string} email - User email
+   * @param {string} language - Current UI language for email
    */
-  resendVerification(email) {
-    return post(`${BASE}/resend-verification`, { email });
+  resendVerification(email, language = 'en') {
+    return post(`${BASE}/resend-verification`, { email, language });
   },
 
   /**
@@ -45,9 +49,11 @@ export const authApi = {
 
   /**
    * Request password reset
+   * @param {string} email - User email
+   * @param {string} language - Current UI language for email
    */
-  forgotPassword(email) {
-    return post(`${BASE}/forgot-password`, { email });
+  forgotPassword(email, language = 'en') {
+    return post(`${BASE}/forgot-password`, { email, language });
   },
 
   /**
@@ -62,6 +68,14 @@ export const authApi = {
    */
   getSession() {
     return get(`${BASE}/session`);
+  },
+
+  /**
+   * Get organization admin status
+   * @returns {Promise<{success: boolean, data: {isAdmin: boolean, organizations: Array}}>}
+   */
+  getAdminStatus() {
+    return get(`${BASE}/admin-status`);
   },
 
   /**

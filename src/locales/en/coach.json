@@ -1,7 +1,7 @@
 {
   "hero": {
     "title": "Ask Eve",
-    "tagline": "Your personal leadership companion"
+    "tagline": "Your leadership coach"
   },
   "welcome": {
     "greeting": "Hello! I'm Eve, your leadership coach. I'm here to help you grow as a leader, manage stress, and build stronger teams.",
@@ -17,6 +17,11 @@
     "placeholder": "Type a message...",
     "hint": "Your conversations are private and confidential"
   },
+  "clearHistory": "Clear history",
+  "clearHistoryConfirm": "Are you sure you want to clear your conversation history?",
+  "translating": "Translating conversation...",
+  "listen": "Listen",
+  "stop": "Stop",
   "quickReplies": {
     "tellMore": "Tell me more about that",
     "whatSuggest": "What would you suggest?",

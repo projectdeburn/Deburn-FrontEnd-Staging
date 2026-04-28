@@ -5,6 +5,7 @@
 
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
+import { NotificationProvider } from '@/context/NotificationContext';
 import { Layout, AuthLayout, HubLayout } from '@/components/layout';
 import { LoadingOverlay } from '@/components/ui';
 
@@ -12,13 +13,16 @@ import { LoadingOverlay } from '@/components/ui';
 import '@/utils/i18n';
 
 // Pages
+import Landing from '@/pages/Landing';
 import Dashboard from '@/pages/Dashboard';
 import Checkin from '@/pages/Checkin';
 import Coach from '@/pages/Coach';
 import Learning from '@/pages/Learning';
 import Circles from '@/pages/Circles';
+import CirclesAdmin from '@/pages/CirclesAdmin';
 import Progress from '@/pages/Progress';
 import Profile from '@/pages/Profile';
+import Feedback from '@/pages/Feedback';
 import Admin from '@/pages/Admin';
 import Hub from '@/pages/Hub';
 
@@ -62,7 +66,7 @@ function PublicRoute({ children }) {
   }
 
   if (isAuthenticated) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   return children;
@@ -74,6 +78,12 @@ function PublicRoute({ children }) {
 function AppRoutes() {
   return (
     <Routes>
+      {/* Landing page - redirects to dashboard if authenticated */}
+      <Route
+        path="/"
+        element={<Landing />}
+      />
+
       {/* Auth routes */}
       <Route element={<AuthLayout />}>
         <Route
@@ -109,17 +119,20 @@ function AppRoutes() {
       <Route path="/terms-of-service" element={<TermsOfService />} />
       <Route path="/cookie-policy" element={<CookiePolicy />} />
 
-      {/* Hub admin (separate layout) */}
-      <Route element={<HubLayout />}>
-        <Route
-          path="/hub"
-          element={
-            <ProtectedRoute>
-              <Hub />
-            </ProtectedRoute>
-          }
-        />
-      </Route>
+      {/* Hub admin - DISABLED: route commented out, /hub will 404 to dashboard */}
+      {/* <Route element={<HubLayout />}>
+        <Route path="/hub" element={<Hub />} />
+      </Route> */}
+
+      {/* Check-in (fullscreen, no sidebar) */}
+      <Route
+        path="/checkin"
+        element={
+          <ProtectedRoute>
+            <Checkin />
+          </ProtectedRoute>
+        }
+      />
 
       {/* Protected app routes */}
       <Route
@@ -129,18 +142,19 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       >
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/checkin" element={<Checkin />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/coach" element={<Coach />} />
         <Route path="/learning" element={<Learning />} />
         <Route path="/circles" element={<Circles />} />
+        <Route path="/circles/admin" element={<CirclesAdmin />} />
         <Route path="/progress" element={<Progress />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/feedback" element={<Feedback />} />
         <Route path="/admin" element={<Admin />} />
       </Route>
 
-      {/* Catch all - redirect to dashboard */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      {/* Catch all - redirect to login */}
+      <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
 }
@@ -149,7 +163,9 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AppRoutes />
+        <NotificationProvider>
+          <AppRoutes />
+        </NotificationProvider>
       </AuthProvider>
     </BrowserRouter>
   );

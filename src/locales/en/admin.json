@@ -1,0 +1,39 @@
+{
+  "title": "Admin Panel",
+  "tagline": "Manage circle invitations",
+  "pool": {
+    "loading": "Loading..."
+  },
+  "invitations": {
+    "title": "Send Invitations",
+    "pasteEmails": "Paste emails (comma or newline separated)",
+    "placeholder": "email1@example.com, email2@example.com\nemail3@example.com",
+    "emailsDetected": "{{count}} emails detected",
+    "sendButton": "Send Invitations",
+    "invitedUsers": "Invited Users",
+    "noInvitations": "No invitations yet",
+    "pending": "Pending",
+    "accepted": "Accepted",
+    "remove": "Action",
+    "tableEmail": "Email",
+    "tableStatus": "Status"
+  },
+  "groups": {
+    "title": "Groups",
+    "assignButton": "Assign Groups",
+    "noGroups": "No groups assigned yet",
+    "members": "members"
+  },
+  "diagnostics": {
+    "title": "Email Diagnostics",
+    "recipientEmail": "Recipient Email",
+    "recipientPlaceholder": "test@example.com",
+    "subject": "Subject",
+    "subjectPlaceholder": "Test Email Subject",
+    "subjectDefault": "Eve Email Diagnostic Test",
+    "message": "Message",
+    "messagePlaceholder": "Enter your test message here...",
+    "messageDefault": "This is a diagnostic test email from the Eve admin panel.",
+    "sendButton": "Send Test Email"
+  }
+}

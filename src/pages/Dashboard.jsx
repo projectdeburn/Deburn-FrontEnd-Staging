@@ -6,8 +6,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import i18n from '@/utils/i18n';
 import { useAuth } from '@/context/AuthContext';
 import { get } from '@/utils/api';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+
+// Modal components for Today's Focus
+import ArticleModal from '@/components/learning/ArticleModal';
+import AudioModal from '@/components/learning/AudioModal';
 
 // Hero image import
 import heroImage from '@/assets/images/hero-nordic-calm.jpg';
@@ -69,6 +75,11 @@ const icons = {
       <line x1="5" y1="12" x2="19" y2="12"></line>
     </svg>
   ),
+  spinner: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="spinner-icon">
+      <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
+    </svg>
+  ),
 };
 
 export default function Dashboard() {
@@ -79,6 +90,12 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState(null);
   const [trends, setTrends] = useState(null);
+
+  // Modal state for Today's Focus
+  const [selectedModule, setSelectedModule] = useState(null);
+  const [showArticleModal, setShowArticleModal] = useState(false);
+  const [showAudioModal, setShowAudioModal] = useState(false);
+  const [isLoadingModule, setIsLoadingModule] = useState(false);
 
   useEffect(() => {
     loadDashboardData();
@@ -108,7 +125,7 @@ export default function Dashboard() {
 
   function getGreeting() {
     const hour = new Date().getHours();
-    const name = user?.name?.split(' ')[0] || t('common:user', 'there');
+    const name = user?.firstName || user?.name?.split(' ')[0] || t('common:user', 'there');
 
     if (hour < 12) {
       return t('dashboard:hero.greeting.morning', { name, defaultValue: `Good morning, ${name}` });
@@ -145,18 +162,122 @@ export default function Dashboard() {
     return change > 0 ? 'positive' : 'negative';
   }
 
+  function getTrendPoints(values) {
+    // Default to flat line at middle if no data
+    if (!values || values.length < 2) {
+      return '0,20 100,20';
+    }
+
+    const width = 100;
+    const height = 40;
+    const padding = 5;
+
+    // Get min/max for dynamic scaling
+    const numericValues = values.map(v => typeof v === 'object' ? v.value : v);
+    const min = Math.min(...numericValues);
+    const max = Math.max(...numericValues);
+    const range = max - min || 1;
+
+    const points = numericValues.map((val, i) => {
+      const x = padding + (i / (numericValues.length - 1)) * (width - 2 * padding);
+      const y = height - padding - ((val - min) / range) * (height - 2 * padding);
+      return `${x},${y}`;
+    });
+
+    return points.join(' ');
+  }
+
+  function getTrendPath(values) {
+    // Default to flat area at middle if no data
+    if (!values || values.length < 2) {
+      return 'M0,20 L100,20 L100,40 L0,40 Z';
+    }
+
+    const width = 100;
+    const height = 40;
+    const padding = 5;
+
+    // Get min/max for dynamic scaling
+    const numericValues = values.map(v => typeof v === 'object' ? v.value : v);
+    const min = Math.min(...numericValues);
+    const max = Math.max(...numericValues);
+    const range = max - min || 1;
+
+    const points = numericValues.map((val, i) => {
+      const x = padding + (i / (numericValues.length - 1)) * (width - 2 * padding);
+      const y = height - padding - ((val - min) / range) * (height - 2 * padding);
+      return `${x},${y}`;
+    });
+
+    const firstX = padding;
+    const lastX = width - padding;
+    return `M${firstX},${height} L${points.join(' L')} L${lastX},${height} Z`;
+  }
+
   if (isLoading) {
-    return (
-      <div className="loading-overlay">
-        <div className="loading-spinner"></div>
-        <p>{t('common:loading', 'Loading...')}</p>
-      </div>
-    );
+    return <LoadingSpinner text={t('common:loading', 'Loading...')} />;
   }
 
   const hasCheckedIn = dashboardData?.todaysCheckin != null;
   const streak = dashboardData?.streak || 0;
   const insightsCount = dashboardData?.insightsCount || 0;
+
+  // Get localized title for today's focus
+  function getTodaysFocusTitle() {
+    const focus = dashboardData?.todaysFocus;
+    if (!focus?.module) return null;
+
+    const lang = i18n.language === 'sv' ? 'Sv' : 'En';
+    return focus.module[`title${lang}`] || focus.module.titleEn;
+  }
+
+  // Open Today's Focus module
+  async function openTodaysFocus(e) {
+    e.stopPropagation();
+
+    const focus = dashboardData?.todaysFocus;
+    if (!focus?.module?.id) {
+      navigate('/learning');
+      return;
+    }
+
+    setIsLoadingModule(true);
+    try {
+      const response = await get(`/api/learning/content/${focus.module.id}`);
+      if (response.success && response.data?.item) {
+        const module = response.data.item;
+        setSelectedModule(module);
+
+        // Open appropriate modal based on content type
+        if (module.contentType === 'text_article') {
+          setShowArticleModal(true);
+        } else if (module.contentType === 'audio_article' || module.contentType === 'audio_exercise') {
+          setShowAudioModal(true);
+        } else if (module.contentType === 'video_link' && module.videoUrl) {
+          window.open(module.videoUrl, '_blank');
+        } else {
+          navigate('/learning');
+        }
+      } else {
+        navigate('/learning');
+      }
+    } catch (error) {
+      console.error('Error loading module:', error);
+      navigate('/learning');
+    } finally {
+      setIsLoadingModule(false);
+    }
+  }
+
+  function closeArticleModal() {
+    setShowArticleModal(false);
+    setSelectedModule(null);
+  }
+
+  function closeAudioModal() {
+    setShowAudioModal(false);
+    setSelectedModule(null);
+  }
 
   return (
     <div className="dashboard-content">
@@ -231,31 +352,23 @@ export default function Dashboard() {
               {t('dashboard:focusCard.title', "Today's Focus")}
             </h3>
             <p className="card-description todays-focus-title">
-              {dashboardData?.todaysFocus?.title ||
+              {getTodaysFocusTitle() ||
                 t('dashboard:focusCard.noFocus', 'No focus set for today')}
             </p>
-            {dashboardData?.todaysFocus && (
-              <div className="progress-indicator">
-                <div className="progress-bar">
-                  <div
-                    className="progress-fill"
-                    style={{ width: `${dashboardData.todaysFocus.progress || 0}%` }}
-                  />
-                </div>
-                <span className="progress-text">
-                  {dashboardData.todaysFocus.progress || 0}%
-                </span>
-              </div>
-            )}
           </div>
           <button
-            className="btn btn-secondary"
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate('/learning');
-            }}
+            className={`btn btn-secondary ${isLoadingModule ? 'btn-loading' : ''}`}
+            onClick={openTodaysFocus}
+            disabled={isLoadingModule}
           >
-            {t('dashboard:focusCard.button', 'Continue')}
+            {isLoadingModule ? (
+              <>
+                {icons.spinner}
+                <span>{t('common:loading', 'Loading...')}</span>
+              </>
+            ) : (
+              t('dashboard:focusCard.button', 'Continue')
+            )}
           </button>
         </div>
       </div>
@@ -276,23 +389,26 @@ export default function Dashboard() {
                 {getTrendIcon(trends?.moodChange, 'mood')}
               </span>
             </div>
-            <div className="mini-chart">
-              <svg className="trend-line" viewBox="0 0 100 40" preserveAspectRatio="none">
-                {(trends?.moodValues || Array(7).fill(5)).map((val, i, arr) => {
-                  const x = (i / (arr.length - 1)) * 100;
-                  const height = (val / 10) * 40;
-                  return (
-                    <rect
-                      key={i}
-                      x={x - 3}
-                      y={40 - height}
-                      width="6"
-                      height={height}
-                      fill="var(--color-sage)"
-                      rx="2"
-                    />
-                  );
-                })}
+            <div className="mini-chart trend-chart">
+              <svg viewBox="0 0 100 40" className="trend-line">
+                <defs>
+                  <linearGradient id="dashMoodGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style={{ stopColor: 'var(--color-sage)', stopOpacity: 0.4 }} />
+                    <stop offset="100%" style={{ stopColor: 'var(--color-sage)', stopOpacity: 0 }} />
+                  </linearGradient>
+                </defs>
+                <path
+                  className="trend-fill"
+                  d={getTrendPath(trends?.moodValues)}
+                  fill="url(#dashMoodGradient)"
+                />
+                <polyline
+                  className="trend-line"
+                  points={getTrendPoints(trends?.moodValues)}
+                  fill="none"
+                  stroke="var(--color-sage)"
+                  strokeWidth="1.5"
+                />
               </svg>
             </div>
           </div>
@@ -307,23 +423,26 @@ export default function Dashboard() {
                 {getTrendIcon(trends?.energyChange, 'energy')}
               </span>
             </div>
-            <div className="mini-chart">
-              <svg className="trend-line" viewBox="0 0 100 40" preserveAspectRatio="none">
-                {(trends?.energyValues || Array(7).fill(5)).map((val, i, arr) => {
-                  const x = (i / (arr.length - 1)) * 100;
-                  const height = (val / 10) * 40;
-                  return (
-                    <rect
-                      key={i}
-                      x={x - 3}
-                      y={40 - height}
-                      width="6"
-                      height={height}
-                      fill="var(--color-sage)"
-                      rx="2"
-                    />
-                  );
-                })}
+            <div className="mini-chart trend-chart">
+              <svg viewBox="0 0 100 40" className="trend-line">
+                <defs>
+                  <linearGradient id="dashEnergyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style={{ stopColor: 'var(--color-sage)', stopOpacity: 0.4 }} />
+                    <stop offset="100%" style={{ stopColor: 'var(--color-sage)', stopOpacity: 0 }} />
+                  </linearGradient>
+                </defs>
+                <path
+                  className="trend-fill"
+                  d={getTrendPath(trends?.energyValues)}
+                  fill="url(#dashEnergyGradient)"
+                />
+                <polyline
+                  className="trend-line"
+                  points={getTrendPoints(trends?.energyValues)}
+                  fill="none"
+                  stroke="var(--color-sage)"
+                  strokeWidth="1.5"
+                />
               </svg>
             </div>
           </div>
@@ -338,23 +457,26 @@ export default function Dashboard() {
                 {getTrendIcon(trends?.stressChange, 'stress')}
               </span>
             </div>
-            <div className="mini-chart">
-              <svg className="trend-line" viewBox="0 0 100 40" preserveAspectRatio="none">
-                {(trends?.stressValues || Array(7).fill(5)).map((val, i, arr) => {
-                  const x = (i / (arr.length - 1)) * 100;
-                  const height = (val / 10) * 40;
-                  return (
-                    <rect
-                      key={i}
-                      x={x - 3}
-                      y={40 - height}
-                      width="6"
-                      height={height}
-                      fill="var(--color-success)"
-                      rx="2"
-                    />
-                  );
-                })}
+            <div className="mini-chart trend-chart">
+              <svg viewBox="0 0 100 40" className="trend-line">
+                <defs>
+                  <linearGradient id="dashStressGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style={{ stopColor: 'var(--color-success)', stopOpacity: 0.4 }} />
+                    <stop offset="100%" style={{ stopColor: 'var(--color-success)', stopOpacity: 0 }} />
+                  </linearGradient>
+                </defs>
+                <path
+                  className="trend-fill"
+                  d={getTrendPath(trends?.stressValues)}
+                  fill="url(#dashStressGradient)"
+                />
+                <polyline
+                  className="trend-line"
+                  points={getTrendPoints(trends?.stressValues)}
+                  fill="none"
+                  stroke="var(--color-success)"
+                  strokeWidth="1.5"
+                />
               </svg>
             </div>
           </div>
@@ -407,6 +529,22 @@ export default function Dashboard() {
           </div>
         </div>
       </section>
+
+      {/* Article Modal for Today's Focus */}
+      {showArticleModal && selectedModule && (
+        <ArticleModal
+          module={selectedModule}
+          onClose={closeArticleModal}
+        />
+      )}
+
+      {/* Audio Modal for Today's Focus */}
+      {showAudioModal && selectedModule && (
+        <AudioModal
+          module={selectedModule}
+          onClose={closeAudioModal}
+        />
+      )}
     </div>
   );
 }

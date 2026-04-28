@@ -3,9 +3,15 @@
  * Micro-lessons and learning modules for leadership development
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { get } from '@/utils/api';
+import i18n from '@/utils/i18n';
+import { get, post, del, getAuthToken } from '@/utils/api';
+
+// Modal components
+import ArticleModal from '@/components/learning/ArticleModal';
+import AudioModal from '@/components/learning/AudioModal';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 
 // Hero image import
 import heroLearning from '@/assets/images/hero-learning.jpg';
@@ -39,18 +45,6 @@ const icons = {
       <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
     </svg>
   ),
-  clock: (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="10"></circle>
-      <polyline points="12 6 12 12 16 14"></polyline>
-    </svg>
-  ),
-  checkCircle: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-      <polyline points="22 4 12 14.01 9 11.01"></polyline>
-    </svg>
-  ),
 };
 
 // Content type icons
@@ -58,25 +52,58 @@ const contentIcons = {
   video: icons.playCircle,
   audio: icons.headphones,
   article: icons.fileText,
-  exercise: icons.bookOpen,
+  exercise: icons.headphones, // exercises use headphones icon like audio
 };
+
+/**
+ * Get localized field from module based on current language
+ * @param {object} module - The content module
+ * @param {string} field - Base field name (e.g., 'title', 'textContent')
+ * @returns {string} The localized value
+ */
+function getLocalizedField(module, field) {
+  const lang = i18n.language === 'sv' ? 'Sv' : 'En';
+  const localizedField = `${field}${lang}`;
+  const fallbackField = `${field}En`;
+  return module[localizedField] || module[fallbackField] || '';
+}
 
 export default function Learning() {
   const { t } = useTranslation(['learning', 'common']);
 
   const [isLoading, setIsLoading] = useState(true);
   const [modules, setModules] = useState([]);
+  const [activeFilter, setActiveFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [bookmarkedIds, setBookmarkedIds] = useState(new Set());
+
+  // Modal state
+  const [selectedModule, setSelectedModule] = useState(null);
+  const [showArticleModal, setShowArticleModal] = useState(false);
+  const [showAudioModal, setShowAudioModal] = useState(false);
+
+  // Audio preload cache and controllers
+  const audioCache = useRef(new Map()); // moduleId -> blob URL
+  const preloadTimers = useRef(new Map()); // moduleId -> timer
+  const abortControllers = useRef(new Map()); // moduleId -> AbortController
 
   useEffect(() => {
     loadLearningContent();
+    loadBookmarks();
+
+    // Cleanup preloaded audio on unmount
+    return () => {
+      audioCache.current.forEach((url) => URL.revokeObjectURL(url));
+      abortControllers.current.forEach((controller) => controller.abort());
+    };
   }, []);
 
   async function loadLearningContent() {
     setIsLoading(true);
     try {
-      const response = await get('/api/learning/modules');
+      const response = await get('/api/learning/content');
       if (response.success) {
-        setModules(response.data.modules || []);
+        setModules(response.data.items || []);
       }
     } catch (error) {
       console.error('Error loading learning content:', error);
@@ -85,23 +112,176 @@ export default function Learning() {
     }
   }
 
-  function formatDuration(minutes) {
-    if (minutes < 60) {
-      return `${minutes} ${t('common:min', 'min')}`;
+  async function loadBookmarks() {
+    try {
+      const response = await get('/api/learning/bookmarks');
+      if (response.success) {
+        setBookmarkedIds(new Set(response.data.bookmarkIds || []));
+      }
+    } catch (error) {
+      console.error('Error loading bookmarks:', error);
     }
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
   }
 
-  if (isLoading) {
-    return (
-      <div className="loading-overlay">
-        <div className="loading-spinner"></div>
-        <p>{t('common:loading', 'Loading...')}</p>
-      </div>
-    );
+  async function handleToggleBookmark(contentId) {
+    const isCurrentlyBookmarked = bookmarkedIds.has(contentId);
+
+    // Optimistic update
+    setBookmarkedIds((prev) => {
+      const next = new Set(prev);
+      if (isCurrentlyBookmarked) {
+        next.delete(contentId);
+      } else {
+        next.add(contentId);
+      }
+      return next;
+    });
+
+    try {
+      if (isCurrentlyBookmarked) {
+        await del(`/api/learning/content/${contentId}/bookmark`);
+      } else {
+        await post(`/api/learning/content/${contentId}/bookmark`);
+      }
+    } catch (error) {
+      console.error('Error toggling bookmark:', error);
+      // Revert on failure
+      setBookmarkedIds((prev) => {
+        const next = new Set(prev);
+        if (isCurrentlyBookmarked) {
+          next.add(contentId);
+        } else {
+          next.delete(contentId);
+        }
+        return next;
+      });
+    }
   }
+
+  function handleCardClick(module) {
+    // Don't open modal if no content
+    if (!module.hasContent) return;
+
+    setSelectedModule(module);
+
+    // Open appropriate modal based on content type
+    if (module.contentType === 'text_article') {
+      setShowArticleModal(true);
+    } else if (module.contentType === 'audio_article' || module.contentType === 'audio_exercise') {
+      setShowAudioModal(true);
+    } else if (module.contentType === 'video_link' && module.videoUrl) {
+      // Open video in new tab
+      window.open(module.videoUrl, '_blank');
+    }
+  }
+
+  function closeArticleModal() {
+    setShowArticleModal(false);
+    setSelectedModule(null);
+  }
+
+  function closeAudioModal() {
+    setShowAudioModal(false);
+    setSelectedModule(null);
+  }
+
+  // Preload audio on hover (debounced)
+  const handleAudioHover = useCallback((module) => {
+    const moduleId = module.id;
+    const isAudio = module.contentType === 'audio_article' || module.contentType === 'audio_exercise';
+
+    if (!isAudio || !module.hasContent || audioCache.current.has(moduleId)) return;
+
+    // Debounce: wait 250ms before starting fetch
+    const timer = setTimeout(async () => {
+      // Double-check cache (might have been preloaded already)
+      if (audioCache.current.has(moduleId)) return;
+
+      const controller = new AbortController();
+      abortControllers.current.set(moduleId, controller);
+
+      try {
+        const audioLang = i18n.language === 'sv' ? 'sv' : 'en';
+        const response = await fetch(
+          `${import.meta.env.VITE_ENDPOINT || ''}/api/learning/content/${moduleId}/audio/${audioLang}`,
+          {
+            headers: { 'Authorization': `Bearer ${getAuthToken()}` },
+            signal: controller.signal,
+          }
+        );
+
+        if (response.ok) {
+          const blob = await response.blob();
+          const blobUrl = URL.createObjectURL(blob);
+          audioCache.current.set(moduleId, blobUrl);
+        }
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.error('Preload failed:', err);
+        }
+      } finally {
+        abortControllers.current.delete(moduleId);
+      }
+    }, 250);
+
+    preloadTimers.current.set(moduleId, timer);
+  }, []);
+
+  // Cancel preload on hover leave
+  const handleAudioLeave = useCallback((module) => {
+    const moduleId = module.id;
+
+    // Clear debounce timer
+    const timer = preloadTimers.current.get(moduleId);
+    if (timer) {
+      clearTimeout(timer);
+      preloadTimers.current.delete(moduleId);
+    }
+
+    // Abort in-flight request
+    const controller = abortControllers.current.get(moduleId);
+    if (controller) {
+      controller.abort();
+      abortControllers.current.delete(moduleId);
+    }
+  }, []);
+
+  // Get preloaded audio URL if available
+  const getPreloadedAudio = useCallback((moduleId) => {
+    return audioCache.current.get(moduleId) || null;
+  }, []);
+
+  if (isLoading) {
+    return <LoadingSpinner text={t('common:loading', 'Loading...')} />;
+  }
+
+  // Filter categories for the filter buttons
+  const filterCategories = ['all', 'bookmarks', 'featured', 'leadership', 'breath', 'meditation'];
+
+  // Filter modules based on active filter and search query
+  const filteredModules = modules.filter(module => {
+    const passesCategory =
+      activeFilter === 'all' ||
+      (activeFilter === 'bookmarks' && bookmarkedIds.has(module.id)) ||
+      module.category === activeFilter;
+
+    if (!passesCategory) return false;
+
+    if (searchQuery.trim() === '') return true;
+    const title = getLocalizedField(module, 'title').toLowerCase();
+    return title.includes(searchQuery.trim().toLowerCase());
+  });
+
+  // Group modules by category
+  const groupedModules = filteredModules.reduce((acc, module) => {
+    const category = module.category || 'other';
+    if (!acc[category]) acc[category] = [];
+    acc[category].push(module);
+    return acc;
+  }, {});
+
+  // Define category order
+  const categoryOrder = ['featured', 'leadership', 'breath', 'meditation', 'burnout', 'wellbeing', 'other'];
 
   return (
     <div className="learning-content">
@@ -123,110 +303,165 @@ export default function Learning() {
         </div>
       </div>
 
+      {/* Search Bar */}
+      <div className="learning-search">
+        <svg className="learning-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" x2="16.65" y1="21" y2="16.65"></line>
+        </svg>
+        <input
+          type="text"
+          className="learning-search-input"
+          placeholder={t('learning:search.placeholder', 'Search micro-courses...')}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+        {searchQuery && (
+          <button className="learning-search-clear" onClick={() => setSearchQuery('')} aria-label={t('common:clear', 'Clear')}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" x2="6" y1="6" y2="18"></line>
+              <line x1="6" x2="18" y1="6" y2="18"></line>
+            </svg>
+          </button>
+        )}
+      </div>
+
+      {/* Filter Buttons */}
+      <div className="learning-filters">
+        {filterCategories.map((category) => (
+          <button
+            key={category}
+            className={`filter-btn ${activeFilter === category ? 'active' : ''}`}
+            onClick={() => setActiveFilter(category)}
+          >
+            {category === 'all'
+              ? t('learning:filters.all', 'All')
+              : category === 'bookmarks'
+                ? t('learning:bookmarks', 'Bookmarks')
+                : t(`learning:categories.${category}`, category)}
+          </button>
+        ))}
+      </div>
+
       {/* Learning Content Container */}
       <div id="learning-content-container">
-        {/* Continue Learning Section */}
-        {modules.some((m) => m.progress > 0 && m.progress < 100) && (
-          <section className="learning-section">
-            <h2 className="section-title">
-              {t('learning:continueLearning', 'Continue Learning')}
-            </h2>
-            <div className="learning-grid">
-              {modules
-                .filter((m) => m.progress > 0 && m.progress < 100)
-                .map((module) => (
+        {/* Render categories in order */}
+        {categoryOrder.map((category) => {
+          const categoryModules = groupedModules[category];
+          if (!categoryModules || categoryModules.length === 0) return null;
+
+          return (
+            <section key={category} className="learning-section">
+              <h2 className="section-title">
+                {t(`learning:categories.${category}`, category)}
+              </h2>
+              <div className="learning-grid">
+                {categoryModules.map((module) => (
                   <LearningCard
                     key={module.id}
                     module={module}
-                    formatDuration={formatDuration}
-                    t={t}
+                    onClick={() => handleCardClick(module)}
+                    onMouseEnter={() => handleAudioHover(module)}
+                    onMouseLeave={() => handleAudioLeave(module)}
+                    isBookmarked={bookmarkedIds.has(module.id)}
+                    onToggleBookmark={() => handleToggleBookmark(module.id)}
                   />
                 ))}
-            </div>
-          </section>
+              </div>
+            </section>
+          );
+        })}
+
+        {filteredModules.length === 0 && searchQuery.trim() !== '' && (
+          <div className="card empty-state">
+            <p>{t('learning:search.noResults', 'No courses match your search.')}</p>
+          </div>
         )}
 
-        {/* All Modules */}
-        <section className="learning-section">
-          <h2 className="section-title">
-            {t('learning:allModules', 'All Modules')}
-          </h2>
-          {modules.length > 0 ? (
-            <div className="learning-grid">
-              {modules.map((module) => (
-                <LearningCard
-                  key={module.id}
-                  module={module}
-                  formatDuration={formatDuration}
-                  t={t}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="card empty-state">
-              {icons.bookOpen}
-              <p>{t('learning:noModules', 'No learning modules available yet.')}</p>
-            </div>
-          )}
-        </section>
+        {modules.length === 0 && (
+          <div className="card empty-state">
+            {icons.bookOpen}
+            <p>{t('learning:noModules', 'No learning modules available yet.')}</p>
+          </div>
+        )}
       </div>
+
+      {/* Article Modal */}
+      {showArticleModal && selectedModule && (
+        <ArticleModal
+          module={selectedModule}
+          onClose={closeArticleModal}
+        />
+      )}
+
+      {/* Audio Modal */}
+      {showAudioModal && selectedModule && (
+        <AudioModal
+          module={selectedModule}
+          onClose={closeAudioModal}
+          preloadedAudioUrl={getPreloadedAudio(selectedModule.id)}
+        />
+      )}
     </div>
   );
 }
 
+// Map content type to display type
+function getDisplayType(contentType) {
+  const mapping = {
+    text_article: 'article',
+    audio_article: 'audio',
+    audio_exercise: 'exercise',
+    video_link: 'video',
+  };
+  return mapping[contentType] || 'article';
+}
+
 // Learning Card Component
-function LearningCard({ module, formatDuration, t }) {
-  const contentIcon = contentIcons[module.type] || icons.bookOpen;
-  const cardClass = module.type === 'video' || module.type === 'audio'
-    ? 'learning-card learning-card-playable'
-    : 'learning-card learning-card-readable';
+function LearningCard({ module, onClick, onMouseEnter, onMouseLeave, isBookmarked, onToggleBookmark }) {
+  const { t } = useTranslation(['learning', 'common']);
+  const displayType = getDisplayType(module.contentType);
+  const contentIcon = contentIcons[displayType] || icons.fileText;
+  const isDisabled = !module.hasContent;
+
+  // Build class names
+  const cardClasses = [
+    'learning-card',
+    isDisabled ? 'learning-card-disabled' : '',
+    displayType === 'audio' || displayType === 'exercise' ? 'learning-card-playable' : '',
+    displayType === 'article' ? 'learning-card-readable' : '',
+  ].filter(Boolean).join(' ');
+
+  // Format duration
+  const duration = module.lengthMinutes;
 
   return (
-    <div className={`${cardClass} ${module.progress === 100 ? 'completed' : ''}`}>
-      {/* Image/Icon */}
-      <div className="learning-card-image">
-        {module.thumbnail ? (
-          <img src={module.thumbnail} alt={module.title} />
-        ) : (
-          <div className="learning-card-icon">
-            {contentIcon}
-          </div>
-        )}
+    <div
+      className={cardClasses}
+      onClick={isDisabled ? undefined : onClick}
+      onMouseEnter={isDisabled ? undefined : onMouseEnter}
+      onMouseLeave={isDisabled ? undefined : onMouseLeave}
+      style={{ cursor: isDisabled ? 'not-allowed' : 'pointer' }}
+    >
+      <button
+        className={`learning-card-bookmark${isBookmarked ? ' active' : ''}`}
+        onClick={(e) => { e.stopPropagation(); onToggleBookmark(); }}
+        title={isBookmarked ? t('learning:removeBookmark', 'Unsave') : t('learning:addBookmark', 'Save')}
+        aria-label={isBookmarked ? t('learning:removeBookmark', 'Unsave') : t('learning:addBookmark', 'Save')}
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill={isBookmarked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+        </svg>
+      </button>
+      <div className="learning-card-icon">
+        {contentIcon}
       </div>
-
-      {/* Content */}
-      <div className="learning-card-content">
-        <div className="learning-card-meta">
-          <span className="learning-type">{module.type || 'lesson'}</span>
-          <span className="learning-duration">
-            {icons.clock}
-            {formatDuration(module.duration || 10)}
-          </span>
-        </div>
-
-        <h3 className="learning-card-title">{module.title}</h3>
-        <p className="learning-card-description">{module.description}</p>
-
-        {/* Progress */}
-        {module.progress > 0 && (
-          <div className="learning-progress">
-            <div className="progress-bar">
-              <div
-                className="progress-fill"
-                style={{ width: `${module.progress}%` }}
-              />
-            </div>
-            {module.progress === 100 ? (
-              <span className="progress-complete">
-                {icons.checkCircle}
-                {t('common:complete', 'Complete')}
-              </span>
-            ) : (
-              <span className="progress-text">{module.progress}%</span>
-            )}
-          </div>
-        )}
-      </div>
+      <h3 className="learning-card-title">{getLocalizedField(module, 'title')}</h3>
+      {duration && (
+        <span className="learning-card-duration">
+          {t('common:time.minutes', '{{count}} min', { count: duration })}
+        </span>
+      )}
     </div>
   );
 }

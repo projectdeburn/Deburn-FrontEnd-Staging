@@ -1,11 +1,18 @@
 /**
  * Modal Component
  * Reusable modal/dialog with overlay
+ * Uses prototype.css classes (no Tailwind)
  */
 
-import { useEffect, useRef } from 'react';
-import { X } from 'lucide-react';
-import { Button } from './Button';
+import { useEffect, useRef, Children, isValidElement } from 'react';
+
+// Close icon SVG
+const CloseIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="18" x2="6" y1="6" y2="18"></line>
+    <line x1="6" x2="18" y1="6" y2="18"></line>
+  </svg>
+);
 
 export function Modal({
   isOpen,
@@ -14,17 +21,8 @@ export function Modal({
   children,
   size = 'md',
   showCloseButton = true,
-  className = '',
 }) {
   const modalRef = useRef(null);
-
-  const sizes = {
-    sm: 'max-w-md',
-    md: 'max-w-lg',
-    lg: 'max-w-2xl',
-    xl: 'max-w-4xl',
-    full: 'max-w-[90vw]',
-  };
 
   // Handle escape key
   useEffect(() => {
@@ -57,45 +55,54 @@ export function Modal({
     }
   }
 
+  // Size mapping
+  const sizeStyles = {
+    sm: { maxWidth: '400px' },
+    md: { maxWidth: '500px' },
+    lg: { maxWidth: '600px' },
+    xl: { maxWidth: '800px' },
+  };
+
   if (!isOpen) return null;
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
+      className="modal-overlay active"
       onClick={handleOverlayClick}
     >
       <div
         ref={modalRef}
-        className={`
-          bg-white rounded-xl shadow-lg w-full
-          animate-in zoom-in-95 duration-200
-          ${sizes[size] || sizes.md}
-          ${className}
-        `}
+        className="circles-modal-content"
+        style={sizeStyles[size] || sizeStyles.md}
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-100">
-          <h2 id="modal-title" className="text-lg font-semibold text-neutral-800">
-            {title}
-          </h2>
+        <div className="circles-modal-header">
+          <h2 id="modal-title">{title}</h2>
           {showCloseButton && (
             <button
+              className="circles-modal-close"
               onClick={onClose}
-              className="p-1 text-neutral-400 hover:text-neutral-600 rounded-lg hover:bg-neutral-100 transition-colors"
               aria-label="Close"
             >
-              <X className="w-5 h-5" />
+              <CloseIcon />
             </button>
           )}
         </div>
 
-        {/* Content */}
-        <div className="px-6 py-4 max-h-[70vh] overflow-y-auto">
-          {children}
+        {/* Body — render everything except ModalFooter */}
+        <div className="circles-modal-body">
+          {Children.toArray(children).filter(
+            child => !(isValidElement(child) && child.type === ModalFooter)
+          )}
         </div>
+
+        {/* Footer — rendered outside scrollable body so it stays pinned */}
+        {Children.toArray(children).filter(
+          child => isValidElement(child) && child.type === ModalFooter
+        )}
       </div>
     </div>
   );
@@ -103,10 +110,11 @@ export function Modal({
 
 /**
  * Modal Footer
+ * Renders action buttons at the bottom of the modal
  */
-export function ModalFooter({ children, className = '' }) {
+export function ModalFooter({ children }) {
   return (
-    <div className={`flex items-center justify-end gap-3 px-6 py-4 border-t border-neutral-100 ${className}`}>
+    <div className="circles-modal-footer">
       {children}
     </div>
   );
@@ -129,18 +137,22 @@ export function ConfirmDialog({
 }) {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title} size="sm">
-      <p className="text-neutral-600">{message}</p>
+      <p style={{ color: 'var(--neutral-600)', margin: 0 }}>{message}</p>
       <ModalFooter>
-        <Button variant="ghost" onClick={onClose} disabled={loading}>
+        <button
+          className="btn btn-ghost"
+          onClick={onClose}
+          disabled={loading}
+        >
           {cancelText}
-        </Button>
-        <Button
-          variant={variant === 'danger' ? 'danger' : 'primary'}
+        </button>
+        <button
+          className={`btn ${variant === 'danger' ? 'btn-danger' : 'btn-primary'}`}
           onClick={onConfirm}
-          loading={loading}
+          disabled={loading}
         >
           {confirmText}
-        </Button>
+        </button>
       </ModalFooter>
     </Modal>
   );

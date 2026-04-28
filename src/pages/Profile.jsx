@@ -7,7 +7,10 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/context/AuthContext';
-import { put, uploadFile } from '@/utils/api';
+import { put, patch, post, uploadFile, del } from '@/utils/api';
+
+// LocalStorage key for conversation history (must match Coach.jsx)
+const CONVERSATION_STORAGE_KEY = 'hfai_coach_conversation';
 
 // SVG Icons
 const icons = {
@@ -57,6 +60,13 @@ const icons = {
       <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
     </svg>
   ),
+  externalLink: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+      <polyline points="15 3 21 3 21 9"></polyline>
+      <line x1="10" x2="21" y1="14" y2="3"></line>
+    </svg>
+  ),
 };
 
 export default function Profile() {
@@ -67,6 +77,10 @@ export default function Profile() {
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [error, setError] = useState('');
+  const [isClearingHistory, setIsClearingHistory] = useState(false);
+  const [historyCleared, setHistoryCleared] = useState(false);
+  const [isSendingReset, setIsSendingReset] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
 
   // Form state
   const [firstName, setFirstName] = useState('');
@@ -93,8 +107,8 @@ export default function Profile() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 1024 * 1024) {
-      setError(t('profile:avatar.error.tooLarge', 'File too large. Max size is 1MB.'));
+    if (file.size > 5 * 1024 * 1024) {
+      setError(t('profile:avatar.error.tooLarge', 'File too large. Max size is 5MB.'));
       return;
     }
 
@@ -155,14 +169,67 @@ export default function Profile() {
     }
   }
 
-  function changeLanguage(lang) {
+  async function changeLanguage(lang) {
     i18n.changeLanguage(lang);
     localStorage.setItem('language', lang);
+
+    // Sync to backend for email preferences
+    try {
+      await patch('/api/user/profile', { preferredLanguage: lang });
+    } catch (err) {
+      // Non-blocking - language still works locally even if sync fails
+      console.warn('Failed to sync language preference:', err);
+    }
   }
 
   async function handleLogout() {
     await logout();
     navigate('/login');
+  }
+
+  async function handleClearConversationHistory() {
+    if (!window.confirm(t('profile:conversation.confirmClear', 'Are you sure you want to clear your conversation history? This cannot be undone.'))) {
+      return;
+    }
+
+    setIsClearingHistory(true);
+    setHistoryCleared(false);
+
+    try {
+      // Delete from backend
+      await del('/api/conversations');
+
+      // Clear localStorage
+      localStorage.removeItem(CONVERSATION_STORAGE_KEY);
+
+      setHistoryCleared(true);
+      setTimeout(() => setHistoryCleared(false), 3000);
+    } catch (err) {
+      setError(err.message || t('profile:conversation.clearError', 'Failed to clear conversation history'));
+    } finally {
+      setIsClearingHistory(false);
+    }
+  }
+
+  async function handleChangePassword() {
+    if (!email) {
+      setError(t('profile:password.noEmail', 'No email address found'));
+      return;
+    }
+
+    setIsSendingReset(true);
+    setResetSent(false);
+    setError('');
+
+    try {
+      await post('/api/auth/forgot-password', { email });
+      setResetSent(true);
+      setTimeout(() => setResetSent(false), 5000);
+    } catch (err) {
+      setError(err.message || t('profile:password.resetError', 'Failed to send reset link'));
+    } finally {
+      setIsSendingReset(false);
+    }
   }
 
   const initials = firstName ? firstName.charAt(0).toUpperCase() : 'U';
@@ -171,7 +238,7 @@ export default function Profile() {
     <div className="profile-page">
       {/* Header */}
       <header className="profile-header">
-        <button className="back-btn" onClick={() => navigate('/')}>
+        <button className="back-btn" onClick={() => navigate('/dashboard')}>
           {icons.arrowLeft}
         </button>
         <h1 className="profile-title">{t('profile:title', 'Profile Settings')}</h1>
@@ -181,17 +248,19 @@ export default function Profile() {
       {/* Content */}
       <div className="profile-content">
         {/* Profile Picture */}
-        <section className="profile-section profile-picture-card">
+        <section className="profile-section">
           <h2 className="profile-section-title">
             {t('profile:avatar.title', 'Profile Picture')}
           </h2>
-          <div className="profile-picture-preview">
-            <div className="profile-avatar-large">
-              {avatarUrl ? (
-                <img src={avatarUrl} alt={`${firstName} ${lastName}`} />
-              ) : (
-                <span>{initials}</span>
-              )}
+          <div className="profile-picture-card">
+            <div className="profile-picture-preview">
+              <div className="profile-avatar-large">
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt={`${firstName} ${lastName}`} />
+                ) : (
+                  <span>{initials}</span>
+                )}
+              </div>
             </div>
             <div className="profile-picture-info">
               <p className="profile-picture-hint">
@@ -349,19 +418,72 @@ export default function Profile() {
           </div>
         </section>
 
+        {/* Legal */}
+        <section className="profile-section">
+          <h2 className="profile-section-title">
+            {t('profile:legal.title', 'Legal')}
+          </h2>
+          <div className="profile-legal-links">
+            <a
+              href="/privacy-policy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="profile-legal-link"
+            >
+              <span>{t('profile:legal.privacy', 'Privacy Policy')}</span>
+              {icons.externalLink}
+            </a>
+            <a
+              href="/terms-of-service"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="profile-legal-link"
+            >
+              <span>{t('profile:legal.terms', 'Terms of Service')}</span>
+              {icons.externalLink}
+            </a>
+          </div>
+        </section>
+
         {/* Account Actions */}
-        <section className="profile-section profile-account-card">
+        <section className="profile-section">
           <h2 className="profile-section-title">
             {t('profile:account.title', 'Account')}
           </h2>
-          <div className="profile-account-item">
+          <div className="profile-account-card">
+            <div className="profile-account-item">
             <div className="profile-account-info">
               <h4>{t('profile:account.changePassword', 'Change Password')}</h4>
               <p>{t('profile:account.changePasswordHint', 'Update your password to keep your account secure')}</p>
+              {resetSent && (
+                <p className="profile-success-text">{t('profile:password.resetSent', 'Password reset link sent to your email')}</p>
+              )}
             </div>
-            <button className="btn btn-secondary" onClick={() => navigate('/forgot-password')}>
+            <button
+              className="btn btn-secondary"
+              onClick={handleChangePassword}
+              disabled={isSendingReset}
+            >
               {icons.key}
-              <span>{t('profile:account.changePasswordBtn', 'Change')}</span>
+              <span>{isSendingReset ? t('common:sending', 'Sending...') : t('profile:account.changePasswordBtn', 'Change')}</span>
+            </button>
+          </div>
+
+          <div className="profile-account-item">
+            <div className="profile-account-info">
+              <h4>{t('profile:conversation.title', 'Conversation History')}</h4>
+              <p>{t('profile:conversation.hint', 'Clear your AI coach conversation history')}</p>
+              {historyCleared && (
+                <p className="profile-success-text">{t('profile:conversation.cleared', 'Conversation history cleared')}</p>
+              )}
+            </div>
+            <button
+              className="btn btn-ghost"
+              onClick={handleClearConversationHistory}
+              disabled={isClearingHistory}
+            >
+              {icons.trash}
+              <span>{isClearingHistory ? t('common:clearing', 'Clearing...') : t('profile:conversation.clearBtn', 'Clear')}</span>
             </button>
           </div>
 
@@ -374,6 +496,7 @@ export default function Profile() {
               {icons.logOut}
               <span>{t('common:logout', 'Sign Out')}</span>
             </button>
+          </div>
           </div>
         </section>
       </div>

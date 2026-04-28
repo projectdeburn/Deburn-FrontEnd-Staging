@@ -4,18 +4,28 @@
     "tagline": "Följ din utveckling över tid"
   },
   "stats": {
+    "streak": "Dagar i rad",
     "dayStreak": "Dagar i rad",
     "checkins": "Incheckningar",
+    "lessons": "Avslutade lektioner",
     "lessonsCompleted": "Avslutade lektioner",
+    "sessions": "Coachsamtal",
     "coachSessions": "Coachsamtal"
   },
   "trends": {
-    "title": "Välbefinnandetrender (Senaste 30 dagarna)",
+    "title": "Välbefinnandetrender",
+    "last": "Senaste",
+    "days": "dagar",
+    "daysShort": "dagar",
+    "mood": "Övergripande humör",
     "overallMood": "Övergripande humör",
+    "stress": "Stressnivåer",
     "stressLevels": "Stressnivåer"
   },
   "insights": {
     "title": "Viktiga insikter",
+    "noInsights": "Inga insikter än",
+    "prompt": "Genomför några incheckningar för att börja se personliga insikter om dina välbefinnandemönster.",
     "thursdayPattern": {
       "title": "Torsdagens stressmönster",
       "description": "Din stress ökar konsekvent på torsdagar. Överväg att omstrukturera ditt mötesschema eller blockera förberedelsetid."

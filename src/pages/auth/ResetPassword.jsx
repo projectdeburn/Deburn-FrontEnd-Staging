@@ -5,6 +5,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { getApiBaseUrl } from '@/utils/api';
 
 export default function ResetPassword() {
   const { t } = useTranslation('auth');
@@ -44,7 +45,7 @@ export default function ResetPassword() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/auth/reset-password', {
+      const response = await fetch(`${getApiBaseUrl()}/api/auth/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token, password }),
@@ -61,7 +62,7 @@ export default function ResetPassword() {
         }
       }
     } catch (err) {
-      setError('Network error. Please try again.');
+      setError(t('errors.network', 'Network error. Please try again.'));
     } finally {
       setIsLoading(false);
     }
@@ -127,7 +128,7 @@ export default function ResetPassword() {
       <div className="auth-container">
         <div className="auth-header">
           <div className="auth-logo">
-            <span className="auth-logo-text">Eve</span>
+            <span className="auth-logo-text">Human First AI</span>
           </div>
           <h1 className="auth-title">{t('resetPassword.title', 'Create new password')}</h1>
           <p className="auth-subtitle">{t('resetPassword.subtitle', 'Enter a new password for your account')}</p>
@@ -156,7 +157,7 @@ export default function ResetPassword() {
                   id="reset-password"
                   name="password"
                   className="form-input"
-                  placeholder="Enter new password"
+                  placeholder={t('resetPassword.passwordPlaceholder', 'Enter new password')}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -191,7 +192,7 @@ export default function ResetPassword() {
                   id="reset-password-confirm"
                   name="passwordConfirm"
                   className="form-input"
-                  placeholder="Confirm new password"
+                  placeholder={t('resetPassword.confirmPasswordPlaceholder', 'Confirm new password')}
                   value={passwordConfirm}
                   onChange={(e) => setPasswordConfirm(e.target.value)}
                   required

@@ -1,7 +1,7 @@
 {
   "hero": {
     "title": "Fråga Eve",
-    "tagline": "Din personliga ledarskapskompanjon"
+    "tagline": "Din ledarskapscoach"
   },
   "welcome": {
     "greeting": "Hej! Jag är Eve, din ledarskapscoach. Jag finns här för att hjälpa dig växa som ledare, hantera stress och bygga starkare team.",
@@ -17,6 +17,11 @@
     "placeholder": "Skriv ett meddelande...",
     "hint": "Dina samtal är privata och konfidentiella"
   },
+  "clearHistory": "Rensa historik",
+  "clearHistoryConfirm": "Är du säker på att du vill rensa din samtalshistorik?",
+  "translating": "Översätter konversation...",
+  "listen": "Lyssna",
+  "stop": "Stoppa",
   "quickReplies": {
     "tellMore": "Berätta mer om det",
     "whatSuggest": "Vad skulle du föreslå?",

@@ -3,7 +3,7 @@
   "picture": {
     "title": "Profile Picture",
     "hint": "Upload a profile picture to personalize your account.",
-    "limits": "Max file size: 1MB. Formats: JPG, PNG",
+    "limits": "Max file size: 5MB. Formats: JPG, PNG",
     "upload": "Upload Photo",
     "remove": "Remove"
   },
@@ -26,6 +26,22 @@
   "language": {
     "label": "Language",
     "helper": "This affects the app interface and Ask Eve responses"
+  },
+  "coachPreferences": {
+    "title": "Coach Preferences",
+    "voice": "Voice",
+    "voiceDescription": "Choose the voice Eve uses when reading messages aloud",
+    "previewVoice": "Preview Voice",
+    "previewDescription": "Listen to a sample of the selected voice",
+    "preview": "Preview",
+    "previewText": "Hello, I am Eve, your leadership coach. How can I help you today?",
+    "highPitch": "High Pitch",
+    "lowPitch": "Low Pitch"
+  },
+  "legal": {
+    "title": "Legal",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service"
   },
   "account": {
     "title": "Account",

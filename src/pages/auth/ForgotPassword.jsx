@@ -5,9 +5,10 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { authApi } from '@/features/auth/authApi';
 
 export default function ForgotPassword() {
-  const { t } = useTranslation('auth');
+  const { t, i18n } = useTranslation('auth');
 
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -20,20 +21,14 @@ export default function ForgotPassword() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/auth/forgot-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-
-      const data = await response.json();
-      if (response.ok && data.success) {
+      const result = await authApi.forgotPassword(email, i18n.language);
+      if (result.success) {
         setSuccess(true);
       } else {
-        setError(data.error || 'Failed to send reset link');
+        setError(result.error || t('errors.resetFailed', 'Failed to send reset link'));
       }
     } catch (err) {
-      setError('Network error. Please try again.');
+      setError(t('errors.network', 'Network error. Please try again.'));
     } finally {
       setIsLoading(false);
     }
@@ -44,7 +39,7 @@ export default function ForgotPassword() {
       <div className="auth-container">
         <div className="auth-header">
           <div className="auth-logo">
-            <span className="auth-logo-text">Eve</span>
+            <span className="auth-logo-text">Human First AI</span>
           </div>
           <h1 className="auth-title">{t('forgotPassword.title', 'Reset your password')}</h1>
           <p className="auth-subtitle">{t('forgotPassword.subtitle', "Enter your email and we'll send you a reset link")}</p>
@@ -83,7 +78,7 @@ export default function ForgotPassword() {
                   id="forgot-email"
                   name="email"
                   className="form-input"
-                  placeholder="you@company.com"
+                  placeholder={t('forgotPassword.emailPlaceholder', 'you@company.com')}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required

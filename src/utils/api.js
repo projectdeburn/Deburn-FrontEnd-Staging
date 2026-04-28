@@ -13,6 +13,25 @@ export function getApiBaseUrl() {
 }
 
 /**
+ * Auth token management
+ * Token is stored in memory for API requests
+ * Initialize from localStorage to avoid race condition on page load
+ */
+let authToken = localStorage.getItem('hfai_auth_token');
+
+export function setAuthToken(token) {
+  authToken = token;
+}
+
+export function clearAuthToken() {
+  authToken = null;
+}
+
+export function getAuthToken() {
+  return authToken;
+}
+
+/**
  * Custom error class for API errors
  */
 export class ApiError extends Error {
@@ -41,6 +60,11 @@ export async function apiRequest(endpoint, options = {}) {
     },
     credentials: 'include', // Include cookies for session management
   };
+
+  // Add Authorization header if token exists
+  if (authToken) {
+    defaultOptions.headers['Authorization'] = `Bearer ${authToken}`;
+  }
 
   const mergedOptions = {
     ...defaultOptions,
@@ -107,6 +131,17 @@ export function put(endpoint, body, options = {}) {
   return apiRequest(endpoint, {
     ...options,
     method: 'PUT',
+    body: JSON.stringify(body),
+  });
+}
+
+/**
+ * Make a PATCH request (partial update)
+ */
+export function patch(endpoint, body, options = {}) {
+  return apiRequest(endpoint, {
+    ...options,
+    method: 'PATCH',
     body: JSON.stringify(body),
   });
 }

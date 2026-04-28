@@ -3,14 +3,20 @@
  */
 
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/context/AuthContext';
+import { circlesApi } from '@/features/circles/circlesApi';
 
 export default function Login() {
   const { t, i18n } = useTranslation('auth');
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // Check for invitation tokens from email links
+  const inviteToken = searchParams.get('inviteToken');
+  const declineToken = searchParams.get('declineToken');
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -32,7 +38,26 @@ export default function Login() {
     try {
       const result = await login(email, password, rememberMe);
       if (result.success) {
-        navigate('/');
+        // Handle pending invitation accept/decline after login
+        if (inviteToken) {
+          try {
+            await circlesApi.acceptInvitation(inviteToken);
+            navigate('/circles');
+          } catch (inviteErr) {
+            console.error('Failed to accept invitation:', inviteErr);
+            navigate('/circles?inviteError=true');
+          }
+        } else if (declineToken) {
+          try {
+            await circlesApi.declineInvitation(declineToken);
+            navigate('/dashboard');
+          } catch (declineErr) {
+            console.error('Failed to decline invitation:', declineErr);
+            navigate('/dashboard');
+          }
+        } else {
+          navigate('/dashboard');
+        }
       }
     } catch (err) {
       setError(err.message || t('errors.loginFailed', 'Invalid email or password'));
@@ -63,16 +88,30 @@ export default function Login() {
       <div className="auth-container">
         <div className="auth-header">
           <div className="auth-logo">
-            <span className="auth-logo-text">Eve</span>
+            <span className="auth-logo-text">Human First AI</span>
           </div>
           <h1 className="auth-title">{t('login.title', 'Welcome back')}</h1>
           <p className="auth-subtitle">{t('login.subtitle', 'Sign in to continue your leadership journey')}</p>
         </div>
 
         <div className="auth-form">
+          {inviteToken && (
+            <div className="auth-alert success visible">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                <polyline points="22,6 12,13 2,6"></polyline>
+              </svg>
+              <span>{t('login.invitePending', 'Sign in to accept your Think Tank invitation')}</span>
+            </div>
+          )}
+
           {error && (
             <div className="auth-alert error visible">
-              <i className="lucide-alert-circle"></i>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
               <span>{error}</span>
             </div>
           )}
@@ -87,11 +126,12 @@ export default function Login() {
                 id="login-email"
                 name="email"
                 className="form-input"
-                placeholder="you@company.com"
+                placeholder={t('login.emailPlaceholder', 'you@company.com')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
+              <span className="form-error" id="login-email-error"></span>
             </div>
 
             <div className="form-group">
@@ -104,7 +144,7 @@ export default function Login() {
                   id="login-password"
                   name="password"
                   className="form-input"
-                  placeholder="Enter your password"
+                  placeholder={t('login.passwordPlaceholder', 'Enter your password')}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -127,6 +167,7 @@ export default function Login() {
                   )}
                 </button>
               </div>
+              <span className="form-error" id="login-password-error"></span>
             </div>
 
             <div className="form-row">
@@ -160,7 +201,7 @@ export default function Login() {
           <div className="form-footer">
             {t('login.noAccount', "Don't have an account?")}{' '}
             <Link to="/register" className="form-link">
-              {t('login.signUp', 'Create account')}
+              {t('login.createAccount', 'Create account')}
             </Link>
           </div>
         </div>

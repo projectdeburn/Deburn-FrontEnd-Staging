@@ -5,15 +5,13 @@
 
 import { NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useAuth } from '@/context/AuthContext';
 
 const navItems = [
-  { key: 'dashboard', path: '/', icon: 'layout-dashboard', labelKey: 'common:nav.dashboard', label: 'Dashboard' },
+  { key: 'dashboard', path: '/dashboard', icon: 'layout-dashboard', labelKey: 'common:nav.dashboard', label: 'Dashboard' },
   { key: 'checkin', path: '/checkin', icon: 'heart-pulse', labelKey: 'common:nav.checkin', label: 'Check-in' },
   { key: 'coach', path: '/coach', icon: 'message-circle', labelKey: 'common:nav.coach', label: 'Ask Eve' },
-  { key: 'learning', path: '/learning', icon: 'book-open', labelKey: 'common:nav.learning', label: 'Learning' },
-  { key: 'circles', path: '/circles', icon: 'users', labelKey: 'common:nav.circles', label: 'Circles' },
-  { key: 'progress', path: '/progress', icon: 'trending-up', labelKey: 'common:nav.progress', label: 'Progress' },
+  { key: 'learning', path: '/learning', icon: 'book-open', labelKey: 'common:nav.learning', label: 'Micro-Courses' },
+  { key: 'circles', path: '/circles', icon: 'users', labelKey: 'common:nav.circles', label: 'Think Tanks', end: true },
 ];
 
 // SVG icons matching Lucide icons used in original
@@ -51,37 +49,22 @@ const icons = {
       <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
     </svg>
   ),
-  'trending-up': (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
-      <polyline points="17 6 23 6 23 12"></polyline>
-    </svg>
-  ),
-  'shield': (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-    </svg>
-  ),
-  'settings': (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="3"></circle>
-      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-    </svg>
-  ),
 };
 
 export function Sidebar({ isOpen, onClose }) {
   const { t } = useTranslation();
-  const { user } = useAuth();
-
-  // Check if user is admin
-  const isAdmin = user?.role === 'admin' || user?.isHubAdmin || user?.isOrgAdmin;
 
   return (
     <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
       <div className="sidebar-header">
         <div className="logo">
-          <span className="logo-text">Eve</span>
+          <svg className="logo-icon" viewBox="0 0 32 32" width="32" height="32">
+            <circle cx="17" cy="16" r="12" fill="none" stroke="#2D4A47" strokeWidth="1.5"/>
+            <circle cx="16.5" cy="16" r="9" fill="none" stroke="#7A9E97" strokeWidth="1.5"/>
+            <circle cx="16" cy="16" r="6" fill="none" stroke="#C4956A" strokeWidth="1.5"/>
+            <circle cx="15.5" cy="16" r="3" fill="none" stroke="#D4A9A0" strokeWidth="1.5"/>
+          </svg>
+          <span className="logo-text">Human First AI</span>
         </div>
       </div>
 
@@ -91,36 +74,14 @@ export function Sidebar({ isOpen, onClose }) {
             key={item.key}
             to={item.path}
             onClick={onClose}
+            end={item.end}
             className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
           >
             {icons[item.icon]}
             <span>{t(item.labelKey, item.label)}</span>
           </NavLink>
         ))}
-
-        {/* Admin link - only show if admin */}
-        {isAdmin && (
-          <NavLink
-            to="/admin"
-            onClick={onClose}
-            className={({ isActive }) => `nav-item admin-only ${isActive ? 'active' : ''}`}
-          >
-            {icons['shield']}
-            <span>Admin</span>
-          </NavLink>
-        )}
       </nav>
-
-      <div className="sidebar-footer">
-        <NavLink
-          to="/profile"
-          onClick={onClose}
-          className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-        >
-          {icons['settings']}
-          <span>{t('common:nav.settings', 'Settings')}</span>
-        </NavLink>
-      </div>
     </aside>
   );
 }

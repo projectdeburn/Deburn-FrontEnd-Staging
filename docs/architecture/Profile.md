@@ -35,11 +35,16 @@
 - **Outputs:** (void) Logs out and navigates to login
 - **Description:** Calls logout from AuthContext, redirects to login page
 
+### handleClearConversationHistory
+
+- **Inputs:** None (async function)
+- **Outputs:** (void) Clears conversation history
+- **Description:** Shows confirmation dialog, deletes conversation history from backend via DELETE /api/conversations, clears localStorage, shows success feedback
+
 ---
 
 ## State
 
-- `isLoading` (boolean): General loading state
 - `isSaving` (boolean): Form submission state
 - `showSuccess` (boolean): Success message visibility
 - `error` (string): Error message
@@ -50,6 +55,8 @@
 - `role` (string): Job title input
 - `bio` (string): Bio textarea
 - `avatarUrl` (string): Current avatar URL
+- `isClearingHistory` (boolean): Clear history loading state
+- `historyCleared` (boolean): Clear history success feedback
 
 ---
 
@@ -59,3 +66,4 @@
 - `PUT /api/profile/avatar` - Removes avatar `{ remove: true }`
 - `PUT /api/profile` - Updates profile data
   - Body: `{ firstName, lastName, organization, role, bio }`
+- `DELETE /api/conversations` - Clears all conversation history

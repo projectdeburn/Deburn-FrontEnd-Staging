@@ -1,0 +1,94 @@
+{
+  "hero": {
+    "title": "Admin Panel",
+    "tagline": "Manage circle invitations"
+  },
+  "pool": {
+    "noPool": "No pool configured",
+    "targetSize": "Target group size: {{size}}",
+    "contactSupport": "Contact support to set up your organization."
+  },
+  "invite": {
+    "title": "Send Invitations",
+    "label": "Paste emails (comma or newline separated)",
+    "placeholder": "email1@example.com, email2@example.com\nemail3@example.com",
+    "emailCount": "{{count}} email(s) detected",
+    "sending": "Sending...",
+    "sendButton": "Send Invitations",
+    "noEmails": "Please enter at least one valid email address",
+    "noPool": "No pool selected",
+    "sentSuccess": "Sent {{count}} invitations",
+    "failed": "{{count}} failed",
+    "duplicate": "{{count}} duplicates skipped",
+    "confirmRemove": "Remove this invitation?"
+  },
+  "invitations": {
+    "title": "Invited Users",
+    "empty": "No invitations yet",
+    "email": "Email",
+    "status": "Status",
+    "action": "Action",
+    "remove": "Remove"
+  },
+  "groups": {
+    "title": "Groups",
+    "empty": "No groups assigned yet",
+    "assigning": "Assigning...",
+    "assignButton": "Assign Groups ({{count}} accepted)",
+    "confirmAssign": "Assign members to groups? This cannot be undone.",
+    "assignSuccess": "Groups assigned successfully",
+    "memberCount": "{{count}} members",
+    "moveTo": "Move to...",
+    "moveTitle": "Move Member",
+    "moveConfirm": "Move {{name}} from {{from}} to {{to}}?",
+    "moving": "Moving...",
+    "confirmMove": "Confirm Move",
+    "deleteGroup": "Delete Group",
+    "deleteTitle": "Delete Group",
+    "deleteConfirm": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone.",
+    "deleteWarning": "This group has {{count}} member(s) who will be removed from the group.",
+    "deleting": "Deleting...",
+    "confirmDelete": "Delete Group",
+    "createButton": "Create Group",
+    "createTitle": "Create New Group",
+    "groupName": "Group Name",
+    "groupNamePlaceholder": "e.g., Circle D",
+    "creating": "Creating...",
+    "confirmCreate": "Create Group",
+    "actions": "Actions...",
+    "removeMember": "Remove Member",
+    "removeTitle": "Remove Member",
+    "removeConfirm": "Remove {{name}} from {{group}}?",
+    "removeWarning": "This will also remove their invitation. They will need to be re-invited to join again.",
+    "removing": "Removing...",
+    "confirmRemove": "Remove Member",
+    "editName": "Edit name",
+    "editGroupTitle": "Edit Group Name"
+  },
+  "unassigned": {
+    "title": "Unassigned Members",
+    "addTo": "Add to...",
+    "allGroupsFull": "All groups full",
+    "addTitle": "Add Member to Group",
+    "addConfirm": "Add {{name}} to {{group}}?",
+    "adding": "Adding...",
+    "confirmAdd": "Add to Group"
+  },
+  "error": {
+    "title": "Something went wrong"
+  },
+  "diagnostics": {
+    "title": "Email Diagnostics",
+    "recipientEmail": "Recipient Email",
+    "recipientPlaceholder": "test@example.com",
+    "subject": "Subject",
+    "subjectPlaceholder": "Test Email Subject",
+    "message": "Message",
+    "messagePlaceholder": "Enter your test message here...",
+    "sendButton": "Send Test Email",
+    "sending": "Sending...",
+    "noRecipient": "Please enter a recipient email",
+    "success": "Test email sent successfully!",
+    "error": "Failed to send test email"
+  }
+}

@@ -1,12 +1,14 @@
 {
   "nav": {
-    "dashboard": "Instrumentpanel",
+    "dashboard": "Dashboard",
     "checkin": "Incheckning",
     "coach": "Fråga Eve",
-    "learning": "Lärande",
-    "circles": "Cirklar",
+    "learning": "Mikrokurser",
+    "circles": "Think Tanks",
     "progress": "Framsteg",
     "settings": "Inställningar",
+    "feedback": "Återkoppling",
+    "admin": "Admin",
     "home": "Hem",
     "learn": "Lär"
   },
@@ -59,5 +61,25 @@
     "label": "Språk",
     "english": "English",
     "swedish": "Svenska"
-  }
+  },
+  "notifications": {
+    "title": "Aviseringar",
+    "empty": "Inga aviseringar ännu",
+    "markAllRead": "Markera alla som lästa",
+    "loadMore": "Ladda fler"
+  },
+  "loading": "Laddar...",
+  "saving": "Sparar...",
+  "adding": "Lägger till...",
+  "creating": "Skapar...",
+  "searching": "Söker...",
+  "save": "Spara",
+  "saveChanges": "Spara ändringar",
+  "cancel": "Avbryt",
+  "remove": "Ta bort",
+  "delete": "Radera",
+  "edit": "Redigera",
+  "refresh": "Uppdatera",
+  "logout": "Logga ut",
+  "submitting": "Skickar..."
 }

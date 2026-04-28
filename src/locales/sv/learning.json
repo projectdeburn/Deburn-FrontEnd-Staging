@@ -1,13 +1,21 @@
 {
   "hero": {
-    "title": "Lärande",
+    "title": "Mikrokurser",
     "tagline": "Mikrolektioner för upptagna ledare"
   },
+  "filters": {
+    "all": "Alla"
+  },
   "categories": {
+    "featured": "Utvalda",
     "leadership": "Ledarskap",
+    "breath": "Andningstekniker",
     "breathTechniques": "Andningstekniker",
     "meditation": "Meditation",
-    "audio": "Ljudinlärning"
+    "burnout": "Utbrändhetsförebyggande",
+    "wellbeing": "Välmående",
+    "audio": "Ljudinlärning",
+    "other": "Övrigt"
   },
   "types": {
     "video": "Video",
@@ -147,5 +155,21 @@
     "timeNinja": {
       "title": "Tidsninja: Bemästra ditt schema"
     }
-  }
+  },
+  "rating": {
+    "title": "Hur hjälpsamt var detta innehåll?",
+    "helpful": "Hjälpsamt",
+    "notHelpful": "Inte hjälpsamt",
+    "anonymous": "Skicka anonymt",
+    "thanks": "Tack!"
+  },
+  "search": {
+    "placeholder": "Sök mikrokurser...",
+    "noResults": "Inga kurser matchar din sökning."
+  },
+  "bookmarks": "Bokmärken",
+  "addBookmark": "Spara",
+  "removeBookmark": "Ta bort",
+  "minRead": "min läsning",
+  "noModules": "Inga lärmoduler tillgängliga ännu."
 }
