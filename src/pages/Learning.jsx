@@ -74,6 +74,7 @@ export default function Learning() {
   const [isLoading, setIsLoading] = useState(true);
   const [modules, setModules] = useState([]);
   const [activeFilter, setActiveFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [bookmarkedIds, setBookmarkedIds] = useState(new Set());
 
   // Modal state
@@ -257,12 +258,19 @@ export default function Learning() {
   // Filter categories for the filter buttons
   const filterCategories = ['all', 'bookmarks', 'featured', 'leadership', 'breath', 'meditation'];
 
-  // Filter modules based on active filter
-  const filteredModules = activeFilter === 'all'
-    ? modules
-    : activeFilter === 'bookmarks'
-      ? modules.filter(m => bookmarkedIds.has(m.id))
-      : modules.filter(m => m.category === activeFilter);
+  // Filter modules based on active filter and search query
+  const filteredModules = modules.filter(module => {
+    const passesCategory =
+      activeFilter === 'all' ||
+      (activeFilter === 'bookmarks' && bookmarkedIds.has(module.id)) ||
+      module.category === activeFilter;
+
+    if (!passesCategory) return false;
+
+    if (searchQuery.trim() === '') return true;
+    const title = getLocalizedField(module, 'title').toLowerCase();
+    return title.includes(searchQuery.trim().toLowerCase());
+  });
 
   // Group modules by category
   const groupedModules = filteredModules.reduce((acc, module) => {
@@ -293,6 +301,29 @@ export default function Learning() {
             {t('learning:hero.tagline', 'Micro-lessons for busy leaders')}
           </p>
         </div>
+      </div>
+
+      {/* Search Bar */}
+      <div className="learning-search">
+        <svg className="learning-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" x2="16.65" y1="21" y2="16.65"></line>
+        </svg>
+        <input
+          type="text"
+          className="learning-search-input"
+          placeholder={t('learning:search.placeholder', 'Search micro-courses...')}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+        {searchQuery && (
+          <button className="learning-search-clear" onClick={() => setSearchQuery('')} aria-label={t('common:clear', 'Clear')}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" x2="6" y1="6" y2="18"></line>
+              <line x1="6" x2="18" y1="6" y2="18"></line>
+            </svg>
+          </button>
+        )}
       </div>
 
       {/* Filter Buttons */}
@@ -340,6 +371,12 @@ export default function Learning() {
             </section>
           );
         })}
+
+        {filteredModules.length === 0 && searchQuery.trim() !== '' && (
+          <div className="card empty-state">
+            <p>{t('learning:search.noResults', 'No courses match your search.')}</p>
+          </div>
+        )}
 
         {modules.length === 0 && (
           <div className="card empty-state">

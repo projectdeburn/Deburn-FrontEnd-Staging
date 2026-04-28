@@ -163,6 +163,10 @@
     "anonymous": "Skicka anonymt",
     "thanks": "Tack!"
   },
+  "search": {
+    "placeholder": "Sök mikrokurser...",
+    "noResults": "Inga kurser matchar din sökning."
+  },
   "bookmarks": "Bokmärken",
   "addBookmark": "Spara",
   "removeBookmark": "Ta bort",

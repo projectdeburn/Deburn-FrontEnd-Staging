@@ -2713,6 +2713,60 @@ p {
    Learning Page
    ========================================================================== */
 
+/* Learning Search */
+.learning-search {
+    position: relative;
+    padding: 0 var(--space-6);
+    margin-bottom: var(--space-2);
+}
+
+.learning-search-icon {
+    position: absolute;
+    left: calc(var(--space-6) + var(--space-3));
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--neutral-400);
+    pointer-events: none;
+}
+
+.learning-search-input {
+    width: 100%;
+    padding: var(--space-3) var(--space-4) var(--space-3) calc(var(--space-3) + 28px);
+    border: 1px solid var(--neutral-300);
+    border-radius: var(--radius-full);
+    background: var(--color-warm-white);
+    font-size: var(--text-body-sm);
+    color: var(--color-ink);
+    transition: border-color var(--duration-fast) var(--ease-standard);
+}
+
+.learning-search-input:focus {
+    outline: none;
+    border-color: var(--color-deep-forest);
+}
+
+.learning-search-input::placeholder {
+    color: var(--neutral-400);
+}
+
+.learning-search-clear {
+    position: absolute;
+    right: calc(var(--space-6) + var(--space-3));
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--neutral-400);
+    padding: var(--space-1);
+    display: flex;
+    align-items: center;
+}
+
+.learning-search-clear:hover {
+    color: var(--neutral-600);
+}
+
 /* Learning Filters */
 .learning-filters {
     display: flex;

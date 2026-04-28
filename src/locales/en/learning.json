@@ -163,6 +163,10 @@
     "anonymous": "Submit anonymously",
     "thanks": "Thanks!"
   },
+  "search": {
+    "placeholder": "Search micro-courses...",
+    "noResults": "No courses match your search."
+  },
   "bookmarks": "Bookmarks",
   "addBookmark": "Save",
   "removeBookmark": "Unsave",
