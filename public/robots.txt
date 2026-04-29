@@ -1,0 +1,35 @@
+# robots.txt for Human First AI - Eve
+# https://www.human-firstai.com
+
+User-agent: *
+
+# Public pages — allow indexing
+Allow: /
+Allow: /login
+Allow: /register
+Allow: /privacy-policy
+Allow: /terms-of-service
+Allow: /cookie-policy
+
+# Authenticated app routes — block indexing
+Disallow: /dashboard
+Disallow: /coach
+Disallow: /learning
+Disallow: /circles
+Disallow: /progress
+Disallow: /profile
+Disallow: /feedback
+Disallow: /admin
+Disallow: /checkin
+Disallow: /hub
+
+# Transactional auth pages — no value for indexing
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /verify-email
+
+# API endpoints
+Disallow: /api/
+
+# Sitemap location
+Sitemap: https://www.human-firstai.com/sitemap.xml
