@@ -8,8 +8,17 @@ const __dirname = dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Serve static files from dist/
-app.use(express.static(join(__dirname, 'dist')));
+// Serve static files from dist/ with correct MIME types
+app.use(express.static(join(__dirname, 'dist'), {
+  setHeaders: (res, path) => {
+    if (path.endsWith('.xml')) {
+      res.setHeader('Content-Type', 'application/xml');
+    }
+    if (path.endsWith('.txt')) {
+      res.setHeader('Content-Type', 'text/plain');
+    }
+  }
+}));
 
 // SPA fallback - serve index.html for all other routes
 app.get('*', (_, res) => {
