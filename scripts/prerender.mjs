@@ -56,12 +56,23 @@ function waitForServer(url, timeoutMs = 15000) {
   });
 }
 
+// Race any cleanup step against a hard deadline. Headless Chromium spawns several
+// internal sub-processes (GPU, renderer, zygote); in a container without a proper
+// init process to reap them, browser.close() can hang forever waiting for a clean
+// shutdown confirmation that never arrives. Never let cleanup block final exit.
+function withTimeout(promise, ms) {
+  return Promise.race([promise, new Promise((resolve) => setTimeout(resolve, ms))]);
+}
+
 async function main() {
-  const preview = spawn(
-    'npx',
-    ['vite', 'preview', '--port', String(PORT), '--strictPort'],
-    { cwd: ROOT, stdio: 'pipe' }
-  );
+  // Spawn Vite's local binary directly rather than through `npx` — npx can leave
+  // an extra process layer between this script and the real server, which makes
+  // preview.kill() unreliable at cleanup time.
+  const viteBin = join(ROOT, 'node_modules', '.bin', 'vite');
+  const preview = spawn(viteBin, ['preview', '--port', String(PORT), '--strictPort'], {
+    cwd: ROOT,
+    stdio: 'pipe',
+  });
   preview.stderr.on('data', (d) => process.stderr.write(`[vite preview] ${d}`));
 
   let browser;
@@ -94,12 +105,14 @@ async function main() {
       console.log(`Wrote ${outPath}`);
     }
   } finally {
-    await browser?.close();
-    preview.kill();
+    await withTimeout(browser?.close() ?? Promise.resolve(), 5000);
+    preview.kill('SIGKILL');
   }
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+main()
+  .then(() => process.exit(0))
+  .catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
