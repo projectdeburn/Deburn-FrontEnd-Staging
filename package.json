@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "postinstall": "playwright install --with-deps chromium",
     "build": "vite build && node scripts/prerender.mjs",
     "start": "node server.js",
     "lint": "eslint .",
