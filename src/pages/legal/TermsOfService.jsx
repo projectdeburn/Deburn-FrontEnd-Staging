@@ -3,10 +3,16 @@
  */
 
 import { Link } from 'react-router-dom';
+import { PageMeta } from '@/components/common/PageMeta';
 
 export default function TermsOfService() {
   return (
     <div className="legal-page">
+      <PageMeta
+        path="/terms-of-service"
+        title="Terms of Service | Human First AI"
+        description="The terms and conditions governing your use of Human First AI's leadership coaching platform."
+      />
       <div className="legal-container">
         {/* Header */}
         <header className="legal-header">

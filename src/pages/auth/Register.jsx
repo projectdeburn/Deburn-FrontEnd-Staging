@@ -3,9 +3,10 @@
  */
 
 import { useState, useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/context/AuthContext';
+import { PageMeta } from '@/components/common/PageMeta';
 
 function getPasswordStrength(password) {
   if (!password) return { strength: 0, textKey: '', dataStrength: '' };
@@ -32,6 +33,7 @@ export default function Register() {
   const { t, i18n } = useTranslation('auth');
   const { register } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -58,6 +60,12 @@ export default function Register() {
   function handleLanguageChange(lang) {
     i18n.changeLanguage(lang);
     localStorage.setItem('language', lang);
+    if (lang === 'en') {
+      searchParams.delete('lng');
+    } else {
+      searchParams.set('lng', lang);
+    }
+    setSearchParams(searchParams, { replace: true });
   }
 
   function handleChange(e) {
@@ -116,6 +124,12 @@ export default function Register() {
   if (success) {
     return (
       <div className="screen auth-screen active">
+        <PageMeta
+          path="/register"
+          title="Check Your Email | Human First AI"
+          description="We've sent a verification link to confirm your Human First AI account."
+          noindex
+        />
         <div className="auth-container">
           <div className="auth-message">
             <div className="auth-message-icon success">
@@ -142,6 +156,11 @@ export default function Register() {
 
   return (
     <div className="screen auth-screen active">
+      <PageMeta
+        path="/register"
+        title="Create Your Account | Human First AI"
+        description="Start your leadership development journey with Human First AI — AI-powered coaching, micro-learning, and daily resilience practice."
+      />
       <div className="auth-language-switcher">
         <span className="auth-lang-label">{t('common.language.label', 'Language:')}</span>
         <button

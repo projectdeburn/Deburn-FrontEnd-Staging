@@ -3,10 +3,16 @@
  */
 
 import { Link } from 'react-router-dom';
+import { PageMeta } from '@/components/common/PageMeta';
 
 export default function PrivacyPolicy() {
   return (
     <div className="legal-page">
+      <PageMeta
+        path="/privacy-policy"
+        title="Privacy Policy | Human First AI"
+        description="How Human First AI collects, uses, and protects your personal data."
+      />
       <div className="legal-container">
         {/* Header */}
         <header className="legal-header">

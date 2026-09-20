@@ -4,6 +4,7 @@
  */
 
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { patch } from '@/utils/api';
 
@@ -15,11 +16,21 @@ const LANGUAGES = [
 export default function LanguageSwitcher({ className = '' }) {
   const { i18n } = useTranslation();
   const { isAuthenticated } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const currentLang = i18n.language || 'en';
 
   const handleLanguageChange = async (langCode) => {
     i18n.changeLanguage(langCode);
     localStorage.setItem('language', langCode);
+
+    // Reflect the language in the URL (?lng=) so it's a real, shareable,
+    // crawlable address — needed for hreflang to point at something real.
+    if (langCode === 'en') {
+      searchParams.delete('lng');
+    } else {
+      searchParams.set('lng', langCode);
+    }
+    setSearchParams(searchParams, { replace: true });
 
     // Sync to backend if user is logged in (for email preferences)
     if (isAuthenticated) {

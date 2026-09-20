@@ -3,6 +3,7 @@
  * Main application entry point with routing
  */
 
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { NotificationProvider } from '@/context/NotificationContext';
@@ -12,19 +13,26 @@ import { LoadingOverlay } from '@/components/ui';
 // Import i18n configuration
 import '@/utils/i18n';
 
-// Pages
+// Public pages — kept eager. These are the crawlable, SEO-relevant routes and
+// are individually lightweight, so there's no page-speed reason to split them
+// further; splitting would only add request-waterfall latency for pages that
+// need to render immediately.
 import Landing from '@/pages/Landing';
-import Dashboard from '@/pages/Dashboard';
-import Checkin from '@/pages/Checkin';
-import Coach from '@/pages/Coach';
-import Learning from '@/pages/Learning';
-import Circles from '@/pages/Circles';
-import CirclesAdmin from '@/pages/CirclesAdmin';
-import Progress from '@/pages/Progress';
-import Profile from '@/pages/Profile';
-import Feedback from '@/pages/Feedback';
-import Admin from '@/pages/Admin';
-import Hub from '@/pages/Hub';
+
+// Authenticated-only pages — lazy-loaded. None of these are crawlable (all
+// already Disallow'd in robots.txt), and eagerly importing all 11 was the
+// entire reason the JS bundle was 661KB/one chunk with nothing split out.
+const Dashboard = lazy(() => import('@/pages/Dashboard'));
+const Checkin = lazy(() => import('@/pages/Checkin'));
+const Coach = lazy(() => import('@/pages/Coach'));
+const Learning = lazy(() => import('@/pages/Learning'));
+const Circles = lazy(() => import('@/pages/Circles'));
+const CirclesAdmin = lazy(() => import('@/pages/CirclesAdmin'));
+const Progress = lazy(() => import('@/pages/Progress'));
+const Profile = lazy(() => import('@/pages/Profile'));
+const Feedback = lazy(() => import('@/pages/Feedback'));
+const Admin = lazy(() => import('@/pages/Admin'));
+const Hub = lazy(() => import('@/pages/Hub'));
 
 // Auth pages
 import Login from '@/pages/auth/Login';
@@ -121,7 +129,7 @@ function AppRoutes() {
 
       {/* Hub admin - DISABLED: route commented out, /hub will 404 to dashboard */}
       {/* <Route element={<HubLayout />}>
-        <Route path="/hub" element={<Hub />} />
+        <Route path="/hub" element={<Suspense fallback={<LoadingOverlay fullScreen />}><Hub /></Suspense>} />
       </Route> */}
 
       {/* Check-in (fullscreen, no sidebar) */}
@@ -129,7 +137,9 @@ function AppRoutes() {
         path="/checkin"
         element={
           <ProtectedRoute>
-            <Checkin />
+            <Suspense fallback={<LoadingOverlay fullScreen />}>
+              <Checkin />
+            </Suspense>
           </ProtectedRoute>
         }
       />
@@ -142,15 +152,15 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       >
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/coach" element={<Coach />} />
-        <Route path="/learning" element={<Learning />} />
-        <Route path="/circles" element={<Circles />} />
-        <Route path="/circles/admin" element={<CirclesAdmin />} />
-        <Route path="/progress" element={<Progress />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/feedback" element={<Feedback />} />
-        <Route path="/admin" element={<Admin />} />
+        <Route path="/dashboard" element={<Suspense fallback={<LoadingOverlay fullScreen />}><Dashboard /></Suspense>} />
+        <Route path="/coach" element={<Suspense fallback={<LoadingOverlay fullScreen />}><Coach /></Suspense>} />
+        <Route path="/learning" element={<Suspense fallback={<LoadingOverlay fullScreen />}><Learning /></Suspense>} />
+        <Route path="/circles" element={<Suspense fallback={<LoadingOverlay fullScreen />}><Circles /></Suspense>} />
+        <Route path="/circles/admin" element={<Suspense fallback={<LoadingOverlay fullScreen />}><CirclesAdmin /></Suspense>} />
+        <Route path="/progress" element={<Suspense fallback={<LoadingOverlay fullScreen />}><Progress /></Suspense>} />
+        <Route path="/profile" element={<Suspense fallback={<LoadingOverlay fullScreen />}><Profile /></Suspense>} />
+        <Route path="/feedback" element={<Suspense fallback={<LoadingOverlay fullScreen />}><Feedback /></Suspense>} />
+        <Route path="/admin" element={<Suspense fallback={<LoadingOverlay fullScreen />}><Admin /></Suspense>} />
       </Route>
 
       {/* Catch all - redirect to login */}

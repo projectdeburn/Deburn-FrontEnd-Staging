@@ -1,44 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  lastmod values are set from the real last commit date of each page's
+  source file (via "git log", formatted as ISO 8601). Google and Bing both
+  ignore priority/changefreq (unreliable, widely abused signals); lastmod is
+  the one field that still affects recrawl priority, but only if kept
+  accurate. Update the date below whenever the corresponding page actually
+  changes: a sitemap with stale or wrong dates is worse than one with none,
+  since search engines stop trusting a site's lastmod values entirely once
+  they catch one that is inaccurate.
+-->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
   <!-- Landing / Home Page -->
   <url>
     <loc>https://www.human-firstai.com/</loc>
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
+    <lastmod>2026-08-07</lastmod>
   </url>
 
   <!-- Registration -->
   <url>
     <loc>https://www.human-firstai.com/register</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <lastmod>2026-02-06</lastmod>
   </url>
 
   <!-- Login -->
   <url>
     <loc>https://www.human-firstai.com/login</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <lastmod>2026-02-01</lastmod>
   </url>
 
   <!-- Legal Pages -->
   <url>
     <loc>https://www.human-firstai.com/privacy-policy</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
+    <lastmod>2026-02-06</lastmod>
   </url>
 
   <url>
     <loc>https://www.human-firstai.com/terms-of-service</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
+    <lastmod>2026-02-06</lastmod>
   </url>
 
   <url>
     <loc>https://www.human-firstai.com/cookie-policy</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
+    <lastmod>2026-01-26</lastmod>
   </url>
 
 </urlset>

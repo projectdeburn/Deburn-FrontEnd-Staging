@@ -7,6 +7,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/context/AuthContext';
+import { PageMeta } from '@/components/common/PageMeta';
 import { get, post } from '@/utils/api';
 import storyElenaDream from '@/assets/images/story-elena-dream.jpg';
 import storyMismatch from '@/assets/images/story-mismatched-priorities.jpg';
@@ -126,6 +127,11 @@ export default function Landing() {
 
   return (
     <div className="landing-root">
+      <PageMeta
+        path="/"
+        title="AI Leadership Coaching & Resilience Training | Human First AI"
+        description="Eve is your AI-powered leadership coach. Build stronger teams through personalized micro-learning, real-time feedback, and actionable leadership insights."
+      />
       {/* NAV */}
       <nav className="l-nav" role="navigation" aria-label="Main navigation">
         <div className="l-nav-inner">

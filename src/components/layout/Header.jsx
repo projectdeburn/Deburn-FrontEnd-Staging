@@ -4,7 +4,7 @@
  */
 
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/context/AuthContext';
 import { NotificationDropdown } from '@/components/notifications/NotificationDropdown';
@@ -13,6 +13,7 @@ export function Header({ onMenuClick }) {
   const { t, i18n } = useTranslation();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef(null);
 
@@ -39,6 +40,12 @@ export function Header({ onMenuClick }) {
   function handleLanguageChange(lang) {
     i18n.changeLanguage(lang);
     localStorage.setItem('language', lang);
+    if (lang === 'en') {
+      searchParams.delete('lng');
+    } else {
+      searchParams.set('lng', lang);
+    }
+    setSearchParams(searchParams, { replace: true });
   }
 
   // Get user initials for avatar

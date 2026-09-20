@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { getApiBaseUrl } from '@/utils/api';
+import { PageMeta } from '@/components/common/PageMeta';
 
 export default function ResetPassword() {
   const { t } = useTranslation('auth');
@@ -72,6 +73,7 @@ export default function ResetPassword() {
   if (!tokenValid) {
     return (
       <div className="screen auth-screen active">
+        <PageMeta path="/reset-password" title="Invalid Reset Link | Human First AI" description="This password reset link is invalid or has expired." noindex />
         <div className="auth-container">
           <div className="auth-message">
             <div className="auth-message-icon error">
@@ -100,6 +102,7 @@ export default function ResetPassword() {
   if (success) {
     return (
       <div className="screen auth-screen active">
+        <PageMeta path="/reset-password" title="Password Reset | Human First AI" description="Your Human First AI password has been reset successfully." noindex />
         <div className="auth-container">
           <div className="auth-message">
             <div className="auth-message-icon success">
@@ -125,6 +128,7 @@ export default function ResetPassword() {
 
   return (
     <div className="screen auth-screen active">
+      <PageMeta path="/reset-password" title="Create New Password | Human First AI" description="Set a new password for your Human First AI account." noindex />
       <div className="auth-container">
         <div className="auth-header">
           <div className="auth-logo">

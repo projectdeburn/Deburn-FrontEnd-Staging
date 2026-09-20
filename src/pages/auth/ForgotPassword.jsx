@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { authApi } from '@/features/auth/authApi';
+import { PageMeta } from '@/components/common/PageMeta';
 
 export default function ForgotPassword() {
   const { t, i18n } = useTranslation('auth');
@@ -36,6 +37,12 @@ export default function ForgotPassword() {
 
   return (
     <div className="screen auth-screen active">
+      <PageMeta
+        path="/forgot-password"
+        title="Reset Your Password | Human First AI"
+        description="Request a password reset link for your Human First AI account."
+        noindex
+      />
       <div className="auth-container">
         <div className="auth-header">
           <div className="auth-logo">

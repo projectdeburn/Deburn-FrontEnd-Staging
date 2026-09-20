@@ -3,10 +3,16 @@
  */
 
 import { Link } from 'react-router-dom';
+import { PageMeta } from '@/components/common/PageMeta';
 
 export default function CookiePolicy() {
   return (
     <div className="legal-page">
+      <PageMeta
+        path="/cookie-policy"
+        title="Cookie Policy | Human First AI"
+        description="How Human First AI uses cookies and similar technologies on this site."
+      />
       <div className="legal-container">
         {/* Header */}
         <header className="legal-header">

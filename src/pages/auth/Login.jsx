@@ -7,12 +7,13 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/context/AuthContext';
 import { circlesApi } from '@/features/circles/circlesApi';
+import { PageMeta } from '@/components/common/PageMeta';
 
 export default function Login() {
   const { t, i18n } = useTranslation('auth');
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // Check for invitation tokens from email links
   const inviteToken = searchParams.get('inviteToken');
@@ -28,6 +29,12 @@ export default function Login() {
   function handleLanguageChange(lang) {
     i18n.changeLanguage(lang);
     localStorage.setItem('language', lang);
+    if (lang === 'en') {
+      searchParams.delete('lng');
+    } else {
+      searchParams.set('lng', lang);
+    }
+    setSearchParams(searchParams, { replace: true });
   }
 
   async function handleSubmit(e) {
@@ -68,6 +75,11 @@ export default function Login() {
 
   return (
     <div className="screen auth-screen active">
+      <PageMeta
+        path="/login"
+        title="Sign In | Human First AI"
+        description="Sign in to your Human First AI account to continue your leadership coaching journey with Eve."
+      />
       <div className="auth-language-switcher">
         <span className="auth-lang-label">{t('common.language.label', 'Language:')}</span>
         <button

@@ -7,6 +7,16 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { getApiBaseUrl } from '@/utils/api';
 import { authApi } from '@/features/auth/authApi';
+import { PageMeta } from '@/components/common/PageMeta';
+
+const verifyEmailMeta = (
+  <PageMeta
+    path="/verify-email"
+    title="Verify Your Email | Human First AI"
+    description="Verify your email address to activate your Human First AI account."
+    noindex
+  />
+);
 
 export default function VerifyEmail() {
   const { t, i18n } = useTranslation('auth');
@@ -70,6 +80,7 @@ export default function VerifyEmail() {
   if (status === 'verifying' && token) {
     return (
       <div className="screen auth-screen active">
+        {verifyEmailMeta}
         <div className="auth-container">
           <div className="auth-message">
             <div className="auth-message-icon pending">
@@ -89,6 +100,7 @@ export default function VerifyEmail() {
   if (status === 'success') {
     return (
       <div className="screen auth-screen active">
+        {verifyEmailMeta}
         <div className="auth-container">
           <div className="auth-message">
             <div className="auth-message-icon success">
@@ -116,6 +128,7 @@ export default function VerifyEmail() {
   if (status === 'resent') {
     return (
       <div className="screen auth-screen active">
+        {verifyEmailMeta}
         <div className="auth-container">
           <div className="auth-message">
             <div className="auth-message-icon success">
@@ -143,6 +156,7 @@ export default function VerifyEmail() {
   if (!token && email) {
     return (
       <div className="screen auth-screen active">
+        {verifyEmailMeta}
         <div className="auth-container">
           <div className="auth-message">
             <div className="auth-message-icon pending">
@@ -177,6 +191,7 @@ export default function VerifyEmail() {
   // Error state
   return (
     <div className="screen auth-screen active">
+      {verifyEmailMeta}
       <div className="auth-container">
         <div className="auth-message">
           <div className="auth-message-icon error">

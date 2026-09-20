@@ -80,8 +80,15 @@ const resources = {
   },
 };
 
-// Get saved language or detect from browser
+// Get language from URL (?lng=), then saved preference, then browser detection.
+// The URL takes priority so /page?lng=sv is a real, crawlable, shareable URL —
+// required for hreflang to point at something that actually renders in that language.
 function getInitialLanguage() {
+  const fromUrl = new URLSearchParams(window.location.search).get('lng');
+  if (fromUrl && ['en', 'sv'].includes(fromUrl)) {
+    return fromUrl;
+  }
+
   const saved = localStorage.getItem('language');
   if (saved && ['en', 'sv'].includes(saved)) {
     return saved;
